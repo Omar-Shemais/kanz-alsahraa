@@ -1,0 +1,246 @@
+{
+    "HorizonLayout": [
+        {
+            "layout": "logo",
+            "showMenu": true,
+            "showSearch": true,
+            "showLogo": true,
+            "enableBackground": true
+        },
+        {
+            "layout": "category",
+            "type": "icon",
+
+            "wrap": false,
+            "size": 2.0,
+            "radius": 100.0,
+            "enableBackground": false,
+            "items": [
+                {
+
+                    "category": 125,
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/03/9-150x150.jpg",
+                    "showDescription": true,
+                    "originalColor": true,
+                    "title": "سبائك ذهب تعليقات",
+                    "colors": [
+                        "#3E6AB5",
+                        "#3E6AB5"
+                    ]
+                },
+                {
+
+                    "category": 127,
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/03/8-150x150.jpg",
+                    "showDescription": true,
+                    "originalColor": true,
+                    "title": "سبائك ذهب بالأسماء",
+                    "colors": [
+                        "#3E6AB5",
+                        "#3E6AB5"
+                    ]
+                },
+                {
+
+                    "category": 124,
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/03/10-150x150.jpg",
+                    "showDescription": true,
+                    "originalColor": true,
+                    "title": "سبائك ذهب",
+                    "colors": [
+                        "#3E6AB5",
+                        "#3E6AB5"
+                    ]
+                },
+                {
+
+                    "category": 130,
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/03/7-150x150.jpg",
+                    "showDescription": true,
+                    "originalColor": true,
+                    "title": "جنيهات ذهب",
+                    "colors": [
+                        "#3E6AB5",
+                        "#3E6AB5"
+                    ]
+                }
+                ,{
+
+                    "category": 126,
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/03/3-150x150.jpg",
+                    "showDescription": true,
+                    "originalColor": true,
+                    "title": "احجار الماس",
+                    "colors": [
+                        "#3E6AB5",
+                        "#3E6AB5"
+                    ]
+                }
+            ]
+        },
+        {
+            "layout": "bannerImage",
+            "isSlider": true,
+            "autoPlay": true,
+            "showNumber": false,
+            "design": "default",
+            "showBackGround": true,
+            "radius": 2.0,
+            "enableBackground": true,
+            "items": [
+                {
+                    "radius": 9.0,
+                    "category": 29,
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240914_160045_430.jpg",
+                    "padding": 15.0
+                },
+                {
+                    "radius": 9.0,
+                    "category": 28,
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240914_155342_184.jpg",
+                    "padding": 15.0
+                }
+
+            ],
+            "itemsWeb": [
+                {
+                    "category": 29,
+                    "image": "https://cln.sh/41hyDrzG+",
+                    "padding": 15.0
+                },
+                {
+                    "category": 28,
+                    "image": "https://cln.sh/5nl2ZsKG+",
+                    "padding": 15.0
+                },
+                {
+                    "product": 30,
+                    "image": "https://cln.sh/q24Xpr1c+",
+                    "padding": 15.0
+                }
+            ]
+        },
+
+
+        {
+            "name": "سبائك ذهب",
+            "image": "",
+            "layout": "twoColumn",
+            "category": 124,
+            "enableBackground": true
+        },
+        {
+            "layout": "bannerImage",
+            "design": "static",
+            "fit": "fitWidth",
+            "marginLeft": 0.0,
+
+            "enableBackground": true,
+            "items": [
+                {
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240904_184703_010-1.jpg",
+
+                    "padding": 5.0,
+                    "radius": 9.0
+
+                },
+                {
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240904_193015_557-1.jpg",
+
+                    "padding": 5.0,
+                    "radius": 9.0
+
+
+                }
+            ],
+            "marginBottom": 0.0,
+            "height": 0.15,
+            "marginRight": 0.0,
+            "marginTop": 20.0
+        },
+
+        {
+            "name": "سبائك ذهب تعليقات",
+            "image": "",
+            "layout": "twoColumn",
+            "category": 125,
+            "enableBackground": true
+        },
+        {
+            "name": "سبائك ذهب الأسماء",
+            "image": "",
+            "layout": "twoColumn",
+            "category": 127,
+            "enableBackground": true
+        }
+        ,
+        {
+            "layout": "bannerImage",
+            "design": "static",
+            "fit": "fitWidth",
+            "marginLeft": 0.0,
+
+            "enableBackground": true,
+            "items": [
+                {
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240904_184706_417-1.jpg",
+
+                    "padding": 5.0,
+                    "radius": 9.0
+
+                }
+            ],
+            "marginBottom": 0.0,
+            "height": 0.15,
+            "marginRight": 0.0,
+            "marginTop": 20.0
+        },
+        {
+            "name": "أحجار الماس",
+            "image": "",
+            "layout": "twoColumn",
+            "category": 144,
+            "enableBackground": true
+        }
+    ],
+    "Setting": {
+        "MainColor": "#c7ac54",
+        "FontFamily": "Tajawal",
+        "FontHeader": "Tajawal",
+        "ProductListLayout": "list",
+        "StickyHeader": false,
+        "ShowChat": false,
+        "useMaterial3": false
+
+
+    },
+    "TabBar": [
+        {
+            "layout": "home",
+            "icon": "assets/icons/tabs/icon-home.png"
+        },
+
+        {
+            "layout": "category",
+            "categoryLayout": "card",
+            "icon": "assets/icons/tabs/icon-category.png"
+        },
+        {
+            "layout": "cart",
+            "icon": "assets/icons/tabs/icon-cart2.png"
+        },
+        {
+            "layout": "profile",
+            "icon": "assets/icons/tabs/icon-user.png",
+            "showChat": true,
+            "showBackground": true,
+            "styleItem": "listTile",
+            "settingStyle": "normal"
+        }
+    ],
+    "searchSuggestion": [
+
+    ],
+    "PrivacyPoliciesPageUrlOrId": "https://kanzalsahra.com/privacy-policy/"
+
+}
