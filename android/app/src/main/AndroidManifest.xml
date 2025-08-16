@@ -1,21 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" 
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.khtwah.kanzalsahra">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-
-    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <queries>
         <provider android:authorities="com.facebook.katana.provider.PlatformProvider" />
@@ -63,52 +50,53 @@
             <!-- Add your other intent filters here -->
         </activity>
 
-        <!-- Change the authorities of content providers to avoid conflicts -->
-        <provider
-            android:name="com.facebook.FacebookInitProvider"
-            android:authorities="com.khtwah.kanzalsahra.FacebookInitProvider"
-            android:exported="false"
-            tools:replace="android:authorities" />
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true" />
 
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="com.khtwah.kanzalsahra.androidx-startup"
-            android:exported="false"
-            tools:replace="android:authorities" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
 
-        <provider
-            android:name="com.google.firebase.provider.FirebaseInitProvider"
-            android:authorities="com.khtwah.kanzalsahra.firebaseinitprovider"
-            android:exported="false"
-            tools:replace="android:authorities" />
+        <!-- Set the default notification icon of Firebase to
+        `ic_stat_onesignal_default` to use the same icon with OneSignal. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_onesignal_default" />
 
-        <provider
-            android:name="io.flutter.plugins.imagepicker.ImagePickerFileProvider"
-            android:authorities="com.khtwah.kanzalsahra.flutter.image_provider"
-            android:exported="false"
-            tools:replace="android:authorities" />
+        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
+            notification message. See README(https://goo.gl/6BKBk7) for more. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
 
-        <provider
-            android:name="com.example.flutter_share.FlutterShareContentProvider"
-            android:authorities="com.khtwah.kanzalsahra.flutter.share_provider"
-            android:exported="false"
-            tools:replace="android:authorities" />
+        <!-- Google map and Admod setup -->
 
-        <provider
-            android:name="io.flutter.plugins.firebasemessaging.FlutterFirebaseMessagingInitProvider"
-            android:authorities="com.khtwah.kanzalsahra.flutterfirebasemessaginginitprovider"
-            android:exported="false"
-            tools:replace="android:authorities" />
 
-        <provider
-            android:name="com.google.android.gms.ads.MobileAdsInitProvider"
-            android:authorities="com.khtwah.kanzalsahra.mobileadsinitprovider"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
-            android:exported="false"
-            tools:replace="android:authorities" />
+        <!-- Facebook Login configuration -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebookAppId" />
+
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="${facebookClientToken}" />
+
+        <meta-data
+            android:name="com.inspireui.ENVATO_PURCHASE_CODE"
+            android:value="${envatoPurchaseCode}" />
+
 
         <!-- Other configurations like meta-data, services, etc. -->
         <meta-data android:name="flutterEmbedding" android:value="2" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
+
+        <property
+            android:name="android.adservices.AD_SERVICES_CONFIG"
+            android:resource="@xml/gma_ad_services_config"
+            tools:replace="android:resource" />
 
     </application>
 </manifest>

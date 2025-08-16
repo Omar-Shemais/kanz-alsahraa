@@ -1,4 +1,4 @@
-package com.kanzalsahra.store
+package com.khtwah.kanzalsahra
 
 import android.app.NotificationManager
 import android.content.Context
