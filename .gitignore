@@ -64,7 +64,7 @@ app.*.symbols
 *.ipa
 
 # External-related
-packages/
+# packages/
 
 # Project-specific
 deps.txt
