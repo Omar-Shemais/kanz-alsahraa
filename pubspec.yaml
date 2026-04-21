@@ -284,3 +284,6 @@ dependency_overrides:
   timeago: 3.7.0
   fluttertoast: 9.0.0
   facebook_app_events: 0.27.0
+
+  google_sign_in_ios: 5.2.5
+  google_sign_in: 5.4.4
