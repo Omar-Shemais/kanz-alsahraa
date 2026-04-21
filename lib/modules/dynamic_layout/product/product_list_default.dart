@@ -128,10 +128,10 @@ class ProductListDefault extends StatelessWidget {
       constraints: BoxConstraints(
         maxHeight: (config.productListItemHeight ?? 0) > 0 
             ? config.productListItemHeight! 
-            : 400.0,
+            : Layout.buildProductHeight(layout: layout, defaultHeight: 180),
         minHeight: (config.productListItemHeight ?? 0) > 0 
             ? config.productListItemHeight! 
-            : 400.0,
+            : Layout.buildProductHeight(layout: layout, defaultHeight: 180),
       ),
       child: (config.isSnapping ?? false) && listProducts.length > 1
           ? InfiniteCarousel.builder(

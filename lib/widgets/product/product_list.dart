@@ -134,6 +134,10 @@ class _ProductListState extends State<ProductList> {
           isTablet ? widthScreen / 3 : (widthScreen / 2); //two columns
     }
     var itemHeight = widget.productListItemHeight;
+    // Exactly matches product text info height to prevent gap and RenderFlex (measured: ~115px)
+    // Adding +5 buffer to prevent 1px rounding overflows on some device scales.
+    itemHeight = 120.0; 
+
     if (kProductDetail.showQuantityInList) {
       itemHeight += 30;
     }
@@ -141,8 +145,20 @@ class _ProductListState extends State<ProductList> {
       itemHeight += 30;
     }
 
-    childAspectRatio = widthContent /
-        (widthContent * (widget.ratioProductImage ?? 1.2) + itemHeight);
+
+    var ratio = widget.ratioProductImage ?? 1.2;
+    // For 1 column view (wide layout), use a smaller ratio to prevent massive vertical height gaps
+    if (crossAxisCount == 1 && widget.layout != 'pinterest') {
+        ratio = widget.ratioProductImage ?? 0.8; 
+    }
+    var imageHeight = widthContent * ratio;
+    
+    // Fallbacks for specific layout fixed heights if forced by config styles
+    if (widget.layout == 'pinterest') {
+      imageHeight = 200.0;
+    }
+
+    childAspectRatio = widthContent / (imageHeight + itemHeight);
 
     final hasNoProduct = widget.products == null || widget.products!.isEmpty;
 

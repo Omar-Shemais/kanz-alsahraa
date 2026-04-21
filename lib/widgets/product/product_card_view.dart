@@ -88,7 +88,7 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
         StoreName(product: widget.item, hide: widget.config.hideStore),
         const SizedBox(height: 2),
         Align(
-          alignment: Alignment.bottomLeft,
+          alignment: Alignment.center,
           child: Stack(
             children: [
               Row(
@@ -158,7 +158,8 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
         constraints: BoxConstraints(maxWidth: widget.maxWidth ?? width),
         width: widget.width!,
         margin: EdgeInsets.symmetric(
-          horizontal: widget.config.hMargin,
+          horizontal: widget.config.hMargin /
+              2, // Halved for tighter gaps between columns
           vertical: widget.config.vMargin,
         ),
         child: Stack(
@@ -202,19 +203,46 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
                     children: <Widget>[
                       Stack(
                         children: [
-                          SizedBox(
-                            height: 240,
-                            width: double.infinity,
-                            child: ProductImage(
-                              width: width,
-                              product: widget.item,
-                              fit: BoxFit.contain,
-                              config: widget.config,
-                              ratioProductImage: widget.config.imageRatio,
-                              offset: widget.offset,
-                              onTapProduct: () => onTapProduct(context,
-                                  product: widget.item, config: widget.config),
-                            ),
+                          Builder(
+                            builder: (context) {
+                              var ratio = widget.config.imageRatio ?? 1.2;
+                              // Match the 1-column logic for dynamically assigned large widths
+                              if ((widget.maxWidth ?? width) > 300 &&
+                                  widget.config.layout != 'pinterest') {
+                                ratio = widget.config.imageRatio ?? 0.8;
+                              }
+                              // Cap ratio for slider layouts to prevent excessive vertical height
+                              if (widget.config.layout == 'oneAndHalfColumn' ||
+                                  widget.config.layout == 'recent_view' ||
+                                  widget.config.layout == 'saleOff') {
+                                ratio = 0.8;
+                              }
+                              var imageHeight = width * ratio;
+
+                              if (widget.config.layout == 'pinterest') {
+                                imageHeight = 200.0;
+                              }
+
+                              return ConstrainedBox(
+                                constraints:
+                                    BoxConstraints(maxHeight: imageHeight),
+                                child: SizedBox(
+                                  height: imageHeight,
+                                  width: double.infinity,
+                                  child: ProductImage(
+                                    width: width,
+                                    product: widget.item,
+                                    fit: BoxFit.cover,
+                                    config: widget.config,
+                                    ratioProductImage: widget.config.imageRatio,
+                                    offset: widget.offset,
+                                    onTapProduct: () => onTapProduct(context,
+                                        product: widget.item,
+                                        config: widget.config),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           Positioned(
                             top: 8,

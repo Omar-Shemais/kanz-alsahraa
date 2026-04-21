@@ -78,63 +78,66 @@ class ProductPricing extends StatelessWidget {
           currency: currency)!;
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          price.replaceAll('ر.س.', '').trim(),
-          style: Theme.of(context)
-              .textTheme
-              .titleLarge!
-              .copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 16.0,
-                color: const Color(0xFFB18729), // Gold
-              )
-              .merge(priceTextStyle),
-        ),
-        if (price.isNotEmpty)
-          Padding(
-            padding: const EdgeInsetsDirectional.only(start: 4.0),
-            child: Text(
-              '﷼',
-              style: TextStyle(
-                color: const Color(0xFFB18729),
-                fontSize: 20.0,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-
-        /// Not show regular price for variant product (product.regularPrice = "").
-        if (isSale && product.type != 'variable' && showOnlyPrice == false) ...[
-          const SizedBox(width: 5),
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
           Text(
-            product.type == 'grouped'
-                ? ''
-                : PriceTools.getPriceProduct(product, currencyRate, currency,
-                    onSale: false)!,
+            price.replaceAll('ر.س.', '').trim(),
             style: Theme.of(context)
                 .textTheme
-                .bodySmall!
+                .titleLarge!
                 .copyWith(
-                  fontWeight: FontWeight.w300,
-                  color:
-                      Theme.of(context).colorScheme.secondary.withOpacity(0.6),
-                  decoration: TextDecoration.lineThrough,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16.0,
+                  color: const Color(0xFFB18729), // Gold
                 )
-                .apply(fontSizeFactor: 0.8)
-                .merge(
-                  priceTextStyle?.copyWith(
-                      color: priceTextStyle?.color?.withOpacity(0.6),
-                      fontSize: priceTextStyle?.fontSize != null
-                          ? priceTextStyle!.fontSize! - 2
-                          : null),
-                ),
+                .merge(priceTextStyle),
           ),
+          if (price.isNotEmpty)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 4.0),
+              child: Text(
+                '﷼',
+                style: const TextStyle(
+                  color: Color(0xFFB18729),
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+  
+          /// Not show regular price for variant product (product.regularPrice = "").
+          if (isSale && product.type != 'variable' && showOnlyPrice == false) ...[
+            const SizedBox(width: 5),
+            Text(
+              product.type == 'grouped'
+                  ? ''
+                  : PriceTools.getPriceProduct(product, currencyRate, currency,
+                      onSale: false)!,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall!
+                  .copyWith(
+                    fontWeight: FontWeight.w300,
+                    color:
+                        Theme.of(context).colorScheme.secondary.withOpacity(0.6),
+                    decoration: TextDecoration.lineThrough,
+                  )
+                  .apply(fontSizeFactor: 0.8)
+                  .merge(
+                    priceTextStyle?.copyWith(
+                        color: priceTextStyle?.color?.withOpacity(0.6),
+                        fontSize: priceTextStyle?.fontSize != null
+                            ? priceTextStyle!.fontSize! - 2
+                            : null),
+                  ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

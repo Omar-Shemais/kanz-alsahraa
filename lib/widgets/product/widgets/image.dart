@@ -58,7 +58,7 @@ class ProductImage extends StatelessWidget {
                     width: width,
                     size: kSize.medium,
                     isResize: true,
-                    fit: fit ?? BoxFit.contain,
+                    fit: fit ?? BoxFit.cover,
                     offset: offset ?? 0.0,
                   ),
                 )

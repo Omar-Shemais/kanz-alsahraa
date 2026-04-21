@@ -38,12 +38,25 @@ class ProductGrid extends StatelessWidget {
       screenWidth: gridWidth,
       layout: config.layout,
     );
-    var productHeight =
-        productWidth * ratioProductImage + config.productListItemHeight;
+    var ratio = ratioProductImage;
+    if (config.columns == 1 && config.layout != 'pinterest') {
+        ratio = ratioProductImage < 1.0 ? ratioProductImage : 0.8; 
+    }
+    var imageHeight = productWidth * ratio;
+
+    if (config.layout == 'pinterest') {
+      imageHeight = 200.0;
+    }
+
+    var productHeight = imageHeight + config.productListItemHeight;
 
     if (ratioProductImage < 1) {
       productHeight = productHeight * (ratioProductImage * 1.2);
     }
+    
+    // Decrease horizontal container padding/gaps if desired via tuning overall height constraints
+    // Updated to include 5px buffer to prevent standard rounding overflows.
+    productHeight = productHeight < 100.0 ? productHeight : productHeight + 5.0 - 35.0; // Removes dead padding space causing overall cell row gaps
 
     // Check if Gridview is overflowed
     for (var i = config.rows; i > 0; i--) {
@@ -71,9 +84,7 @@ class ProductGrid extends StatelessWidget {
       height: rows * productHeight,
       child: GridView.count(
         controller: scrollController,
-        childAspectRatio:
-            (ratioProductImage * (ratioProductImage < 1 ? 1.5 : 1)) *
-                getGridRatio(),
+        childAspectRatio: productHeight / productWidth,
         scrollDirection: Axis.horizontal,
         physics: config.isSnapping ?? false
             ? CustomScrollPhysic(

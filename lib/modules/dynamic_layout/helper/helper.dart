@@ -157,7 +157,7 @@ class Layout {
       case Layout.recentView:
       case Layout.saleOff:
       case Layout.oneAndHalfColumn:
-        return 220;
+        return 380; // Re-tuned to 380 for better visual proportionality
       case Layout.card:
       case Layout.listTile:
       default:

@@ -35,9 +35,9 @@ subprojects {
 
             // Forcing NDK 27 for 16 KB page size compatibility.
             // Ref: https://developer.android.com/guide/practices/page-sizes
-            if (project.android.ndkVersion < "27.0.12077973") {
+            if (project.android.ndkVersion < "28.2.13676358") {
                 project.android {
-                    ndkVersion "27.0.12077973"
+                    ndkVersion "28.2.13676358"
                     defaultConfig {
                         minSdkVersion 21
                     }

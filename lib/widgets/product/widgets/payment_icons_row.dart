@@ -9,17 +9,16 @@ class PaymentIconsRow extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildIcon('assets/icons/payment/visa.png'),
+        _buildIcon('assets/icons/credit_cards/visa.png', label: 'Visa'),
         const SizedBox(width: 4),
-        _buildIcon('assets/icons/payment/mastercard.png'),
+        _buildIcon('assets/icons/credit_cards/mastercard.png', label: 'Mastercard'),
         const SizedBox(width: 4),
-        // _buildIcon('https://upload.wikimedia.org/wikipedia/commons/e/e0/Mada_Logo.svg'),
-        _buildIcon('assets/icons/payment/visa.png'), // Placeholder or just remove
+        _buildIcon('assets/icons/credit_cards/visa.png', label: 'Payment'), 
       ],
     );
   }
 
-  Widget _buildIcon(String path) {
+  Widget _buildIcon(String path, {String? label}) {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
