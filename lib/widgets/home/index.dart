@@ -335,8 +335,7 @@ class _HomeLayoutState extends State<HomeLayout> with AppBarMixin {
           return Services().widget.renderVerticalLayout(
                 value,
                 horizontalLayouts.isEmpty || _useNestedScrollView == false,
-                onRefresh:
-                    widget.enableRefresh && _useNestedaaScrollView == false
+                onRefresh: widget.enableRefresh && _useNestedScrollView == false
                         ? onRefresh
                         : null,
               );

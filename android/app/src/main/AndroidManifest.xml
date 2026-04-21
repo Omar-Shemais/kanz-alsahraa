@@ -98,5 +98,9 @@
             android:resource="@xml/gma_ad_services_config"
             tools:replace="android:resource" />
 
+        <property
+            android:name="android.graphics.HARDWARE_BUFFER_MAX_LAYERS"
+            android:value="true" />
+
     </application>
 </manifest>

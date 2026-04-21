@@ -76,7 +76,7 @@ android {
 
     compileSdkVersion 36
 
-    ndkVersion "25.1.8937393"
+    ndkVersion "27.0.12077973"
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -154,6 +154,12 @@ android {
             keyPassword envProperties.getProperty('keyPassword', '')
             storeFile rootProject.file('../configs/' + envProperties.getProperty('storeFile', ''))
             storePassword envProperties.getProperty('storePassword', '')
+        }
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 
