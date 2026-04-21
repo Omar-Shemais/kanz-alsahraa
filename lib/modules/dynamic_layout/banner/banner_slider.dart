@@ -41,7 +41,8 @@ class _StateBannerSlider extends State<BannerSlider> {
   @override
   void initState() {
     autoPlay = widget.config.autoPlay;
-    _controller = PageController(viewportFraction: 1.0);
+    _controller =
+        PageController(viewportFraction: widget.config.viewportFraction ?? 1.0);
     intervalTime = widget.config.intervalTime ?? 3;
     autoPlayBanner();
 
@@ -85,7 +86,7 @@ class _StateBannerSlider extends State<BannerSlider> {
         widget.config.pageIndicatorType?.isCircle == true;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 5),
+      padding: const EdgeInsets.all(0),
       child: Stack(
         children: <Widget>[
           PageView(
@@ -114,21 +115,8 @@ class _StateBannerSlider extends State<BannerSlider> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SmoothPageIndicator(
-                controller: _controller, // PageController
-                count: items.length,
-                effect: SlideEffect(
-                  spacing: 8.0,
-                  radius: 5.0,
-                  dotWidth: isCirclePageIndicator ? 6.0 : 24.0,
-                  dotHeight: isCirclePageIndicator ? 6.0 : 2.0,
-                  paintStyle: PaintingStyle.fill,
-                  strokeWidth: 1.5,
-                  dotColor: Colors.black12,
-                  activeDotColor: Colors.black87,
-                ),
-              ),
+              padding: const EdgeInsets.only(bottom: 0),
+              child: const SizedBox(),
             ),
           ),
           showNumber
@@ -175,21 +163,33 @@ class _StateBannerSlider extends State<BannerSlider> {
   Widget renderBanner(width) {
     List? items = widget.config.items;
 
-    switch (widget.config.design) {
+    switch (widget.config.design?.toLowerCase()) {
       case 'swiper':
-        return Swiper(
-          onIndexChanged: (index) {
-            position = index;
-          },
-          autoplay: autoPlay,
-          itemBuilder: (BuildContext context, int index) {
-            return renderBannerItem(config: items[index], width: width);
-          },
-          itemCount: items.length,
-          viewportFraction:
-              Tools.isTablet(MediaQuery.of(context)) ? 0.55 : 0.85,
-          scale: 0.9,
-          duration: intervalTime * 100,
+        var viewportFraction = widget.config.viewportFraction ??
+            (Tools.isTablet(MediaQuery.of(context)) ? 0.55 : 0.85);
+
+        /// Shift the swiper left to remove the starting gap when viewportFraction < 1.0
+        double offsetRatio = (1.0 - viewportFraction) / 2;
+
+        return OverflowBox(
+          maxWidth: width * (1.0 + offsetRatio * 2),
+          alignment: Alignment.centerLeft,
+          child: FractionalTranslation(
+            translation: Offset(-offsetRatio, 0.0),
+            child: Swiper(
+              onIndexChanged: (index) {
+                position = index;
+              },
+              autoplay: autoPlay,
+              loop: true,
+              itemBuilder: (BuildContext context, int index) {
+                return renderBannerItem(config: items[index], width: width);
+              },
+              itemCount: items.length,
+              viewportFraction: viewportFraction,
+              duration: intervalTime * 100,
+            ),
+          ),
         );
       case 'tinder':
         return Swiper(
@@ -262,7 +262,7 @@ class _StateBannerSlider extends State<BannerSlider> {
 
     List? items = widget.config.items;
     var bannerExtraHeight =
-        screenSize.height * (widget.config.title != null ? 0.12 : 0.0);
+        screenSize.height * (widget.config.title != null ? 0.0 : 0.0);
     var upHeight = Helper.formatDouble(widget.config.upHeight);
 
     //Set autoplay for default template
@@ -309,7 +309,7 @@ class _StateBannerSlider extends State<BannerSlider> {
                     SizedBox(
                       height: height,
                       child: Padding(
-                        padding: const EdgeInsets.only(bottom: 50),
+                        padding: const EdgeInsets.only(bottom: 0),
                         child: ValueListenableBuilder<int>(
                           valueListenable: _positionNotifier,
                           builder: (context, position, child) {
@@ -338,10 +338,7 @@ class _StateBannerSlider extends State<BannerSlider> {
                                       imageUrl: item.background ?? item.image,
                                       fit: BoxFit.fill,
                                       width: constraint.maxWidth,
-                                      height: screenSize.height *
-                                              bannerPercentWidth +
-                                          bannerExtraHeight +
-                                          upHeight,
+                                      height: height,
                                     ),
                             );
                           },
@@ -352,10 +349,18 @@ class _StateBannerSlider extends State<BannerSlider> {
                     children: [
                       if (widget.config.title != null)
                         HeaderText(config: widget.config.title!),
-                      SizedBox(
-                        height: screenSize.height * bannerPercentWidth,
-                        child: renderBanner(constraint.maxWidth),
-                      )
+                      LayoutBuilder(
+                        builder: (context, constraint) {
+                          var width = constraint.maxWidth;
+                          return Center(
+                            child: SizedBox(
+                              width: width,
+                              height: screenSize.height * bannerPercentWidth,
+                              child: renderBanner(width),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ],
@@ -363,6 +368,47 @@ class _StateBannerSlider extends State<BannerSlider> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _LinePaginationBuilder extends SwiperPlugin {
+  final Color activeColor;
+  final Color color;
+
+  _LinePaginationBuilder({
+    required this.activeColor,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context, SwiperPluginConfig config) {
+    List<Widget> list = [];
+
+    int itemCount = config.itemCount;
+    int activeIndex = config.activeIndex;
+
+    for (int i = 0; i < itemCount; i++) {
+      bool active = i == activeIndex;
+      list.add(Container(
+        key: Key("pagination_$i"),
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        width: active ? 20 : 6,
+        height: 2,
+        decoration: BoxDecoration(
+          color: active ? activeColor : color,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Row(
+        key: const Key("pagination_row"),
+        mainAxisSize: MainAxisSize.min,
+        children: list,
       ),
     );
   }

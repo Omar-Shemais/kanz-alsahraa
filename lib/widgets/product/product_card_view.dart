@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../generated/l10n.dart';
 import '../../common/tools.dart';
 import '../../models/index.dart' show CartModel, Product;
 import '../../modules/dynamic_layout/config/product_config.dart';
@@ -22,6 +23,8 @@ import 'index.dart'
         SaleProgressBar,
         StockStatus,
         StoreName;
+import 'widgets/availability_badge.dart';
+import 'widgets/payment_icons_row.dart';
 import 'widgets/cart_button_with_quantity.dart';
 
 class ProductCard extends StatefulWidget {
@@ -74,7 +77,7 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
     }
 
     Widget productInfo = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 10),
         ProductTitle(
@@ -83,7 +86,7 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
           maxLines: widget.config.titleLine,
         ),
         StoreName(product: widget.item, hide: widget.config.hideStore),
-        const SizedBox(height: 5),
+        const SizedBox(height: 2),
         Align(
           alignment: Alignment.bottomLeft,
           child: Stack(
@@ -100,14 +103,11 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
                         ProductPricing(
                           product: widget.item,
                           hide: widget.config.hidePrice,
+                          color: widget.config.priceColor,
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 8),
                         StockStatus(
                             product: widget.item, config: widget.config),
-                        ProductRating(
-                          product: widget.item,
-                          config: widget.config,
-                        ),
                         SaleProgressBar(
                           width: widget.width,
                           product: widget.item,
@@ -119,14 +119,7 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
                   const SizedBox(width: 10),
                 ],
               ),
-              if (!widget.config.showQuantity) ...[
-                Positioned(
-                  left: context.isRtl ? 0 : null,
-                  right: context.isRtl ? null : 0,
-                  child: CartIcon(product: widget.item, config: widget.config),
-                ),
-                const SizedBox(height: 40),
-              ],
+              const SizedBox(width: 10),
             ],
           ),
         ),
@@ -141,7 +134,7 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
         ),
         if (widget.config.showCartButton &&
             Services().widget.enableShoppingCart(widget.item)) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           CartButton(
             product: widget.item,
             hide: !widget.item.canBeAddedToCartFromList(
@@ -152,6 +145,7 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
         ],
         OutsideService.subProductCardInfoWidget(widget.item) ??
             const SizedBox(),
+        const SizedBox(height: 6),
       ],
     );
 
@@ -171,97 +165,79 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
           children: [
             Container(
               decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(widget.config.borderRadius ?? 3),
+                borderRadius: BorderRadius.circular(12.0),
                 color: Theme.of(context).cardColor,
-                boxShadow: [
-                  if (widget.config.boxShadow != null)
-                    BoxShadow(
-                      color: Colors.black12,
-                      offset: Offset(
-                        widget.config.boxShadow?.x ?? 0.0,
-                        widget.config.boxShadow?.y ?? 0.0,
-                      ),
-                      blurRadius: widget.config.boxShadow?.blurRadius ?? 0.0,
-                    ),
+                border: Border.all(
+                  color: const Color(0xFFB18729),
+                  width: 1.5,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color.fromRGBO(0, 0, 0, 0.08),
+                    offset: Offset(0, 2),
+                    blurRadius: 8.0,
+                  ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(widget.config.borderRadius ?? 3),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  // mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Stack(
-                      children: [
-                        ProductImage(
-                          width: width,
-                          product: widget.item,
-                          config: widget.config,
-                          ratioProductImage: widget.config.imageRatio,
-                          offset: widget.offset,
-                          onTapProduct: () => onTapProduct(context,
-                              product: widget.item, config: widget.config),
-                        ),
-                        if (widget.config.showCartButtonWithQuantity &&
-                            widget.item.canBeAddedToCartFromList(
-                              enableBottomAddToCart:
-                                  widget.config.enableBottomAddToCart,
-                            ) &&
-                            Services().widget.enableShoppingCart(widget.item))
-                          Positioned.fill(
-                            child: Align(
-                              alignment: Alignment.bottomRight,
-                              child: Selector<CartModel, int>(
-                                selector: (context, cartModel) =>
-                                    cartModel.productsInCart[widget.item.id] ??
-                                    0,
-                                builder: (context, quantity, child) {
-                                  return CartButtonWithQuantity(
-                                    quantity: quantity,
-                                    borderRadiusValue:
-                                        widget.config.cartIconRadius,
-                                    increaseQuantityFunction: () {
-                                      // final minQuantityNeedAdd =
-                                      //     widget.item.getMinQuantity();
-                                      // var quantityWillAdd = 1;
-                                      // if (quantity == 0 &&
-                                      //     minQuantityNeedAdd > 1) {
-                                      //   quantityWillAdd = minQuantityNeedAdd;
-                                      // }
-                                      addToCart(
-                                        context,
-                                        quantity: 1,
-                                        product: widget.item,
-                                        enableBottomAddToCart:
-                                            widget.config.enableBottomAddToCart,
-                                      );
-                                    },
-                                    decreaseQuantityFunction: () {
-                                      if (quantity <= 0) return;
-                                      updateQuantity(
-                                        context: context,
-                                        quantity: quantity - 1,
-                                        product: widget.item,
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: widget.config.hPadding,
-                        vertical: widget.config.vPadding,
-                      ),
-                      child: productInfo,
+              padding: const EdgeInsets.all(12.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius:
+                      BorderRadius.circular(widget.config.borderRadius ?? 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6.0,
+                      offset: const Offset(0, 2),
                     ),
                   ],
+                ),
+                child: ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(widget.config.borderRadius ?? 3),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Stack(
+                        children: [
+                          SizedBox(
+                            height: 240,
+                            width: double.infinity,
+                            child: ProductImage(
+                              width: width,
+                              product: widget.item,
+                              fit: BoxFit.contain,
+                              config: widget.config,
+                              ratioProductImage: widget.config.imageRatio,
+                              offset: widget.offset,
+                              onTapProduct: () => onTapProduct(context,
+                                  product: widget.item, config: widget.config),
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: AvailabilityBadge(product: widget.item),
+                          ),
+                          const Positioned(
+                            bottom: 8,
+                            left: 8,
+                            child: PaymentIconsRow(),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: (widget.config.hPadding ?? 10.0) + 4.0,
+                          vertical: widget.config.vPadding,
+                        ),
+                        child: Center(child: productInfo),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
                 ),
               ),
             ),

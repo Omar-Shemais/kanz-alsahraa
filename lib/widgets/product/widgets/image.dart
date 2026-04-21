@@ -14,6 +14,7 @@ class ProductImage extends StatelessWidget {
   final double? ratioProductImage;
   final Function() onTapProduct;
   final Alignment? alignmentImage;
+  final BoxFit? fit;
 
   const ProductImage({
     super.key,
@@ -24,6 +25,7 @@ class ProductImage extends StatelessWidget {
     required this.config,
     required this.onTapProduct,
     this.alignmentImage,
+    this.fit,
   });
 
   @override
@@ -56,7 +58,7 @@ class ProductImage extends StatelessWidget {
                     width: width,
                     size: kSize.medium,
                     isResize: true,
-                    fit: ImageTools.boxFit(config.imageBoxfit),
+                    fit: fit ?? BoxFit.contain,
                     offset: offset ?? 0.0,
                   ),
                 )

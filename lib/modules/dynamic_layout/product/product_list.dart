@@ -17,7 +17,7 @@ import 'product_list_tile.dart';
 import 'product_quilted_grid_tile.dart';
 import 'product_staggered.dart';
 
-class ProductList extends StatelessWidget {
+class ProductList extends StatefulWidget {
   final ProductConfig config;
   final bool cleanCache;
 
@@ -27,9 +27,22 @@ class ProductList extends StatelessWidget {
     super.key,
   });
 
+  @override
+  State<ProductList> createState() => _ProductListState();
+}
+
+class _ProductListState extends State<ProductList> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   bool isShowCountDown() {
-    final isSaleOffLayout = config.layout == Layout.saleOff;
-    return config.showCountDown && isSaleOffLayout;
+    final isSaleOffLayout = widget.config.layout == Layout.saleOff;
+    return widget.config.showCountDown && isSaleOffLayout;
   }
 
   int getCountDownDuration(List<Product>? data,
@@ -46,51 +59,52 @@ class ProductList extends StatelessWidget {
   }
 
   Widget getProductLayout({maxWidth, maxHeight, products}) {
-    switch (config.layout) {
+    switch (widget.config.layout) {
       case Layout.listTile:
         return ProductListTitle(
           products: products,
-          config: config..showCountDown = isShowCountDown(),
+          config: widget.config..showCountDown = isShowCountDown(),
         );
       case Layout.staggered:
         return ProductStaggered(
           products: products,
           width: maxWidth,
-          config: config..showCountDown = isShowCountDown(),
+          config: widget.config..showCountDown = isShowCountDown(),
         );
 
       case Layout.quiltedGridTile:
         return ProductQuiltedGridTile(
           products: products,
           width: maxWidth,
-          config: config..showCountDown = isShowCountDown(),
+          config: widget.config..showCountDown = isShowCountDown(),
         );
 
       default:
-        return config.rows > 1
+        return widget.config.rows > 1
             ? ProductGrid(
                 maxWidth: maxWidth,
                 maxHeight: maxHeight,
                 products: products,
-                config: config..showCountDown = isShowCountDown(),
+                config: widget.config..showCountDown = isShowCountDown(),
               )
             : ProductListDefault(
                 maxWidth: maxWidth,
                 products: products,
-                config: config..showCountDown = isShowCountDown(),
+                config: widget.config..showCountDown = isShowCountDown(),
+                scrollController: _scrollController,
               );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isRecentLayout = config.layout == Layout.recentView;
-    final isSaleOffLayout = config.layout == Layout.saleOff;
+    final isRecentLayout = widget.config.layout == Layout.recentView;
+    final isSaleOffLayout = widget.config.layout == Layout.saleOff;
     Brand? brandByParams;
     var brandLayoutModel =
         Provider.of<BrandLayoutModel>(context, listen: false);
-    var brandId = config.advancedParams != null
-        ? FilterProductParams.fromJson(config.advancedParams!).brand
+    var brandId = widget.config.advancedParams != null
+        ? FilterProductParams.fromJson(widget.config.advancedParams!).brand
         : null;
 
     if (brandId?.isNotEmpty ?? false) {
@@ -98,32 +112,35 @@ class ProductList extends StatelessWidget {
     }
 
     return ProductFutureBuilder(
-      config: config,
-      cleanCache: cleanCache,
+      config: widget.config,
+      cleanCache: widget.cleanCache,
       child: ({maxWidth, maxHeight, products}) {
         final duration = getCountDownDuration(products, isSaleOffLayout);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            if (config.image != null && config.image != '')
+            if (widget.config.image != null && widget.config.image != '')
               BackgroundColorWidget(
-                enable: config.enableBackground,
-                padding: const EdgeInsets.symmetric(horizontal: 15),
+                enable: widget.config.enableBackground,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: 8,
+                ),
                 child: FluxImage(
-                  imageUrl: config.image!,
+                  imageUrl: widget.config.image!,
                   width: MediaQuery.of(context).size.width,
                   fit: BoxFit.cover,
                 ),
               ),
-            if (config.name?.isNotEmpty ?? false)
+            if (widget.config.name?.isNotEmpty ?? false)
               HeaderView(
-                headerText: config.name ?? '',
+                headerText: widget.config.name ?? '',
                 showSeeAll: isRecentLayout ? false : true,
-                verticalMargin: config.image != null ? 6.0 : 10.0,
+                verticalMargin: 0.0,
                 callback: () => ProductModel.showList(
                   brandByParams: brandByParams,
-                  config: config.jsonData,
+                  config: widget.config.jsonData,
                   products: products,
                   showCountdown: isShowCountDown() && duration > 0,
                   countdownDuration: Duration(milliseconds: duration),
@@ -131,6 +148,7 @@ class ProductList extends StatelessWidget {
                 ),
                 showCountdown: isShowCountDown() && duration > 0,
                 countdownDuration: Duration(milliseconds: duration),
+                scrollController: _scrollController,
               ),
             getProductLayout(
               maxWidth: maxWidth,

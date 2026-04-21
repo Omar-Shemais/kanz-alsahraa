@@ -36,6 +36,7 @@ class Layout {
       'largeCardHorizontalListItems';
   static const String sliderList = 'sliderList';
   static const String sliderItem = 'sliderItem';
+  static const String oneAndHalfColumn = 'oneAndHalfColumn';
 
   /// Other Type Layout styles
   static const String logo = 'logo';
@@ -56,6 +57,7 @@ class Layout {
   static const String bannerImage = 'bannerImage';
   static const String bannerAnimated = 'bannerAnimated';
   static const String bannerGrid = 'bannerGrid';
+  static const String luxurySaleBanner = 'luxurySaleBanner';
 
   /// Common Layout style
   static const String divider = 'divider';
@@ -105,6 +107,8 @@ class Layout {
         return screenWidth * 0.35;
       case saleOff:
         return screenWidth * 0.35;
+      case oneAndHalfColumn:
+        return screenWidth / 1.5;
       case card:
       case listTile:
       default:
@@ -133,6 +137,9 @@ class Layout {
       case saleOff:
         width = 200;
         break;
+      case oneAndHalfColumn:
+        width = 300;
+        break;
       case card:
       case listTile:
       default:
@@ -149,6 +156,7 @@ class Layout {
       case Layout.fourColumn:
       case Layout.recentView:
       case Layout.saleOff:
+      case Layout.oneAndHalfColumn:
         return 220;
       case Layout.card:
       case Layout.listTile:
@@ -163,6 +171,8 @@ class Layout {
         return 2;
       case Layout.fourColumn:
         return 4;
+      case Layout.oneAndHalfColumn:
+        return 2;
       case Layout.threeColumn:
       default:
         return 3;
@@ -170,6 +180,7 @@ class Layout {
   }
 
   static const List<String> layoutSupportDesktop = [
+    Layout.oneAndHalfColumn,
     Layout.fourColumn,
     Layout.threeColumn,
     Layout.twoColumn,

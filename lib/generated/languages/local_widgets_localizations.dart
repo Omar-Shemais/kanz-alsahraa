@@ -53,28 +53,52 @@ class LocalWidgetsLocalizations implements WidgetsLocalizations {
       WidgetsLocalizationsDelegate();
 
   @override
-  // TODO: implement reorderItemDown
-  String get reorderItemDown => throw UnimplementedError();
+  String get copyButtonLabel => 'Copy';
 
   @override
-  // TODO: implement reorderItemLeft
-  String get reorderItemLeft => throw UnimplementedError();
+  String get cutButtonLabel => 'Cut';
 
   @override
-  // TODO: implement reorderItemRight
-  String get reorderItemRight => throw UnimplementedError();
+  String get lookUpButtonLabel => 'Look Up';
 
   @override
-  // TODO: implement reorderItemToEnd
-  String get reorderItemToEnd => throw UnimplementedError();
+  String get searchResultsFound => 'Search results found';
 
   @override
-  // TODO: implement reorderItemToStart
-  String get reorderItemToStart => throw UnimplementedError();
+  String get menuDismissLabel => 'Dismiss';
 
   @override
-  // TODO: implement reorderItemUp
-  String get reorderItemUp => throw UnimplementedError();
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get pasteButtonLabel => 'Paste';
+
+  @override
+  String get searchWebButtonLabel => 'Search Web';
+
+  @override
+  String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get shareButtonLabel => 'Share';
+
+  @override
+  String get reorderItemDown => 'Move down';
+
+  @override
+  String get reorderItemLeft => 'Move left';
+
+  @override
+  String get reorderItemRight => 'Move right';
+
+  @override
+  String get reorderItemToEnd => 'Move to end';
+
+  @override
+  String get reorderItemToStart => 'Move to start';
+
+  @override
+  String get reorderItemUp => 'Move up';
 }
 
 class WidgetsLocalizationsDelegate

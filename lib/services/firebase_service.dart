@@ -27,8 +27,16 @@ class FirebaseServices extends BaseFirebaseServices {
   @override
   Future<void> init() async {
     var startTime = DateTime.now();
-    await Firebase.initializeApp();
-    _isEnabled = kAdvanceConfig.enableFirebase;
+    try {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp();
+      }
+      _isEnabled = kAdvanceConfig.enableFirebase;
+    } catch (e) {
+      printLog('[FirebaseServices] Init error: $e');
+      _isEnabled = false;
+      return; // Stop further initialization if core fails
+    }
 
     /// Not require Play Services
     /// https://firebase.google.com/docs/android/android-play-services

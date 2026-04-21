@@ -9,11 +9,13 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/flux_firebase/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/packages/flux_firebase/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/packages/flux_firebase/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/flutterflow/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/flutterflow/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/flutterflow/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />
-    <orderEntry type="library" name="Flutter Plugins" level="project" />
     <orderEntry type="library" name="Dart Packages" level="project" />
   </component>
 </module>

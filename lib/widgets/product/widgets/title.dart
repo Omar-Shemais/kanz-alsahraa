@@ -16,7 +16,7 @@ class ProductTitle extends StatelessWidget {
     required this.product,
     this.style,
     required this.hide,
-    this.textCenter = false,
+    this.textCenter = true,
     this.maxLines = 2,
   });
 
@@ -47,7 +47,7 @@ class ProductTitle extends StatelessWidget {
         children: [
           Expanded(
             child: Text.rich(
-              textAlign: textCenter ? TextAlign.center : null,
+              textAlign: TextAlign.right,
               TextSpan(
                 children: [
                   if (pinnedTag.isNotEmpty)
@@ -56,12 +56,7 @@ class ProductTitle extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: style?.color ??
-                                Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.color ??
-                                Theme.of(context).colorScheme.onSurface,
+                            color: const Color(0xFF1A1A1A),
                           ),
                           borderRadius: BorderRadius.circular(5),
                         ),
@@ -74,23 +69,28 @@ class ProductTitle extends StatelessWidget {
                           pinnedTag.upperCaseFirstChar(),
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
+                            fontSize: 10,
                           ),
                         ),
                       ),
                     ),
                   TextSpan(
-                    text: '${product.name}\n',
+                    text: product.name,
                   ),
                 ],
               ),
-              maxLines: maxLines ?? 2,
-              style: style ??
-                  Theme.of(context).textTheme.titleMedium!.apply(
-                        fontSizeFactor: 0.9,
-                      ),
-              strutStyle: const StrutStyle(
-                forceStrutHeight: true,
-              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: style?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14.0,
+                    color: const Color(0xFF1A1A1A),
+                  ) ??
+                  const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14.0,
+                    color: Color(0xFF1A1A1A),
+                  ),
             ),
           ),
           if (product.verified ?? false)

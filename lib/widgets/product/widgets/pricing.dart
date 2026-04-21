@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common/constants.dart';
 import '../../../common/tools.dart';
 import '../../../generated/l10n.dart';
 import '../../../models/index.dart' show AppModel, Product;
@@ -11,13 +12,14 @@ class ProductPricing extends StatelessWidget {
   final bool hide;
   final bool showOnlyPrice;
   final TextStyle? priceTextStyle;
-
+  final Color? color;
   const ProductPricing({
     super.key,
     required this.product,
     required this.hide,
     this.showOnlyPrice = false,
     this.priceTextStyle,
+    this.color,
   });
 
   @override
@@ -76,20 +78,34 @@ class ProductPricing extends StatelessWidget {
           currency: currency)!;
     }
 
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.end,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Text(
-          price,
+          price.replaceAll('ر.س.', '').trim(),
           style: Theme.of(context)
               .textTheme
               .titleLarge!
               .copyWith(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
+                fontSize: 16.0,
+                color: const Color(0xFFB18729), // Gold
               )
-              .apply(fontSizeFactor: 0.8)
               .merge(priceTextStyle),
         ),
+        if (price.isNotEmpty)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 4.0),
+            child: Text(
+              '﷼',
+              style: TextStyle(
+                color: const Color(0xFFB18729),
+                fontSize: 20.0,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
 
         /// Not show regular price for variant product (product.regularPrice = "").
         if (isSale && product.type != 'variable' && showOnlyPrice == false) ...[

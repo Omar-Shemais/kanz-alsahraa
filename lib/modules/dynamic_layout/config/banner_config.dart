@@ -79,6 +79,7 @@ class BannerConfig {
   BoxShadowConfig? boxShadow;
 
   double? overrideBannerPercentWidth;
+  double? viewportFraction;
 
   BannerConfig({
     this.layout,
@@ -112,6 +113,7 @@ class BannerConfig {
     required this.radius,
     required this.enableParallax,
     required this.parallaxImageRatio,
+    this.viewportFraction,
   });
 
   BannerConfig.fromJson(dynamic json) {
@@ -150,6 +152,7 @@ class BannerConfig {
     overrideBannerPercentWidth = Helper.formatDouble(
       json['overrideBannerPercentWidth'],
     );
+    viewportFraction = Helper.formatDouble(json['viewportFraction']);
 
     /// double
     height = Helper.formatDouble(json['height']);
@@ -186,6 +189,7 @@ class BannerConfig {
     map['boxShadow'] = boxShadow?.toJson();
     map['enableBackground'] = enableBackground;
     map['overrideBannerPercentWidth'] = overrideBannerPercentWidth;
+    map['viewportFraction'] = viewportFraction;
 
     if (isSlider) {
       map['isSlider'] = isSlider;
@@ -228,6 +232,7 @@ class BannerItemConfig {
   int productLength = 3;
   List<String> products = [];
   String? video;
+  double? topRadius;
 
   /// If set it true then click to banner item, it will navigate to
   /// the [SubcategoryScreen] instead of navigate to product page as default
@@ -250,6 +255,7 @@ class BannerItemConfig {
     this.products = const [],
     this.showSubcategory = false,
     this.video = '',
+    this.topRadius,
   });
 
   BannerItemConfig.fromJson(dynamic json) {
@@ -274,6 +280,7 @@ class BannerItemConfig {
     productLength = int.tryParse(json['productLength'].toString()) ?? 3;
     showSubcategory = json['showSubcategory'] ?? false;
     video = json['video'] ?? '';
+    topRadius = Helper.formatDouble(json['topRadius']);
     // ignore: prefer_initializing_formals
     jsonData = json;
   }
@@ -294,6 +301,7 @@ class BannerItemConfig {
     map['defaultShowProduct'] = defaultShowProduct;
     map['showSubcategory'] = showSubcategory;
     map['video'] = video;
+    map['topRadius'] = topRadius;
     map['products'] = List<String>.from(products);
     map['productLength'] = productLength;
     map.removeWhere((key, value) => value == null);

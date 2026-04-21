@@ -9,117 +9,257 @@
         },
         {
             "layout": "bannerImage",
-            "isSlider": true,
-            "autoPlay": true,
-            "showNumber": false,
-            "design": "default",
-            "showBackGround": true,
-            "radius": 2,
-            "enableBackground": true,
+            "design": "static",
+            "fit": "fill",
             "items": [
                 {
                     "radius": 9,
-                    "category": 29,
-                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240914_160045_430.jpg",
-                    "padding": 15
-                },
-                {
-                    "radius": 9,
-                    "category": 28,
-                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240914_155342_184.jpg",
-                    "padding": 15
+                    "category": "",
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-700x263.png",
+                    "padding": 5
                 }
             ],
-            "itemsWeb": [
+            "marginBottom": 10,
+            "marginTop": 10
+        },
+        {
+            "layout": "bannerImage",
+            "design": "static",
+            "fit": "fill",
+            "items": [
                 {
-                    "category": 29,
-                    "image": "https://cln.sh/41hyDrzG+",
-                    "padding": 15
+                    "radius": 9,
+                    "category": "",
+                    "image": "https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-376-700x263.png",
+                    "padding": 5
+                }
+            ],
+            "marginBottom": 15,
+            "marginTop": 10
+        },
+        {
+            "layout": "bannerImage",
+            "isSlider": true,
+            "design": "swiper",
+            "height": 0.18,
+            "fit": "contain",
+            "viewportFraction": 0.35,
+            "padding": 5,
+            "autoPlay": true,
+            "intervalTime": 3,
+            "radius": 30,
+            "items": [
+                {
+                    "category": 124,
+                    "image": "assets/images/gold-bars.png"
                 },
                 {
-                    "category": 28,
-                    "image": "https://cln.sh/5nl2ZsKG+",
-                    "padding": 15
+                    "category": 127,
+                    "image": "assets/images/gold-bars-with-name.png"
                 },
                 {
-                    "product": 30,
-                    "image": "https://cln.sh/q24Xpr1c+",
-                    "padding": 15
+                    "category": 130,
+                    "image": "assets/images/gold-pounds.png"
+                },
+                {
+                    "category": 453,
+                    "image": "assets/images/jewelry.png"
+                },
+                {
+                    "category": 125,
+                    "image": "assets/images/gold-bars-with-name.png"
+                },
+                {
+                    "category": 430,
+                    "image": "assets/images/silver-bars.png"
+                },
+                {
+                    "category": 438,
+                    "image": "assets/images/bracelets.png"
+                }
+            ],
+            "marginBottom": 25,
+            "marginTop": 5
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "سبائك ذهب",
+            "category": "124",
+            "rows": 1,
+            "productListItemHeight": 420.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "isSnapping": true,
+            "enableAutoSliding": false,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "جنيهات ذهب",
+            "category": "130",
+            "rows": 1,
+            "productListItemHeight": 420.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "isSnapping": true,
+            "enableAutoSliding": false,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "سبائك فضة",
+            "category": "430",
+            "rows": 1,
+            "productListItemHeight": 420.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "isSnapping": true,
+            "enableAutoSliding": false,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "الاساور",
+            "category": "438",
+            "rows": 1,
+            "productListItemHeight": 420.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "isSnapping": true,
+            "enableAutoSliding": false,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "أطقم ماس",
+            "category": "453",
+            "rows": 1,
+            "productListItemHeight": 420.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "isSnapping": true,
+            "enableAutoSliding": false,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        },
+        {
+            "layout": "luxurySaleBanner",
+            "title": {
+                "title": "تخفيضات مميزة على تشكيلاتنا الفاخرة"
+            },
+            "imageBanner": "assets/images/sale_background.png",
+            "height": 0.55,
+            "padding": 12,
+            "radius": 15,
+            "marginBottom": 10,
+            "items": [
+                {
+                    "category": 453,
+                    "image": "assets/images/discover_banner.png"
+                },
+                {
+                    "category": 124,
+                    "image": "assets/images/bar_banner.png"
+                },
+                {
+                    "category": 122,
+                    "image": "assets/images/gold_nexales_banner.png"
                 }
             ]
         },
         {
-            "name": "سبائك ذهب",
-            "image": "",
-            "layout": "twoColumn",
-            "category": 124,
-            "enableBackground": true
-        },
-        {
-            "layout": "bannerImage",
-            "design": "static",
-            "fit": "fitWidth",
-            "marginLeft": 0,
-            "enableBackground": true,
-            "items": [
-                {
-                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240904_184703_010-1.jpg",
-                    "padding": 5,
-                    "radius": 9
-                },
-                {
-                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240904_193015_557-1.jpg",
-                    "padding": 5,
-                    "radius": 9
-                }
-            ],
-            "marginBottom": 0,
-            "height": 0.15,
-            "marginRight": 0,
-            "marginTop": 20
-        },
-        {
-            "name": "سبائك ذهب تعليقات",
-            "image": "",
-            "layout": "twoColumn",
-            "category": 125,
-            "enableBackground": true
-        },
-        {
-            "name": "سبائك ذهب الأسماء",
-            "image": "",
-            "layout": "twoColumn",
-            "category": 127,
-            "enableBackground": true
-        },
-        {
-            "layout": "bannerImage",
-            "design": "static",
-            "fit": "fitWidth",
-            "marginLeft": 0,
-            "enableBackground": true,
-            "items": [
-                {
-                    "image": "https://kanzalsahra.com/wp-content/uploads/2024/09/IMG_20240904_184706_417-1.jpg",
-                    "padding": 5,
-                    "radius": 9
-                }
-            ],
-            "marginBottom": 0,
-            "height": 0.15,
-            "marginRight": 0,
-            "marginTop": 20
-        },
-        {
-            "name": "أحجار الماس",
-            "image": "",
-            "layout": "twoColumn",
-            "category": 144,
-            "enableBackground": true
+            "layout": "oneAndHalfColumn",
+            "name": "الأكثر مبيعاً",
+            "orderby": "popularity",
+            "order": "desc",
+            "rows": 1,
+            "productListItemHeight": 420.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "isSnapping": true,
+            "enableAutoSliding": false,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
         }
     ],
     "Setting": {
-        "MainColor": "#c7ac54",
+        "MainColor": "#B18729",
         "FontFamily": "Tajawal",
         "FontHeader": "Tajawal",
         "ProductListLayout": "list",

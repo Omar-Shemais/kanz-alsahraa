@@ -1,5 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:notification_permissions/notification_permissions.dart';
+
 import 'package:permission_handler/permission_handler.dart' as ph;
 
 import '../../common/constants.dart';
@@ -55,31 +55,16 @@ abstract class NotificationService {
       return false;
     }
 
-    /// Case unknown - First time open the app
-    var granted = (await NotificationPermissions.requestNotificationPermissions(
-          iosSettings: const NotificationSettingsIos(
-            sound: true,
-            badge: true,
-            alert: true,
-          ),
-        )) ==
-        PermissionStatus.granted;
-
-    /// To support POST_NOTIFICATION on Android 13.
-    /// Requires permission_handler 10+.
-    if (isAndroid) {
-      granted = (await ph.Permission.notification.request()) ==
-          ph.PermissionStatus.granted;
-    }
+    final status = await ph.Permission.notification.request();
+    var granted = status == ph.PermissionStatus.granted;
 
     return granted;
   }
 
   Future<bool> isGranted() async {
     if (kIsWeb) return false;
-    final status =
-        await NotificationPermissions.getNotificationPermissionStatus();
-    if (status == PermissionStatus.granted) {
+    final status = await ph.Permission.notification.status;
+    if (status == ph.PermissionStatus.granted) {
       return true;
     }
     return false;

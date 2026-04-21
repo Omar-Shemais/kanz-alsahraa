@@ -20,6 +20,9 @@ import '../../services/index.dart';
 import '../common/dialogs.dart';
 import '../web_layout/web_layout.dart';
 import 'preview_overlay.dart';
+import 'home_banner_custom.dart';
+import 'excellence_section.dart';
+import 'investment_section.dart';
 
 class HomeLayout extends StatefulWidget {
   final configs;
@@ -57,7 +60,12 @@ class _HomeLayoutState extends State<HomeLayout> with AppBarMixin {
     /// init config data
     widgetData =
         List<Map<String, dynamic>>.from(widget.configs['HorizonLayout']);
-    if (widgetData.isNotEmpty && widget.isShowAppbar && !widget.showNewAppBar) {
+
+    // Only remove the first item if it is a logo layout (which is rendered in the App Bar)
+    if (widgetData.isNotEmpty &&
+        widget.isShowAppbar &&
+        !widget.showNewAppBar &&
+        widgetData[0]['layout'] == 'logo') {
       widgetData.removeAt(0);
     }
 
@@ -77,11 +85,16 @@ class _HomeLayoutState extends State<HomeLayout> with AppBarMixin {
   void didUpdateWidget(HomeLayout oldWidget) {
     if (oldWidget.configs != widget.configs) {
       /// init config data
-      List data =
+      List<Map<String, dynamic>> data =
           List<Map<String, dynamic>>.from(widget.configs['HorizonLayout']);
-      if (data.isNotEmpty && widget.isShowAppbar && !widget.showNewAppBar) {
+
+      if (data.isNotEmpty &&
+          widget.isShowAppbar &&
+          !widget.showNewAppBar &&
+          data[0]['layout'] == 'logo') {
         data.removeAt(0);
       }
+
       widgetData = data;
 
       /// init vertical layout
@@ -269,21 +282,31 @@ class _HomeLayoutState extends State<HomeLayout> with AppBarMixin {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                var config = widgetData[index];
+                Widget? body;
 
-                /// if show app bar, the preview should plus +1
-                var previewIndex = widget.isShowAppbar ? index + 1 : index;
-                Widget body = PreviewOverlay(
-                  index: previewIndex,
-                  config: config,
-                  builder: (value) {
-                    return DynamicLayout(
-                        configLayout: value, cleanCache: cleanCache);
-                  },
-                );
+                if (index == 0) {
+                  body = const HomeBannerCustom();
+                } else if (index == widgetData.length + 1) {
+                  body = const ExcellenceSection();
+                } else if (index == widgetData.length + 2) {
+                  body = const InvestmentSection();
+                } else {
+                  var actualIndex = index - 1;
+                  var config = widgetData[actualIndex];
 
-                /// Use row to limit the drawing area.
-                /// If you delete the row, setting the size for the body will not work.
+                  /// if show app bar, the preview should plus +1
+                  var previewIndex = widget.isShowAppbar ? index : index - 1;
+                  body = PreviewOverlay(
+                    index: previewIndex,
+                    config: config,
+                    builder: (value) {
+                      return DynamicLayout(
+                          configLayout: value, cleanCache: cleanCache);
+                    },
+                  );
+                }
+
+                /// Use row to limit the drawing area for all sections.
                 return LayoutBuilder(
                   builder: (_, constraints) => Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -294,13 +317,13 @@ class _HomeLayoutState extends State<HomeLayout> with AppBarMixin {
                               ? constraints.maxWidth
                               : kLimitWidthScreen,
                         ),
-                        child: body,
+                        child: body!,
                       ),
                     ],
                   ),
                 );
               },
-              childCount: widgetData.length,
+              childCount: widgetData.length + 3,
             ),
           ),
       ];
@@ -312,9 +335,10 @@ class _HomeLayoutState extends State<HomeLayout> with AppBarMixin {
           return Services().widget.renderVerticalLayout(
                 value,
                 horizontalLayouts.isEmpty || _useNestedScrollView == false,
-                onRefresh: widget.enableRefresh && _useNestedScrollView == false
-                    ? onRefresh
-                    : null,
+                onRefresh:
+                    widget.enableRefresh && _useNestedaaScrollView == false
+                        ? onRefresh
+                        : null,
               );
         },
       );

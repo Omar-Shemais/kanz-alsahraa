@@ -12,6 +12,7 @@ class HeaderView extends StatelessWidget {
   final Duration countdownDuration;
   final double? verticalMargin;
   final double? horizontalMargin;
+  final ScrollController? scrollController;
 
   const HeaderView({
     this.headerText,
@@ -22,6 +23,7 @@ class HeaderView extends StatelessWidget {
     this.horizontalMargin,
     this.showCountdown = false,
     this.countdownDuration = const Duration(),
+    this.scrollController,
   });
 
   @override
@@ -33,35 +35,41 @@ class HeaderView extends StatelessWidget {
       width: screenSize.width,
       child: Container(
         color: Theme.of(context).colorScheme.surface,
-        margin: EdgeInsets.only(top: verticalMargin!),
         padding: EdgeInsets.only(
-          left: horizontalMargin ?? 16.0,
-          top: verticalMargin!,
-          right: horizontalMargin ?? 8.0,
-          bottom: verticalMargin!,
+          left: horizontalMargin ?? 18.0,
+          top: 8.0,
+          right: horizontalMargin ?? 18.0,
+          bottom: 12.0,
         ),
         child: Row(
-          textBaseline: TextBaseline.alphabetic,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            // Title on the Start (Right in RTL)
             Expanded(
+              flex: 10,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min, // Shrink to content
+                crossAxisAlignment:
+                    CrossAxisAlignment.start, // Start = Right in RTL
                 children: [
-                  if (isDesktop) ...[
-                    const SizedBox(height: 16),
-                  ],
                   Text(
                     headerText ?? '',
                     style: isDesktop
-                        ? Theme.of(context)
-                            .textTheme
-                            .headlineSmall!
-                            .copyWith(fontWeight: FontWeight.w700)
-                        : Theme.of(context).textTheme.titleLarge,
+                        ? Theme.of(context).textTheme.headlineSmall!.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: Colors.black,
+                            )
+                        : Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 18,
+                              color: Colors.black,
+                            ),
                   ),
+                  if (showCountdown) const SizedBox(height: 2),
                   if (showCountdown)
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
                           S.of(context).endsIn('').toUpperCase(),
@@ -79,21 +87,24 @@ class HeaderView extends StatelessWidget {
                         CountDownTimer(countdownDuration),
                       ],
                     ),
-                  if (isDesktop) const SizedBox(height: 8),
                 ],
               ),
             ),
+            // "See All" on the End (Left in RTL)
             if (showSeeAll)
               InkResponse(
                 onTap: callback,
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4.0,
+                    horizontal: 8.0,
+                  ),
                   child: Text(
                     S.of(context).seeAll,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall!
-                        .copyWith(color: Theme.of(context).primaryColor),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: const Color(0xFFB18729),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
               ),

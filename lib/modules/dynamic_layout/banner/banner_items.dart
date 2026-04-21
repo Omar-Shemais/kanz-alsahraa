@@ -133,7 +133,12 @@ class BannerImageItem extends StatelessWidget {
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(radiusVal),
+                  borderRadius: (config.topRadius ?? 0) > 0
+                      ? BorderRadius.only(
+                          topLeft: Radius.circular(config.topRadius!),
+                          topRight: Radius.circular(config.topRadius!),
+                        )
+                      : BorderRadius.circular(radiusVal),
                   child: FluxImage(
                     imageUrl: config.image,
                     fit: boxFit ?? BoxFit.fitWidth,

@@ -17,8 +17,4 @@ class MainActivity : FlutterFragmentActivity() {
         notificationManager.cancelAll()
     }
 
-    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-        super.configureFlutterEngine(flutterEngine)
-        GeneratedPluginRegistrant.registerWith(flutterEngine)
-    }
 }

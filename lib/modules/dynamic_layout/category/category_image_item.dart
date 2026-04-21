@@ -30,7 +30,7 @@ class CategoryImageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final itemWidth = width ?? screenSize.width / 3;
+    final itemWidth = width ?? screenSize.width / 4.2;
     final categoryList = Provider.of<CategoryModel>(context).categoryList;
 
     final id = config.category;
@@ -87,7 +87,7 @@ class CategoryImageItem extends StatelessWidget {
                   )
               ]),
           width: itemWidth,
-          height: height ?? 180.0,
+          height: height ?? 140.0,
           padding: EdgeInsets.symmetric(
             horizontal: commonConfig.paddingX,
             vertical: commonConfig.paddingY,

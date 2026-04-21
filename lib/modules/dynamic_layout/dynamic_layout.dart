@@ -12,6 +12,7 @@ import 'banner/banner_grid.dart';
 import 'banner/banner_group_items.dart';
 import 'banner/banner_horizontal.dart';
 import 'banner/banner_slider.dart';
+import 'banner/luxury_banner_grid.dart';
 import 'blog/blog_grid.dart';
 import 'blog/blog_grid_web.dart';
 import 'brand/brand_layout.dart';
@@ -230,6 +231,16 @@ class DynamicLayout extends StatelessWidget {
         return BannerGrid(
           config: BannerGridConfig.fromJson(config),
         );
+      case Layout.luxurySaleBanner:
+        return LuxuryBannerGrid(
+          config: BannerConfig.fromJson(config),
+          onTap: (itemConfig) {
+            NavigateTools.onTapNavigateOptions(
+              context: context,
+              config: itemConfig,
+            );
+          },
+        );
 
       case Layout.blog:
         return BlogGrid(config: BlogConfig.fromJson(config));
@@ -250,6 +261,7 @@ class DynamicLayout extends StatelessWidget {
           return ProductRecentPlaceholder();
         }
         return Services().widget.renderHorizontalListItem(config);
+      case Layout.oneAndHalfColumn:
       case Layout.fourColumn:
       case Layout.threeColumn:
       case Layout.twoColumn:

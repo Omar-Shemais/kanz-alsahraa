@@ -10,6 +10,7 @@ import '../../../widgets/common/flex_separated.dart';
 import '../../../widgets/common/index.dart';
 import '../../../widgets/common/parallax_image.dart';
 import '../config/product_config.dart';
+import 'package:infinite_carousel/infinite_carousel.dart';
 import '../helper/custom_physic.dart';
 import '../helper/helper.dart';
 
@@ -21,6 +22,7 @@ class ProductListDefault extends StatelessWidget {
   final int? row;
   final ProductConfig config;
   final Color? background;
+  final ScrollController? scrollController;
 
   const ProductListDefault({
     super.key,
@@ -29,6 +31,7 @@ class ProductListDefault extends StatelessWidget {
     this.row = 1,
     required this.config,
     this.background,
+    this.scrollController,
   });
 
   List<Widget> renderProduct(BuildContext context,
@@ -93,7 +96,7 @@ class ProductListDefault extends StatelessWidget {
         : 12.0;
     var horizontalWidth = maxWidth - padding;
     var layout = config.layout ?? Layout.threeColumn;
-    var scrollController = ScrollController();
+    var controller = scrollController ?? ScrollController();
     final listProducts = products is List ? (products as List) : [];
 
     /// wrap the product for Desktop mode
@@ -112,6 +115,9 @@ class ProductListDefault extends StatelessWidget {
       );
     }
 
+    final cardWidth = Layout.buildProductWidth(
+        screenWidth: horizontalWidth, layout: layout);
+
     final body = Container(
       color: background ??
           Theme.of(context)
@@ -120,33 +126,54 @@ class ProductListDefault extends StatelessWidget {
               .withOpacity(enableBackground ? 0.0 : 1.0),
       padding: EdgeInsetsDirectional.only(start: padding),
       constraints: BoxConstraints(
-        minHeight: config.productListItemHeight,
+        maxHeight: (config.productListItemHeight ?? 0) > 0 
+            ? config.productListItemHeight! 
+            : 400.0,
+        minHeight: (config.productListItemHeight ?? 0) > 0 
+            ? config.productListItemHeight! 
+            : 400.0,
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        controller: scrollController,
-        padding: const EdgeInsets.symmetric(
-          vertical: 8,
-          horizontal: 8,
-        ),
-        physics: config.isSnapping ?? false
-            ? CustomScrollPhysic(
-                width: Layout.buildProductWidth(
-                    screenWidth: horizontalWidth, layout: layout))
-            : const ScrollPhysics(),
-        child: FlexSeparated.row(
-          separationSize: 16,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: renderProduct(context, enableBackground: enableBackground),
-        ),
-      ),
+      child: (config.isSnapping ?? false) && listProducts.length > 1
+          ? InfiniteCarousel.builder(
+              itemCount: listProducts.length,
+              itemExtent: cardWidth + 16,
+              controller: InfiniteScrollController(),
+              axisDirection: Axis.horizontal,
+              itemBuilder: (context, itemIndex, realIndex) {
+                final productWidgets =
+                    renderProduct(context, enableBackground: enableBackground);
+                return Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: productWidgets[itemIndex],
+                );
+              },
+            )
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: controller,
+              padding: const EdgeInsets.symmetric(
+                vertical: 0,
+                horizontal: 8,
+              ),
+              physics: config.isSnapping ?? false
+                  ? CustomScrollPhysic(
+                      width: Layout.buildProductWidth(
+                          screenWidth: horizontalWidth, layout: layout))
+                  : const ScrollPhysics(),
+              child: FlexSeparated.row(
+                separationSize: 16,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children:
+                    renderProduct(context, enableBackground: enableBackground),
+              ),
+            ),
     );
 
     return HandleAutoSlide.list(
       enable: config.enableAutoSliding,
       durationAutoSliding: config.durationAutoSliding,
       numberOfItems: listProducts.length,
-      controller: scrollController,
+      controller: controller,
       child: body,
     );
   }
@@ -213,7 +240,10 @@ class ProductListDefault extends StatelessWidget {
 
     return BackgroundColorWidget(
       enable: config.enableBackground,
-      child: body,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 20.0),
+        child: body,
+      ),
     );
   }
 }

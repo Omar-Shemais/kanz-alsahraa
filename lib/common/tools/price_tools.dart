@@ -148,15 +148,23 @@ class PriceTools {
             formatCurrency.format(double.parse(price.toString()) * quantity);
       }
 
-      return defaultCurrency.symbolBeforeTheNumber
-          ? defaultCurrency.symbol + number
-          : number + defaultCurrency.symbol;
+      final result = number;
+
+      return result;
     } catch (err, trace) {
       printError(err, trace);
-      return defaultCurrency.symbolBeforeTheNumber
-          ? defaultCurrency.symbol + formatCurrency.format(0)
-          : formatCurrency.format(0) + defaultCurrency.symbol;
+      return formatCurrency.format(0);
     }
+  }
+
+  static String toArabicNumerals(String input) {
+    const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    var result = input;
+    for (var i = 0; i < english.length; i++) {
+      result = result.replaceAll(english[i], arabic[i]);
+    }
+    return result;
   }
 
   static double? getPriceByRate(price, Map<String, dynamic>? rates,

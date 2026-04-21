@@ -1,3 +1,70 @@
-# Project exclude paths
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# IntelliJ-related
+.idea/
+*.iml
+*.iws
+out/
+
+# Visual Studio Code-related
+.vscode/
+.history/
+
+# Flutter-related
+/build/
 /.dart_tool/
 /packages/flux_firebase/.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# Android-related
+**/android/**/generated/
+**/android/app/src/main/res/values/strings.xml
+**/android/local.properties
+**/android/key.properties
+**/android/app/*.jks
+**/android/app/*.keystore
+**/android/app/*.gpg
+**/android/app/google-services.json
+
+# iOS-related
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/App.framework
+**/ios/Flutter/App.podspec
+**/ios/Flutter/App.podspec.json
+**/ios/Runner/GeneratedPluginRegistrant.[mh]
+**/ios/Runner/google-services.json
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Config.xcconfig
+
+# Web-related
+lib/generated_plugin_registrant.dart
+
+# Symbolication related
+app.*.symbols
+
+# Executable distributions
+*.apk
+*.aab
+*.ipa
+
+# External-related
+packages/
+
+# Project-specific
+deps.txt

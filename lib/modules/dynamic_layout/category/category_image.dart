@@ -20,7 +20,7 @@ class CategoryImages extends StatelessWidget {
       sizeWidth = itemSize.width;
       sizeHeight = itemSize.height;
     } else {
-      sizeWidth = maxWidth / 3;
+      sizeWidth = maxWidth / 4.2;
     }
     for (var item in config.items) {
       items.add(CategoryImageItem(
@@ -94,7 +94,7 @@ class CategoryImages extends StatelessWidget {
           }
 
           return SizedBox(
-            height: sizeHeight ?? heightList + 80,
+            height: sizeHeight ?? heightList + 40,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(

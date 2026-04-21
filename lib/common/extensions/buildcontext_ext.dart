@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:inspireui/icons/constants.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../generated/l10n.dart';
 import '../../models/app_model.dart';
@@ -68,7 +68,8 @@ extension ShareLinkBuildContextExt on BuildContext {
           .dynamicLinkService
           .createDynamicLink(productUrl: url);
       if (dynamicLink != null) {
-        return Share.share(dynamicLink);
+        await Share.share(dynamicLink);
+        return;
       }
     }
 

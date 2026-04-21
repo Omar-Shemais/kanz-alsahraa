@@ -59,7 +59,7 @@ class ProductGrid extends StatelessWidget {
     }
 
     final body = BackgroundColorWidget(
-      padding: const EdgeInsetsDirectional.only(start: padding, top: padding),
+      padding: const EdgeInsetsDirectional.only(start: padding, top: 0.0),
       enable: config.enableBackground ?? true,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(2),

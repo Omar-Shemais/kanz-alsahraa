@@ -88,7 +88,7 @@ Map<String, dynamic> environment = {
     "httpCache": true,
 
     "DefaultCurrency": {
-      "symbol": "SAR",
+      "symbol": "ر.س",
       "decimalDigits": 2,
       "symbolBeforeTheNumber": true,
       "currency": "SAR",
@@ -96,7 +96,7 @@ Map<String, dynamic> environment = {
     },
     "Currencies": [
       {
-        "symbol": "SAR",
+        "symbol": "ر.س",
         "decimalDigits": 2,
         "symbolBeforeTheNumber": true,
         "currency": "SAR",
@@ -768,7 +768,7 @@ Map<String, dynamic> environment = {
     'web': 'AIzaSyDSNYVC-8DU9BTcyqkeN9c5pgVhwOBAvGg'
   },
 
-  "productCard": {"defaultImage": 'assets/images/no_product_image.png'},
+  "productCard": {"defaultImage": 'https://mstore.io/wp-content/uploads/2017/04/placeholder.jpg'},
 
   /// ➡️ lib/common/products.dart
   "productDetail": {

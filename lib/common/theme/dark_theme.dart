@@ -82,7 +82,7 @@ ThemeData buildDarkTheme(String? language,
       TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
     }),
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelColor: Colors.white,
       unselectedLabelColor: Colors.white,
       labelPadding: EdgeInsets.zero,

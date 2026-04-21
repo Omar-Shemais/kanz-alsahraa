@@ -91,6 +91,9 @@ class ProductConfig {
   bool? enableBackground;
   CardDesign cardDesign = CardDesign.card;
   int? titleLine;
+  Color? borderColor;
+  double? borderWidth;
+  Color? priceColor;
 
   /// date, price,...
   String? orderby;
@@ -209,6 +212,9 @@ class ProductConfig {
     required this.showStockStatus,
     required this.hideEmptyProductListRating,
     required this.productListItemHeight,
+    this.borderColor,
+    this.borderWidth,
+    this.priceColor,
   });
 
   ProductConfig.empty() {
@@ -359,6 +365,13 @@ class ProductConfig {
     showSeeAll = json['showSeeAll'] ?? env.showSeeAll;
     boostEngine = json['boostEngine'];
     enableBackground = json['enableBackground'];
+    if (json['borderColor'] != null) {
+      borderColor = HexColor(json['borderColor']);
+    }
+    borderWidth = Helper.formatDouble(json['borderWidth']);
+    if (json['priceColor'] != null) {
+      priceColor = HexColor(json['priceColor']);
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -445,6 +458,9 @@ class ProductConfig {
     map['durationAutoSliding'] = durationAutoSliding;
     map['boostEngine'] = boostEngine;
     map['enableBackground'] = enableBackground;
+    map['borderColor'] = borderColor?.value.toRadixString(16);
+    map['borderWidth'] = borderWidth;
+    map['priceColor'] = priceColor?.value.toRadixString(16);
     map.removeWhere((key, value) => value == null);
     return map;
   }
@@ -528,6 +544,9 @@ class ProductConfig {
     bool? useCircularRadius,
     bool? useSort,
     bool? showCategory,
+    Color? borderColor,
+    double? borderWidth,
+    Color? priceColor,
   }) {
     return ProductConfig(
       category: category ?? this.category,
@@ -600,6 +619,9 @@ class ProductConfig {
       durationAutoSliding: durationAutoSliding ?? this.durationAutoSliding,
       boostEngine: boostEngine ?? this.boostEngine,
       enableBackground: enableBackground ?? this.enableBackground,
+      borderColor: borderColor ?? this.borderColor,
+      borderWidth: borderWidth ?? this.borderWidth,
+      priceColor: priceColor ?? this.priceColor,
     );
   }
 }

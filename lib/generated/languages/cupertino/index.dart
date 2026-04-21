@@ -28,6 +28,7 @@ class SubCupertinoLocalizationsDelegate
     Locale locale,
     intl.DateFormat fullYearFormat,
     intl.DateFormat dayFormat,
+    intl.DateFormat weekdayFormat,
     intl.DateFormat mediumDateFormat,
     intl.DateFormat singleDigitHourFormat,
     intl.DateFormat singleDigitMinuteFormat,
@@ -40,6 +41,7 @@ class SubCupertinoLocalizationsDelegate
         return CupertinoLocalizationKu(
             fullYearFormat: fullYearFormat,
             dayFormat: dayFormat,
+            weekdayFormat: weekdayFormat,
             mediumDateFormat: mediumDateFormat,
             singleDigitHourFormat: singleDigitHourFormat,
             singleDigitMinuteFormat: singleDigitMinuteFormat,
@@ -50,6 +52,7 @@ class SubCupertinoLocalizationsDelegate
         return CupertinoLocalizationTi(
             fullYearFormat: fullYearFormat,
             dayFormat: dayFormat,
+            weekdayFormat: weekdayFormat,
             mediumDateFormat: mediumDateFormat,
             singleDigitHourFormat: singleDigitHourFormat,
             singleDigitMinuteFormat: singleDigitMinuteFormat,
@@ -83,6 +86,7 @@ class SubCupertinoLocalizationsDelegate
 
       late intl.DateFormat fullYearFormat;
       late intl.DateFormat dayFormat;
+      late intl.DateFormat weekdayFormat;
       late intl.DateFormat mediumDateFormat;
       // We don't want any additional decoration here. The am/pm is handled in
       // the date picker. We just want an hour number localized.
@@ -95,6 +99,7 @@ class SubCupertinoLocalizationsDelegate
       void loadFormats(String? locale) {
         fullYearFormat = intl.DateFormat.y(locale);
         dayFormat = intl.DateFormat.d(locale);
+        weekdayFormat = intl.DateFormat.E(locale);
         mediumDateFormat = intl.DateFormat.MMMEd(locale);
 
         singleDigitHourFormat = intl.DateFormat('HH', locale);
@@ -117,6 +122,7 @@ class SubCupertinoLocalizationsDelegate
         locale,
         fullYearFormat,
         dayFormat,
+        weekdayFormat,
         mediumDateFormat,
         singleDigitHourFormat,
         singleDigitMinuteFormat,

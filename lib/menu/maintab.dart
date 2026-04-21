@@ -132,15 +132,23 @@ class MainTabsState extends CustomOverlayState<MainTabs>
       });
     }
 
-    Services().chatServices.init();
+    Future.delayed(Duration.zero, () {
+      if (mounted) {
+        Services().chatServices.init();
+      }
+    });
 
     showGDPRMessage();
 
     // App rating
     showRatingOnOpen();
 
-    if (!kIsWeb) {
-      Services().dynamicLinkService.initialize();
+    if (!kIsWeb && Services().firebase.isEnabled) {
+      Future.delayed(Duration.zero, () {
+        if (mounted) {
+          Services().dynamicLinkService.initialize();
+        }
+      });
     }
   }
 
