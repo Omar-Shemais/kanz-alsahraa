@@ -79,6 +79,14 @@ post_install do |installer|
       end
     end
   end
+
+  # Fix for Xcode 15 and Firebase 8/9 C++ compilation issue
+  firestore_settings = File.join(installer.sandbox.root, 'FirebaseFirestore', 'Firestore', 'Source', 'API', 'FIRFirestoreSettings.mm')
+  if File.exist?(firestore_settings)
+    content = File.read(firestore_settings)
+    content = content.gsub(/ABSL_CONST_INIT extern "C"/, 'extern "C"')
+    File.write(firestore_settings, content)
+  end
 end
 
 target 'OneSignalNotificationServiceExtension' do
