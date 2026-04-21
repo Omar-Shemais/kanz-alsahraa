@@ -27,6 +27,9 @@ subprojects {
                 // )
                 project.android {
                     compileSdk 31
+                    defaultConfig {
+                        minSdkVersion 21
+                    }
                 }
             }
 
@@ -35,6 +38,9 @@ subprojects {
             if (project.android.ndkVersion < "27.0.12077973") {
                 project.android {
                     ndkVersion "27.0.12077973"
+                    defaultConfig {
+                        minSdkVersion 21
+                    }
                 }
             }
 
