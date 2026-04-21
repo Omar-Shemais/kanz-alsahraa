@@ -32,5 +32,3 @@
 
 
 
-
-srcset="https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375.png 1730w, https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-medium.png 400w, https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-large.png 1300w, https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-768x289.png 768w, https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-1536x577.png 1536w, https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-430x162.png 430w, https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-700x263.png 700w, https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-150x56.png 150w"
