@@ -12,10 +12,17 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/flutterflow/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/packages/flutterflow/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/packages/flutterflow/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/paytm_allinonesdk/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/paytm_allinonesdk/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/paytm_allinonesdk/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/paytm_allinonesdk/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/paytm_allinonesdk/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/paytm_allinonesdk/example/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart SDK" level="project" />
     <orderEntry type="library" name="Dart Packages" level="project" />
+    <orderEntry type="library" name="Flutter Plugins" level="project" />
   </component>
 </module>
