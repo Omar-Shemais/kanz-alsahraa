@@ -64,6 +64,17 @@ post_install do |installer|
       config.build_settings['RUN_CLANG_STATIC_ANALYZER'] = 'NO'
       config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
 
+      ## Fix: Remove invalid '-G' flag injected by some pods (e.g. google_mobile_ads Metal shaders)
+      ## '-G' is a CUDA/GPU compiler option not supported by Clang for arm64-apple-ios targets
+      ['OTHER_CFLAGS', 'OTHER_CPPFLAGS'].each do |flags_key|
+        flags = config.build_settings[flags_key]
+        if flags.is_a?(Array)
+          config.build_settings[flags_key] = flags.reject { |f| f.strip == '-G' }
+        elsif flags.is_a?(String)
+          config.build_settings[flags_key] = flags.gsub(/\s*-G\s*/, ' ').strip
+        end
+      end
+
       ## permission handler
       if target.name == 'permission_handler_apple'
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
