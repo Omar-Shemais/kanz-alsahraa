@@ -55,7 +55,7 @@ post_install do |installer|
         # Remove the -G flag (and -G<n> variants like -G0, -G8) from xcconfig files.
         # This flag is injected by some pods (e.g. google_mobile_ads) but is unsupported
         # by Clang for arm64-apple-ios targets, causing "unsupported option '-G'" errors.
-        xcconfig_mod = xcconfig_mod.gsub(/\s-G\d*(?=\s|$)/, '')
+        xcconfig_mod = xcconfig_mod.gsub(/(?<=[\s=])-G\d*(?=\s|$)/, '')
         File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
       end
 
@@ -68,14 +68,20 @@ post_install do |installer|
       config.build_settings['RUN_CLANG_STATIC_ANALYZER'] = 'NO'
       config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
 
-      ## Fix: Remove invalid '-G' flag injected by some pods (e.g. google_mobile_ads Metal shaders)
-      ## '-G' is a CUDA/GPU compiler option not supported by Clang for arm64-apple-ios targets
+      ## Fix: Remove invalid '-G' flag and add -Qunused-arguments so Clang silently
+      ## ignores any remaining unsupported flags instead of treating them as errors.
       ['OTHER_CFLAGS', 'OTHER_CPPFLAGS'].each do |flags_key|
         flags = config.build_settings[flags_key]
         if flags.is_a?(Array)
-          config.build_settings[flags_key] = flags.reject { |f| f.strip == '-G' }
+          cleaned = flags.map { |f| f.gsub(/-G\d*/, '').strip }.reject(&:empty?)
+          cleaned << '-Qunused-arguments' unless cleaned.include?('-Qunused-arguments')
+          config.build_settings[flags_key] = cleaned
         elsif flags.is_a?(String)
-          config.build_settings[flags_key] = flags.gsub(/\s*-G\s*/, ' ').strip
+          cleaned = flags.gsub(/-G\d*/, '').strip
+          cleaned += ' -Qunused-arguments' unless cleaned.include?('-Qunused-arguments')
+          config.build_settings[flags_key] = cleaned
+        else
+          config.build_settings[flags_key] = ['$(inherited)', '-Qunused-arguments']
         end
       end
 
@@ -97,6 +103,16 @@ post_install do |installer|
         ]
       end
     end
+  end
+
+  ## Nuclear fix: scan EVERY xcconfig in the entire Pods sandbox and strip -G.
+  ## The base_configuration_reference patch above only hits top-level xcconfigs;
+  ## the flag may live in a nested #include'd xcconfig that this glob catches.
+  Dir.glob("#{installer.sandbox.root}/**/*.xcconfig").each do |xcconfig_path|
+    next unless File.exist?(xcconfig_path)
+    content = File.read(xcconfig_path)
+    patched = content.gsub(/(?<=[\s=])-G\d*(?=\s|$)/, '')
+    File.write(xcconfig_path, patched) if patched != content
   end
 
   # Fix for Xcode 15 and Firebase 8/9 C++ compilation issue
