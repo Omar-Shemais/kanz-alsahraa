@@ -1,0 +1,73 @@
+workflows:
+  ios-release:
+    name: iOS Release
+    max_build_duration: 120
+    environment:
+      flutter: 3.41.7
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Get Flutter packages
+        script: flutter packages pub get
+
+      - name: Patch pub-cache incompatibilities (Dart 3.10 compat)
+        script: |
+          set -e
+
+          PUB_CACHE="$HOME/.pub-cache"
+
+          # ── Fix 1: FallThroughError removed in Dart 3.10 ──────────────────────────
+          # cloud_firestore_platform_interface 5.7.5
+          CF_FILE="$PUB_CACHE/hosted/pub.dev/cloud_firestore_platform_interface-5.7.5/lib/src/platform_interface/utils/load_bundle_task_state.dart"
+          if [ -f "$CF_FILE" ]; then
+            sed -i '' 's/throw FallThroughError();/throw StateError("Unexpected value");/g' "$CF_FILE"
+            echo "Patched cloud_firestore_platform_interface FallThroughError"
+          fi
+
+          # firebase_auth_platform_interface 6.10.0
+          FA_FILE="$PUB_CACHE/hosted/pub.dev/firebase_auth_platform_interface-6.10.0/lib/src/action_code_info.dart"
+          if [ -f "$FA_FILE" ]; then
+            sed -i '' 's/throw FallThroughError();/throw StateError("Unexpected value");/g' "$FA_FILE"
+            echo "Patched firebase_auth_platform_interface FallThroughError"
+          fi
+
+          # ── Fix 2: hashValues removed from Flutter ─────────────────────────────────
+          # flare_flutter (inspireui fork)
+          FLARE_FILE=$(find "$PUB_CACHE/git" -path "*/flare_flutter/lib/provider/asset_flare.dart" 2>/dev/null | head -1)
+          if [ -n "$FLARE_FILE" ]; then
+            sed -i '' 's/hashValues(bundle, name)/Object.hash(bundle, name)/g' "$FLARE_FILE"
+            echo "Patched flare_flutter hashValues -> Object.hash"
+          fi
+
+          # ── Fix 3: signInWithAuthProvider missing in FirebaseAuthPlatform ──────────
+          # Add stub method to firebase_auth_platform_interface if missing
+          FA_PLATFORM="$PUB_CACHE/hosted/pub.dev/firebase_auth_platform_interface-6.10.0/lib/src/platform_interface/platform_interface_firebase_auth.dart"
+          if [ -f "$FA_PLATFORM" ] && ! grep -q "signInWithAuthProvider" "$FA_PLATFORM"; then
+            # Append stub before the last closing brace
+            sed -i '' 's/^}$/  Future<UserCredentialPlatform> signInWithAuthProvider(AuthProvider provider) {\n    throw UnimplementedError("signInWithAuthProvider() not implemented.");\n  }\n}/' "$FA_PLATFORM"
+            echo "Patched firebase_auth_platform_interface: added signInWithAuthProvider stub"
+          fi
+
+          echo "All pub-cache patches applied."
+
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --platform IOS \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: Build iOS IPA
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+
+    publishing:
+      app_store_connect:
+        auth: integration
