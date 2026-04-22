@@ -1091,7 +1091,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIER = com.khtwah.kanzalsahra.NotificationServiceExtension;FI
+				PRODUCT_BUNDLE_IDENTIFIER = com.khtwah.kanzalsahra.NotificationServiceExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
