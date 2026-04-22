@@ -52,6 +52,10 @@ post_install do |installer|
         xcconfig_path = config.base_configuration_reference.real_path
         xcconfig = File.read(xcconfig_path)
         xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
+        # Remove the -G flag (and -G<n> variants like -G0, -G8) from xcconfig files.
+        # This flag is injected by some pods (e.g. google_mobile_ads) but is unsupported
+        # by Clang for arm64-apple-ios targets, causing "unsupported option '-G'" errors.
+        xcconfig_mod = xcconfig_mod.gsub(/\s-G\d*(?=\s|$)/, '')
         File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
       end
 
