@@ -99,6 +99,9 @@ class LocalWidgetsLocalizations implements WidgetsLocalizations {
 
   @override
   String get reorderItemUp => 'Move up';
+
+  @override
+  String get radioButtonUnselectedLabel => 'Not selected';
 }
 
 class WidgetsLocalizationsDelegate
