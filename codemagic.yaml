@@ -57,7 +57,7 @@ workflows:
       - name: Set up code signing
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+          app-store-connect fetch-signing-files "$BUNDLE_ID" "com.khtwah.kanzalsahra.NotificationServiceExtension" \
             --platform IOS \
             --type IOS_APP_STORE \
             --create
