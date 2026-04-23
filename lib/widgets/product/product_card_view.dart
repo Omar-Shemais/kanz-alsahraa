@@ -24,7 +24,6 @@ import 'index.dart'
         StockStatus,
         StoreName;
 import 'widgets/availability_badge.dart';
-import 'widgets/payment_icons_row.dart';
 import 'widgets/cart_button_with_quantity.dart';
 
 class ProductCard extends StatefulWidget {
@@ -248,11 +247,6 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
                             top: 8,
                             right: 8,
                             child: AvailabilityBadge(product: widget.item),
-                          ),
-                          const Positioned(
-                            bottom: 8,
-                            left: 8,
-                            child: PaymentIconsRow(),
                           ),
                         ],
                       ),
