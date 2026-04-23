@@ -71,6 +71,9 @@ subprojects {
                     // )
                     namespace project.group
                 }
+                buildFeatures {
+                    buildConfig true
+                }
             }
         }
     }
