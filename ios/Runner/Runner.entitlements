@@ -17,10 +17,5 @@
 	<array>
 		<string>group.com.khtwah.kanzalsahra.notifications</string>
 	</array>
-	<key>keychain-access-groups</key>
-	<array>
-		<string>2JQ58865RY.com.khtwah.kanzalsahra</string>
-		<string>$(AppIdentifierPrefix)com.khtwah.kanzalsahra</string>
-	</array>
 </dict>
 </plist>
