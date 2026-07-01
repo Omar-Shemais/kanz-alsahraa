@@ -20,7 +20,7 @@ dependencies:
   firebase_auth: any
   firebase_remote_config: any
   firebase_dynamic_links: any
-  cloud_firestore: ^4.0.0
+  cloud_firestore: any
   firebase_remote_config_web: any
 
   firebase_messaging: any
