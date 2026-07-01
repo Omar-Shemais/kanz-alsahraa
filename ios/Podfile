@@ -36,6 +36,10 @@ target 'Runner' do
 
   # This is just a temporary solution to fix the iOS build issue. We need to remove this line after the author fixes this [issue](https://github.com/natintosh/plugin_libphonenumber/issues/35)
   pod 'PhoneNumberKit', '3.8.0'
+  
+  # Fix CocoaPods failing to resolve GoogleMaps version intersection
+  pod 'GoogleMaps', '~> 9.0'
+  pod 'Google-Maps-iOS-Utils', '~> 6.0'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
