@@ -82,20 +82,21 @@ post_install do |installer|
       config.build_settings['RUN_CLANG_STATIC_ANALYZER'] = 'NO'
       config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
 
-      ## Fix: Remove invalid '-G' flag and add -Qunused-arguments so Clang silently
-      ## ignores any remaining unsupported flags instead of treating them as errors.
-      ['OTHER_CFLAGS', 'OTHER_CPPFLAGS'].each do |flags_key|
+      ## Fix: Remove invalid '-G' flag and add flags so Clang silently
+      ## ignores unsupported flags and new template syntax errors in gRPC-Core.
+      ['OTHER_CFLAGS', 'OTHER_CPPFLAGS', 'OTHER_CPLUSPLUSFLAGS'].each do |flags_key|
         flags = config.build_settings[flags_key]
+        extra_flags = ['-Qunused-arguments', '-Wno-missing-template-arg-list-after-template-kw']
         if flags.is_a?(Array)
           cleaned = flags.map { |f| f.gsub(/-G\d*/, '').strip }.reject(&:empty?)
-          cleaned << '-Qunused-arguments' unless cleaned.include?('-Qunused-arguments')
+          extra_flags.each { |ef| cleaned << ef unless cleaned.include?(ef) }
           config.build_settings[flags_key] = cleaned
         elsif flags.is_a?(String)
           cleaned = flags.gsub(/-G\d*/, '').strip
-          cleaned += ' -Qunused-arguments' unless cleaned.include?('-Qunused-arguments')
+          extra_flags.each { |ef| cleaned += " #{ef}" unless cleaned.include?(ef) }
           config.build_settings[flags_key] = cleaned
         else
-          config.build_settings[flags_key] = ['$(inherited)', '-Qunused-arguments']
+          config.build_settings[flags_key] = ['$(inherited)'] + extra_flags
         end
       end
 
