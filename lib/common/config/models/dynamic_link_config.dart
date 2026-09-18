@@ -13,7 +13,7 @@ class DynamicLinkConfig {
         _firebaseDynamicLinkConfig = firebaseDynamicLinkConfig;
 
   bool get enable {
-    if (type.isBranchIO) {
+    if (type.isBranchIO || type == DynamicLinkType.native) {
       return _enable;
     }
     // TODO(tgloc): Remove this when all the user has migrated to the branchIO
@@ -39,6 +39,7 @@ class DynamicLinkConfig {
 }
 
 enum DynamicLinkType {
+  native,
   branchIO,
   firebase,
   ;
@@ -49,6 +50,8 @@ enum DynamicLinkType {
 
   static DynamicLinkType fromString(String type) {
     switch (type) {
+      case 'native':
+        return DynamicLinkType.native;
       case 'branchIO':
         return DynamicLinkType.branchIO;
       default:

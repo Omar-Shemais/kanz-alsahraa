@@ -58,12 +58,12 @@ class HeaderView extends StatelessWidget {
                     style: isDesktop
                         ? Theme.of(context).textTheme.headlineSmall!.copyWith(
                               fontWeight: FontWeight.w900,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                             )
                         : Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w900,
                               fontSize: 18,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                   ),
                   if (showCountdown) const SizedBox(height: 2),

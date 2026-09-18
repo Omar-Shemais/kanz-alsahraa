@@ -14,12 +14,15 @@ import 'app.dart';
 import 'common/config.dart';
 import 'common/constants.dart';
 import 'common/tools.dart';
+import 'common/tools/app_error_handler.dart';
 import 'common/tools/biometrics_tools.dart';
 import 'data/boxes.dart';
+import 'data/storage_recovery.dart';
 import 'env.dart';
 import 'modules/analytics/analytics.dart';
 import 'modules/meta_seo/meta_seo_service.dart';
 import 'modules/webview/index.dart';
+import 'services/app_telemetry.dart';
 import 'services/dependency_injection.dart';
 import 'services/locale_service.dart';
 import 'services/services.dart';
@@ -74,6 +77,7 @@ void main() {
 
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    AppErrorHandler.init();
 
     /// Call the setup for the application.
     _setupApplication();
@@ -82,7 +86,7 @@ void main() {
     var languageCode = kAdvanceConfig.defaultLanguage;
 
     /// Init Hive boxes.
-    await initBoxes();
+    await initializeStorageWithRecovery(initBoxes);
 
     if (!foundation.kIsWeb) {
       /// Enable network traffic logging.
@@ -103,6 +107,13 @@ void main() {
         /// Init Firebase settings due to version 0.5.0+ requires to.
         /// Use await to prevent any usage until the initialization is completed.
         await Services().firebase.init();
+        if (Firebase.apps.isNotEmpty) {
+          try {
+            await AppTelemetry.initialize();
+          } catch (_) {
+            printLog('[Telemetry] Initialization unavailable.');
+          }
+        }
         await Configurations().loadRemoteConfig();
         await BiometricsTools.instance.init();
       }
@@ -116,7 +127,11 @@ void main() {
         ignoreInitCart: (Configurations.multiSiteConfigs?.isNotEmpty ?? false));
     Analytics.instance.init();
 
-    if (isMobile && kAdvanceConfig.autoDetectLanguage) {
+    if (!kAdvanceConfig.isMultiLanguages) {
+      // Kanz is Arabic-only. Ignore a stale language saved by older releases.
+      languageCode = kAdvanceConfig.defaultLanguage;
+      SettingsBox().languageCode = languageCode;
+    } else if (isMobile && kAdvanceConfig.autoDetectLanguage) {
       final lang = SettingsBox().languageCode;
 
       if (lang?.isEmpty ?? true) {
@@ -139,5 +154,11 @@ void main() {
     ResponsiveSizingConfig.instance.setCustomBreakpoints(
         const ScreenBreakpoints(desktop: 1000, tablet: 600, watch: 100));
     runApp(App(languageCode: languageCode));
-  }, printError);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(AppTelemetry.firstFrame().catchError((Object _) {}));
+    });
+  }, (error, stack) {
+    AppTelemetry.report(error, stack, fatal: true);
+    printLog('[App] Unhandled application error.');
+  });
 }

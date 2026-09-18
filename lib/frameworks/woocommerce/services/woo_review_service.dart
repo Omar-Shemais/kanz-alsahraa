@@ -9,6 +9,7 @@ import '../../../models/entities/review.dart';
 import '../../../models/entities/review_payload.dart';
 import '../../../services/https.dart';
 import '../../../services/review_service.dart';
+import '../../../services/secure_requests.dart';
 import 'woo_commerce.dart';
 import 'woocommerce_api.dart';
 
@@ -28,7 +29,7 @@ final class WooReviewService extends ReviewService {
         headers['User-Cookie'] = token;
       }
 
-      final response = await httpPost(
+      final response = await securePost(
         '${wcApi.url}/wp-json/api/flutter_woo/products/reviews'.toUri()!,
         body: jsonEncode(payload.toWooJson()),
         headers: headers,

@@ -24,6 +24,7 @@ class ProductVariation {
   String? stockStatus;
   String? description;
   bool manageStock = false;
+  bool stockManagedByParent = false;
   bool? onSale;
   bool? inStock;
   int? stockQuantity;
@@ -72,6 +73,10 @@ class ProductVariation {
       salePrice: salePrice ?? this.salePrice,
       wholesalePrice: wholesalePrice ?? this.wholesalePrice,
       imageFeature: imageFeature ?? this.imageFeature,
+      inStock: inStock,
+      manageStock: manageStock,
+      stockManagedByParent: stockManagedByParent,
+      isActive: isActive,
     );
   }
 
@@ -92,12 +97,17 @@ class ProductVariation {
     this.imageFeature,
     this.attributeList,
     this.stockStatus,
+    this.manageStock = false,
+    this.stockManagedByParent = false,
+    this.isActive = true,
   });
 
   ProductVariation.fromJson(Map parsedJson) {
     id = parsedJson['id'].toString();
     productId = parsedJson['product_id'].toString();
     price = parsedJson['price'].toString();
+    isActive = parsedJson['purchasable'] != false &&
+        (parsedJson['status'] == null || parsedJson['status'] == 'publish');
     regularPrice = parsedJson['regular_price'].toString();
     salePrice = parsedJson['sale_price'].toString();
     dateOnSaleFrom = parsedJson['date_on_sale_from'] is Map
@@ -113,7 +123,8 @@ class ProductVariation {
     inStock = parsedJson['in_stock'] ?? parsedJson['stock_status'] == 'instock';
     if (parsedJson['manage_stock'] != null) {
       if (parsedJson['manage_stock'] == 'parent') {
-        manageStock = inStock ?? false;
+        stockManagedByParent = true;
+        manageStock = false;
       } else {
         manageStock = parsedJson['manage_stock'];
       }
@@ -309,6 +320,9 @@ class ProductVariation {
       'on_sale': onSale,
       'in_stock': inStock,
       'stock_quantity': stockQuantity,
+      'manage_stock': manageStock,
+      'stock_managed_by_parent': stockManagedByParent,
+      'is_active': isActive,
       'image': {'src': imageFeature},
       'attributes': attributes.map((item) {
         return item.toJson();
@@ -342,6 +356,9 @@ class ProductVariation {
       dateOnSaleFrom = json['date_on_sale_from'];
       dateOnSaleTo = json['date_on_sale_to'];
       inStock = json['in_stock'];
+      manageStock = json['manage_stock'] == true;
+      stockManagedByParent = json['stock_managed_by_parent'] == true;
+      isActive = json['is_active'] != false;
       inStock! ? stockQuantity = json['stock_quantity'] : stockQuantity = 0;
       imageFeature = json['image']['src'];
       var attributeList = <Attribute>[];

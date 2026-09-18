@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../common/config.dart';
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../common/tools/flash.dart';
 import '../../generated/l10n.dart';
 import '../../models/app_model.dart';
@@ -114,7 +115,7 @@ class _LanguageScreenState extends State<LanguageScreen> with AppBarMixin {
                 child: GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Icon(
-                    Icons.arrow_back_ios,
+                    Tools.getBackIcon(context),
                     color: Theme.of(context)
                         .primaryColor
                         .getColorBasedOnBackground,

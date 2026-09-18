@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,6 +15,7 @@ import '../../../generated/l10n.dart';
 import '../../../menu/maintab_delegate.dart';
 import '../../../models/index.dart';
 import '../../../routes/flux_navigate.dart';
+import '../../../services/cart_validation.dart';
 import '../../../services/service_config.dart';
 import '../../../services/services.dart';
 import '../../../widgets/product/product_bottom_sheet.dart';
@@ -21,6 +24,7 @@ import '../../checkout/checkout_screen.dart';
 mixin MyCartMixin<T extends StatefulWidget> on State<T> {
   bool isLoading = false;
   String errMsg = '';
+  bool _checkoutStarting = false;
 
   bool? get isModal;
 
@@ -30,6 +34,7 @@ mixin MyCartMixin<T extends StatefulWidget> on State<T> {
     await NavigateTools.navigateToLogin(
       context,
     );
+    if (!mounted) return;
 
     final user = Provider.of<UserModel>(context, listen: false).user;
     if (user != null && user.name != null) {
@@ -112,79 +117,101 @@ mixin MyCartMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> doCheckout() async {
-    if (BiometricsTools.instance.isCheckoutSupported) {
-      var didAuth = await BiometricsTools.instance.localAuth(context);
-      if (!didAuth) {
-        return;
+    if (!mounted || _checkoutStarting || isLoading) return;
+    _checkoutStarting = true;
+    try {
+      if (BiometricsTools.instance.isCheckoutSupported) {
+        var didAuth = await BiometricsTools.instance.localAuth(context);
+        if (!didAuth) {
+          return;
+        }
       }
-    }
-    showLoading();
+      if (!mounted) return;
+      showLoading();
 
-    await Services().widget.doCheckout(
-      context,
-      success: () async {
-        hideLoading('');
+      await Services().widget.doCheckout(
+        context,
+        success: () async {
+          if (!mounted) return;
+          hideLoading('');
 
-        if (ServerConfig().isHaravan) {
-          return FluxNavigate.pushNamed(
-            RouteList.checkoutWithWebview,
-            context: context,
-            forceRootNavigator: true,
-          );
-        }
-
-        var manualClosed = await FluxNavigate.pushNamed(
-          RouteList.checkout,
-          arguments: CheckoutArgument(isModal: isModal),
-          forceRootNavigator: true,
-          context: context,
-        );
-
-        if (true == manualClosed) {
-          if (isModal == true) {
-            try {
-              ExpandingBottomSheet.of(context)!.close();
-            } catch (e) {
-              if (ModalRoute.of(context)?.canPop ?? false) {
-                Navigator.of(context).pop();
-              } else {
-                await Navigator.of(context).pushNamed(RouteList.dashboard);
-              }
-            }
-          } else if (ModalRoute.of(context)?.canPop ?? false) {
-            Navigator.of(context).pop();
+          if (ServerConfig().isHaravan) {
+            await FluxNavigate.pushNamed(
+              RouteList.checkoutWithWebview,
+              context: context,
+              forceRootNavigator: true,
+            );
+            return;
           }
-        }
-      },
-      error: (message) async {
-        if (message ==
-            Exception('Token expired. Please logout then login again')
-                .toString()) {
-          setState(() {
-            isLoading = false;
-          });
-          //logout
-          final userModel = Provider.of<UserModel>(context, listen: false);
-          await userModel.logout();
-          await Services().firebase.signOut();
 
-          _loginWithResult(context);
-        } else {
-          hideLoading(message);
-          Future.delayed(const Duration(seconds: 3), () {
-            setState(() => errMsg = '');
+          var manualClosed = await FluxNavigate.pushNamed(
+            RouteList.checkout,
+            arguments: CheckoutArgument(isModal: isModal),
+            forceRootNavigator: true,
+            context: context,
+          );
+
+          if (true == manualClosed) {
+            if (!mounted) return;
+            if (isModal == true) {
+              try {
+                ExpandingBottomSheet.of(context)!.close();
+              } catch (e) {
+                if (ModalRoute.of(context)?.canPop ?? false) {
+                  Navigator.of(context).pop();
+                } else {
+                  await Navigator.of(context).pushNamed(RouteList.dashboard);
+                }
+              }
+            } else if (ModalRoute.of(context)?.canPop ?? false) {
+              Navigator.of(context).pop();
+            }
+          }
+        },
+        error: (message) async {
+          if (!mounted) return;
+          if (message ==
+              Exception('Token expired. Please logout then login again')
+                  .toString()) {
+            setState(() {
+              isLoading = false;
+            });
+            //logout
+            final userModel = Provider.of<UserModel>(context, listen: false);
+            await userModel.logout();
+            await Services().firebase.signOut();
+            if (!mounted) return;
+            _loginWithResult(context);
+          } else {
+            final displayError = message is CartValidationNotice
+                ? message.message
+                : 'تعذر الانتقال إلى الدفع. تحقق من الاتصال ثم أعد المحاولة.';
+            hideLoading(displayError);
+            unawaited(FlashHelper.errorMessage(context, message: displayError));
+          }
+        },
+        loading: (isLoading) {
+          if (!mounted) return;
+          setState(() {
+            this.isLoading = isLoading;
           });
-        }
-      },
-      loading: (isLoading) {
-        setState(() {
-          this.isLoading = isLoading;
-        });
-      },
-    );
+        },
+      );
+    } catch (_) {
+      if (mounted) {
+        const message =
+            'تعذر الانتقال إلى الدفع. تحقق من الاتصال ثم أعد المحاولة.';
+        hideLoading(message);
+        unawaited(FlashHelper.errorMessage(context, message: message));
+      }
+    } finally {
+      _checkoutStarting = false;
+      if (mounted && isLoading) hideLoading('');
+    }
   }
 
   void showLoading() {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
       errMsg = '';
@@ -192,9 +219,10 @@ mixin MyCartMixin<T extends StatefulWidget> on State<T> {
   }
 
   void hideLoading(error) {
+    if (!mounted) return;
     setState(() {
       isLoading = false;
-      errMsg = error;
+      errMsg = error?.toString() ?? '';
     });
   }
 

@@ -3,6 +3,7 @@ import 'package:inspireui/inspireui.dart' show Skeleton;
 import 'package:provider/provider.dart';
 
 import '../../../common/constants.dart';
+import '../../../common/tools.dart';
 import '../../../generated/l10n.dart';
 import '../../../modules/dynamic_layout/helper/helper.dart';
 import '../../../widgets/blog/blog_action_button_mixin.dart';
@@ -50,8 +51,8 @@ class _ListBlogScreenState extends BaseScreen<ListBlogScreen>
               : Center(
                   child: GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.arrow_back_ios,
+                    child: Icon(
+                      Tools.getBackIcon(context),
                     ),
                   ),
                 )),

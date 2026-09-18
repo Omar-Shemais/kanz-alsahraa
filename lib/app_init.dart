@@ -148,7 +148,7 @@ class _AppInitState extends BaseScreen<AppInit> {
 
     if (Services().widget.isRequiredLogin &&
         !SettingsBox().hasFinishedOnboarding) {
-      await _notificationModel.enableNotification();
+      unawaited(_notificationModel.enableNotification());
     }
 
     if (Layout.isDisplayDesktop(context)) {
@@ -165,13 +165,13 @@ class _AppInitState extends BaseScreen<AppInit> {
       }
 
       if (!SettingsBox().hasFinishedOnboarding) {
+        SettingsBox().hasFinishedOnboarding = true;
         if (kAdvanceConfig.showRequestNotification) {
           await Navigator.of(context)
               .pushReplacementNamed(RouteList.notificationRequest);
           return;
         }
-        await _notificationModel.enableNotification();
-        SettingsBox().hasFinishedOnboarding = true;
+        unawaited(_notificationModel.enableNotification());
       }
     }
 

@@ -4,7 +4,7 @@ const int _defaultMinDays = 7;
 const int _defaultMinLaunches = 10;
 const int _defaultRemindDays = 7;
 const int _defaultRemindLaunches = 10;
-const String _defaultGooglePlayIdentifier = 'com.kanzalsahra.store';
+const String _defaultGooglePlayIdentifier = 'com.khtwah.kanzalsahra';
 const String _defaultAppStoreIdentifier = '1469772800';
 
 class AppRatingConfig {

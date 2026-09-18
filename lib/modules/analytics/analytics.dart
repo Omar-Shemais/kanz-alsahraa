@@ -48,7 +48,8 @@ class AnalyticData {
 
 class Analytics {
   static final StreamController<(AnalyticsEvent, AnalyticData?)> _controller =
-      StreamController<(AnalyticsEvent, AnalyticData?)>();
+      // Listeners must snapshot checkout values before callers clear the cart.
+      StreamController<(AnalyticsEvent, AnalyticData?)>(sync: true);
   static StreamSubscription? _subscription;
 
   Analytics._();

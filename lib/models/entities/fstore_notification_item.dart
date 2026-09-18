@@ -26,7 +26,16 @@ class FStoreNotificationItem {
     return timeago.format(date);
   }
 
-  String? get dynamicLink => additionalData?['dynamic_link'];
+  String? get dynamicLink {
+    if (additionalData?['kanz_target'] != null) {
+      final data = additionalData!;
+      return Uri.https('kanzalsahra.com', '/app-notification', {
+        for (final key in ['kanz_target', 'kanz_id', 'kanz_url'])
+          if (data[key] is String) key: data[key] as String,
+      }).toString();
+    }
+    return additionalData?['dynamic_link'];
+  }
 
   String? get image => additionalData?['image'];
 

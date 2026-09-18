@@ -12,6 +12,7 @@ import '../common/tools/error_key.dart';
 import '../data/boxes.dart';
 import '../generated/l10n.dart';
 import '../services/index.dart';
+import '../services/native_browser_session.dart';
 import 'entities/cookie_data.dart';
 import 'entities/user.dart';
 
@@ -211,6 +212,8 @@ class UserModel with ChangeNotifier {
   }
 
   Future<void> _saveUser(User? user) async {
+    await browserSession.changeAccount(user?.id?.toString());
+    unawaited(Services().firebase.syncPublicNotificationDevice(user: user));
     try {
       if (Services().firebase.isEnabled && ServerConfig().isVendorType()) {
         Services().firebase.saveUserToFirestore(user: user);
@@ -240,6 +243,7 @@ class UserModel with ChangeNotifier {
     try {
       final localUser = UserBox().userInfo;
       if (localUser != null) {
+        await browserSession.changeAccount(localUser.id?.toString());
         user = localUser;
         loggedIn = true;
         final userInfo = await _service.api.getUserInfo(user!.cookie);
@@ -321,6 +325,12 @@ class UserModel with ChangeNotifier {
 
   Future<void> logout() async {
     loggedIn = false;
+    try {
+      await browserSession.clear();
+    } catch (_) {
+      // Local logout still completes; new web pages remain gated until retry.
+      printLog('[Logout] Browser cleanup requires retry');
+    }
     try {
       unawaited(Services().firebase.signOut());
       unawaited(FacebookAuth.instance.logOut());

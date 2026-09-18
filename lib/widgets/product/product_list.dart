@@ -12,7 +12,7 @@ import '../../modules/dynamic_layout/config/product_config.dart';
 import '../../modules/dynamic_layout/helper/helper.dart';
 import '../../modules/dynamic_layout/vertical/pinterest_card.dart';
 import '../../services/index.dart';
-import '../common/no_internet_connection.dart';
+import '../common/catalog_load_error.dart';
 import 'product_simple_view.dart';
 
 class ProductList extends StatefulWidget {
@@ -165,10 +165,8 @@ class _ProductListState extends State<ProductList> {
     final productsList =
         hasNoProduct && widget.isFetching ? emptyList : widget.products;
 
-    if (hasNoProduct &&
-        widget.errMsg != null &&
-        widget.errMsg!.isNoInternetError) {
-      return NoInternetConnection(onRefresh: _onRefresh);
+    if (widget.errMsg != null && !widget.isFetching) {
+      return CatalogLoadError(onRetry: _onRefresh);
     }
 
     Widget typeList = const SizedBox();

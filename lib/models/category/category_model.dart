@@ -13,6 +13,10 @@ abstract class CategoryModel extends ListCategoryModel {
     String? categoryLayout,
   });
 
+  void resortCategories(dynamic sortingList, {String? categoryLayout}) {}
+
+  List<Category>? get allCategories => categories;
+
   void refreshCategoryList();
 
   void mapCategories(List<Category> categories, List<Map> remapCategories);

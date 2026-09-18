@@ -30,6 +30,8 @@ class BaseFirebaseServices {
   /// save user to firebase
   void saveUserToFirestore({User? user}) {}
 
+  Future<void> syncPublicNotificationDevice({User? user}) async {}
+
   /// verify SMS login
   dynamic getFirebaseStream() {}
 

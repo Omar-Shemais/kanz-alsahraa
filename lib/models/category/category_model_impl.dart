@@ -7,6 +7,9 @@ import '../entities/category.dart';
 import 'category_model.dart';
 
 class CategoryModelImpl extends CategoryModel {
+  CategoryModelImpl({Future<List<Category>?> Function()? loadCategories})
+      : _loadCategories = loadCategories;
+  final Future<List<Category>?> Function()? _loadCategories;
   final Services _service = Services();
 
   List<Category>? _categories;
@@ -26,6 +29,21 @@ class CategoryModelImpl extends CategoryModel {
 
   List<Category>? _allCategories;
 
+  @override
+  List<Category>? get allCategories => _allCategories ?? _categories;
+
+  @override
+  void resortCategories(dynamic sortingList, {String? categoryLayout}) {
+    final list = _allCategories ?? _categories;
+    if (list != null && list.isNotEmpty) {
+      sortCategoryList(
+        categoryList: list,
+        sortingList: sortingList,
+        categoryLayout: categoryLayout,
+      );
+    }
+  }
+
   /// Format the Category List and assign the List by Category ID
   @override
   void sortCategoryList(
@@ -33,35 +51,32 @@ class CategoryModelImpl extends CategoryModel {
       dynamic sortingList,
       String? categoryLayout}) {
     var listCategory = <String?, Category>{};
-    var result = categoryList;
+    var result = categoryList ?? <Category>[];
 
-    if (sortingList != null) {
+    if (sortingList != null &&
+        sortingList is Iterable &&
+        sortingList.isNotEmpty &&
+        categoryList != null) {
       var categories = <Category>[];
-      var subCategories = <Category>[];
-      var isParent = true;
+      var seenIds = <String>{};
       for (var cate in sortingList) {
-        var item = categoryList!.firstWhereOrNull(
+        var item = categoryList.firstWhereOrNull(
             (Category cat) => cat.id.toString() == cate.toString());
-        if (item != null) {
-          if (item.parent != '0') {
-            isParent = false;
-          }
+        if (item != null && !seenIds.contains(item.id.toString())) {
+          seenIds.add(item.id.toString());
           categories.add(item);
         }
       }
-      if (!['column', 'grid', 'subCategories'].contains(categoryLayout)) {
-        for (var category in categoryList!) {
-          var item =
-              categories.firstWhereOrNull((cat) => cat.id == category.id);
-          if (item == null && isParent && category.parent != '0') {
-            subCategories.add(category);
-          }
+      for (var category in categoryList) {
+        if (!seenIds.contains(category.id.toString())) {
+          seenIds.add(category.id.toString());
+          categories.add(category);
         }
       }
-      result = [...categories, ...subCategories];
+      result = categories;
     }
 
-    for (var cat in result!) {
+    for (var cat in result) {
       listCategory[cat.id] = cat;
     }
     this.categoryList = listCategory;
@@ -123,8 +138,11 @@ class CategoryModelImpl extends CategoryModel {
     try {
       printLog('[Category] getCategories');
       isLoading = true;
+      loadError = null;
       notifyListeners();
-      _allCategories = await _service.api.getCategories();
+      _allCategories =
+          await (_loadCategories?.call() ?? _service.api.getCategories());
+      if (_allCategories == null) throw StateError('Category data unavailable');
 
       if (remapCategories != null) {
         mapCategories(
@@ -141,7 +159,8 @@ class CategoryModelImpl extends CategoryModel {
       notifyListeners();
     } catch (err) {
       isLoading = false;
-      //notifyListeners();
+      loadError = 'Unable to load categories';
+      notifyListeners();
     }
   }
 

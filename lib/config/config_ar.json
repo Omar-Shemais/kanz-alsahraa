@@ -50,32 +50,32 @@
             "radius": 30,
             "items": [
                 {
-                    "category": 124,
-                    "image": "assets/images/gold-bars.png"
-                },
-                {
-                    "category": 127,
-                    "image": "assets/images/gold_bar_withname.png"
-                },
-                {
-                    "category": 130,
-                    "image": "assets/images/gold-pounds.png"
+                    "category": 125,
+                    "image": "assets/images/gold-bars-with-name.png"
                 },
                 {
                     "category": 453,
                     "image": "assets/images/jewelry.png"
                 },
                 {
-                    "category": 125,
-                    "image": "assets/images/gold-bars-with-name.png"
+                    "category": 124,
+                    "image": "assets/images/gold-bars.png"
+                },
+                {
+                    "category": 130,
+                    "image": "assets/images/gold-pounds.png"
+                },
+                {
+                    "category": 438,
+                    "image": "assets/images/bracelets.png"
                 },
                 {
                     "category": 430,
                     "image": "assets/images/silver-bars.png"
                 },
                 {
-                    "category": 438,
-                    "image": "assets/images/bracelets.png"
+                    "category": 127,
+                    "image": "assets/images/gold_bar_withname.png"
                 }
             ],
             "marginBottom": 25,

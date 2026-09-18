@@ -1,12 +1,5 @@
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:inspireui/utils/logs.dart';
 import 'package:provider/provider.dart';
-import 'package:quiver/strings.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../../../common/config.dart';
 import '../../../common/tools.dart';
@@ -21,46 +14,16 @@ import '../../../models/tax_model.dart';
 import '../../../models/user_model.dart';
 import '../../../modules/analytics/analytics.dart';
 import '../../../modules/dynamic_layout/helper/helper.dart';
-import '../../../modules/native_payment/flutterwave/services.dart';
-import '../../../modules/native_payment/mercado_pago/index.dart';
-import '../../../modules/native_payment/paystack/services.dart';
-import '../../../modules/native_payment/paytm/services.dart';
-import '../../../modules/native_payment/razorpay/services.dart';
 import '../../../services/services.dart';
 import '../../../widgets/html/index.dart';
 
-mixin CheckoutMixin<T extends StatefulWidget> on State<T>, RazorDelegate {
+mixin CheckoutMixin<T extends StatefulWidget> on State<T> {
   bool isPaying = false;
   String? selectedId;
 
   Function? get onBack;
   Function? get onFinish;
   Function(bool)? get onLoading;
-
-  @override
-  void handlePaymentSuccess(PaymentSuccessResponse response) {
-    createOrder(
-            paid: true,
-            additionalPaymentInfo:
-                AdditionalPaymentInfo(transactionId: response.paymentId))
-        .then((value) {
-      onLoading?.call(false);
-      isPaying = false;
-    });
-  }
-
-  @override
-  void handlePaymentFailure(PaymentFailureResponse response) {
-    onLoading?.call(false);
-    isPaying = false;
-    final body = jsonDecode(response.message!);
-    if (body['error'] != null &&
-        body['error']['reason'] != 'payment_cancelled') {
-      Tools.showSnackBar(
-          ScaffoldMessenger.of(context), body['error']['description']);
-    }
-    printLog(response.message);
-  }
 
   @override
   void initState() {
@@ -123,13 +86,6 @@ mixin CheckoutMixin<T extends StatefulWidget> on State<T>, RazorDelegate {
     }
   }
 
-  Future<void> _deletePendingOrder(String? orderId) async {
-    try {
-      final userModel = Provider.of<UserModel>(context, listen: false);
-      await Services().api.deleteOrder(orderId, token: userModel.user?.cookie);
-    } catch (_) {}
-  }
-
   Future<void> createOrder(
       {paid = false,
       bacs = false,
@@ -141,18 +97,11 @@ mixin CheckoutMixin<T extends StatefulWidget> on State<T>, RazorDelegate {
         cod: cod,
         additionalPaymentInfo: additionalPaymentInfo,
         onFinish: (Order? order) async {
-          if ((additionalPaymentInfo?.transactionId?.isNotEmpty ?? false) &&
-              order != null) {
-            await Services().api.updateOrderIdForRazorpay(
-                additionalPaymentInfo?.transactionId, order.number);
-          }
           onFinish!(order);
         });
   }
 
   void placeOrder(PaymentMethodModel paymentMethodModel, CartModel cartModel) {
-    final currencyRate =
-        Provider.of<AppModel>(context, listen: false).currencyRate;
     final cartModel = Provider.of<CartModel>(context, listen: false);
 
     onLoading!(true);
@@ -284,178 +233,6 @@ mixin CheckoutMixin<T extends StatefulWidget> on State<T>, RazorDelegate {
           builder: (sContext) => bodyForm,
         );
 
-        return;
-      }
-
-      /// MercadoPago payment
-      if (!isSubscriptionProduct &&
-          isNotBlank(kMercadoPagoConfig['paymentMethodId']) &&
-          paymentMethod.id!.contains(kMercadoPagoConfig['paymentMethodId']) &&
-          kMercadoPagoConfig['enabled'] == true) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MercadoPagoPayment(
-              onFinish: (number, paid) {
-                if (number == null) {
-                  onLoading?.call(false);
-                  isPaying = false;
-                  return;
-                } else {
-                  createOrder(paid: paid).then((value) {
-                    onLoading?.call(false);
-                    isPaying = false;
-                  });
-                }
-              },
-            ),
-          ),
-        );
-        return;
-      }
-
-      /// RazorPay payment
-      /// Check below link for parameters:
-      /// https://razorpay.com/docs/payment-gateway/web-integration/standard/#step-2-pass-order-id-and-other-options
-      if (!isSubscriptionProduct &&
-          paymentMethod.id!.contains(kRazorpayConfig['paymentMethodId']) &&
-          kRazorpayConfig['enabled'] == true) {
-        Services().api.createRazorpayOrder({
-          'amount': (PriceTools.getPriceValueByCurrency(cartModel.getTotal()!,
-                      cartModel.currencyCode!, currencyRate) *
-                  100)
-              .toInt()
-              .toString(),
-          'currency': cartModel.currencyCode,
-        }).then((value) {
-          final razorServices = RazorServices(
-            amount: (PriceTools.getPriceValueByCurrency(cartModel.getTotal()!,
-                        cartModel.currencyCode!, currencyRate) *
-                    100)
-                .toInt()
-                .toString(),
-            keyId: kRazorpayConfig['keyId'],
-            delegate: this,
-            orderId: value,
-            userInfo: RazorUserInfo(
-              email: cartModel.address?.email,
-              phone: cartModel.address?.phoneNumber,
-              fullName:
-                  '${cartModel.address?.firstName ?? ''} ${cartModel.address?.lastName ?? ''}'
-                      .trim(),
-            ),
-          );
-          razorServices.openPayment(cartModel.currencyCode!);
-        }).catchError((e) {
-          onLoading?.call(false);
-          Tools.showSnackBar(ScaffoldMessenger.of(context), e);
-          isPaying = false;
-        });
-        return;
-      }
-
-      /// PayTm payment.
-      /// Check below link for parameters:
-      /// https://developer.paytm.com/docs/all-in-one-sdk/hybrid-apps/flutter/
-      final availablePayTm = kPayTmConfig['paymentMethodId'] != null &&
-          (kPayTmConfig['enabled'] ?? false) &&
-          paymentMethod.id!.contains(kPayTmConfig['paymentMethodId']);
-      if (!isSubscriptionProduct && availablePayTm) {
-        createOrderOnWebsite(
-            paid: false,
-            onFinish: (Order? order) async {
-              if (order != null) {
-                final paytmServices = PayTmServices(
-                  amount: cartModel.getTotal()!.toString(),
-                  orderId: order.id!,
-                  email: cartModel.address?.email,
-                );
-                try {
-                  await paytmServices.openPayment();
-                  onFinish!(order);
-                } catch (e) {
-                  Tools.showSnackBar(
-                      ScaffoldMessenger.of(context), e.toString());
-                  isPaying = false;
-                  unawaited(_deletePendingOrder(order.id));
-                }
-              }
-            });
-        return;
-      }
-
-      /// PayStack payment.
-      final availablePayStack = kPayStackConfig['paymentMethodId'] != null &&
-          (kPayStackConfig['enabled'] ?? false) &&
-          paymentMethod.id!.contains(kPayStackConfig['paymentMethodId']);
-      if (!isSubscriptionProduct && availablePayStack) {
-        final isSupported =
-            List.from(kPayStackConfig['supportedCurrencies'] ?? [])
-                    .firstWhereOrNull((e) =>
-                        e.toString().toLowerCase() ==
-                        cartModel.currencyCode?.toLowerCase()) !=
-                null;
-        if (isSupported) {
-          createOrderOnWebsite(
-              paid: false,
-              onFinish: (Order? order) async {
-                if (order != null) {
-                  final payStackServices = PayStackServices(
-                    amount: order.total?.toString() ?? '',
-                    orderId: order.id!,
-                    email: cartModel.address?.email,
-                  );
-                  try {
-                    await payStackServices.openPayment(context, onLoading!);
-                    onFinish!(order);
-                  } catch (e) {
-                    Tools.showSnackBar(
-                        ScaffoldMessenger.of(context), e.toString());
-                    isPaying = false;
-                    unawaited(_deletePendingOrder(order.id));
-                  }
-                }
-              });
-        } else {
-          isPaying = false;
-          onLoading?.call(false);
-          Tools.showSnackBar(
-              ScaffoldMessenger.of(context),
-              S.of(context).currencyIsNotSupported(
-                  cartModel.currencyCode?.toUpperCase() ?? ''));
-        }
-        return;
-      }
-
-      /// Flutterwave payment.
-      final availableFlutterwave =
-          kFlutterwaveConfig['paymentMethodId'] != null &&
-              (kFlutterwaveConfig['enabled'] ?? false) &&
-              paymentMethod.id!.contains(kFlutterwaveConfig['paymentMethodId']);
-      if (!isSubscriptionProduct && availableFlutterwave) {
-        createOrderOnWebsite(
-            paid: false,
-            onFinish: (Order? order) async {
-              if (order != null) {
-                final flutterwaveServices = FlutterwaveServices(
-                    amount: cartModel.getTotal()!.toString(),
-                    orderId: order.id!,
-                    email: cartModel.address?.email,
-                    name: cartModel.address?.fullName,
-                    phone: cartModel.address?.phoneNumber,
-                    currency: cartModel.currencyCode!,
-                    paymentMethod: paymentMethod.title);
-                try {
-                  await flutterwaveServices.openPayment(context, onLoading!);
-                  onFinish!(order);
-                } catch (e) {
-                  Tools.showSnackBar(
-                      ScaffoldMessenger.of(context), e.toString());
-                  isPaying = false;
-                  unawaited(_deletePendingOrder(order.id));
-                }
-              }
-            });
         return;
       }
 

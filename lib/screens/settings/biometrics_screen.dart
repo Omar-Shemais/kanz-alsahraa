@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/config.dart';
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../common/tools/biometrics_tools.dart';
 import '../../common/tools/flash.dart';
 import '../../data/boxes.dart';
@@ -51,8 +52,8 @@ class _BiometricsScreenState extends BaseScreen<BiometricsScreen>
                 onTap: () {
                   Navigator.pop(context);
                 },
-                child: const Icon(
-                  Icons.arrow_back_ios,
+                child: Icon(
+                  Tools.getBackIcon(context),
                   color: Colors.white,
                 ),
               ),

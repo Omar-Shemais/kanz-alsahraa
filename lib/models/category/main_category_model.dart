@@ -70,5 +70,11 @@ class MainCategoryModel extends ListCategoryModel implements CategoryModel {
   List<Category>? get rootCategories => categories;
 
   @override
+  List<Category>? get allCategories => categories;
+
+  @override
+  void resortCategories(dynamic sortingList, {String? categoryLayout}) {}
+
+  @override
   void refreshCategoryList() => refresh(autoGetData: false);
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common/constants.dart';
+import '../../../common/tools.dart';
 import '../../../generated/l10n.dart';
 import '../../../models/index.dart';
 import '../../../services/services.dart';
@@ -10,6 +11,7 @@ import '../../common/app_bar_mixin.dart';
 import '../constants/enums.dart';
 import '../models/list_order_history_model.dart';
 import '../models/order_history_detail_model.dart';
+import 'guest_order_lookup_screen.dart';
 import 'widgets/order_item.dart';
 import 'widgets/order_loading_item.dart';
 
@@ -75,11 +77,24 @@ class _ListOrderHistoryScreenState extends State<ListOrderHistoryScreen>
         backgroundColor: colorScheme.surface,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back_ios_sharp,
+            Tools.getBackIcon(context),
             color: colorScheme.secondary,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: Tools.isRTL(context) ? 'استعلام عن طلب' : 'Track Order',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const GuestOrderLookupScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       backgroundColor: colorScheme.surface,
       child: Column(
@@ -162,7 +177,24 @@ class _ListOrderHistoryScreenState extends State<ListOrderHistoryScreen>
                                   style: Theme.of(context).textTheme.bodyMedium,
                                   textAlign: TextAlign.center),
                             ),
-                            const SizedBox(height: 50)
+                            const SizedBox(height: 20),
+                            OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const GuestOrderLookupScreen(),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.search),
+                              label: Text(
+                                Tools.isRTL(context)
+                                    ? 'استعلام عن طلب سابق'
+                                    : 'Lookup an Order',
+                              ),
+                            ),
+                            const SizedBox(height: 40)
                           ],
                         )
                       ],

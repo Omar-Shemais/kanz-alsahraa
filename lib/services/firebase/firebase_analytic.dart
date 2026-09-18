@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/index.dart';
 import '../../modules/analytics/abstract_analytic_trigger.dart';
+import '../../modules/analytics/transaction_id.dart';
 import '../services.dart';
 
 class FirebaseAnalytic extends AbstractAnalyticTrigger {
@@ -93,6 +94,10 @@ class FirebaseAnalytic extends AbstractAnalyticTrigger {
 
   @override
   void onPurchased(Order value, BuildContext? context) {
+    final transactionId = analyticsTransactionId(value.id, value.number);
+    if (transactionId == null) {
+      return;
+    }
     double? price;
     double? shipping;
     double? tax;
@@ -109,7 +114,7 @@ class FirebaseAnalytic extends AbstractAnalyticTrigger {
       productList = model.getProductsInCart();
     }
     Services().firebase.firebaseAnalytics?.logPurchase(
-          orderId: value.id,
+          orderId: transactionId,
           price: price,
           shipping: shipping,
           tax: tax,

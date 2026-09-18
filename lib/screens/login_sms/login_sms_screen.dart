@@ -142,26 +142,16 @@ class LoginSMSScreenState<T extends LoginSMSScreen> extends State<T>
                       Padding(
                         padding: const EdgeInsets.only(top: 17.0),
                         child: CountryCodePicker(
-                            showDropDownButton: false,
-                              favorite: ['SA'],
-                              countryFilter:['SA'],
-                                enabled: false,
-
-
-
+                          showDropDownButton: false,
+                          favorite: const ['SA'],
+                          countryFilter: const ['SA'],
+                          enabled: false,
                           onChanged: (CountryCode? countryCode) =>
                               viewModel.updateCountryCode(
                             code: countryCode?.code,
                             dialCode: countryCode?.dialCode,
                             name: countryCode?.name,
-//showDropDownButton: false,
-
-      // Disable the drop-down (non-selectable)
-
-                            // priorityList :['CD', 'CG', 'KE', 'UG'], // only specific countries
-
                           ),
-                          // Initial selection and favorite can be one of code ('IT') OR dial_code('+39')
                           initialSelection: viewModel.countryCode,
                           onInit: (countryCode) => viewModel.loadConfig(
                             code: countryCode?.code,
@@ -172,7 +162,8 @@ class LoginSMSScreenState<T extends LoginSMSScreen> extends State<T>
                           backgroundColor:
                               Theme.of(context).colorScheme.surface,
                           dialogBackgroundColor:
-                              Theme.of(context).dialogBackgroundColor,
+                              Theme.of(context).dialogTheme.backgroundColor ??
+                                  Theme.of(context).colorScheme.surface,
                         ),
                       ),
                       const SizedBox(width: 8.0),
@@ -221,7 +212,7 @@ class LoginSMSScreenState<T extends LoginSMSScreen> extends State<T>
                             Text(S.of(context).dontHaveAccount),
                             GestureDetector(
                               onTap: () {
-                               // NavigateTools.navigateRegister(context);
+                                NavigateTools.navigateRegister(context);
                               },
                               child: Text(
                                 ' ${S.of(context).signup}',

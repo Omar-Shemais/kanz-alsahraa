@@ -2,13 +2,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Kanz does not use advertising identifiers or Privacy Sandbox ads. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS" tools:node="remove" />
 
     <queries>
-        <provider android:authorities="com.facebook.katana.provider.PlatformProvider" />
-        <intent>
-            <action android:name="android.speech.RecognitionService" />
-        </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
@@ -26,7 +28,7 @@
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         tools:replace="android:usesCleartextTraffic,android:allowBackup">
 
         <activity
@@ -47,7 +49,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Add your other intent filters here -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="kanzalsahra.com" android:pathPrefix="/product/" />
+                <data android:scheme="https" android:host="kanzalsahra.com" android:pathPrefix="/product-category/" />
+                <data android:scheme="https" android:host="kanzalsahra.com" android:pathPrefix="/product-tag/" />
+                <data android:scheme="https" android:host="kanzalsahra.com" android:pathPrefix="/app-notification" />
+            </intent-filter>
         </activity>
 
         <meta-data
@@ -73,30 +84,35 @@
         <!-- Google map and Admod setup -->
 
 
-        <!-- Facebook Login configuration -->
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebookAppId" />
-
-        <meta-data
-            android:name="com.facebook.sdk.ClientToken"
-            android:value="${facebookClientToken}" />
-
         <meta-data
             android:name="com.inspireui.ENVATO_PURCHASE_CODE"
             android:value="${envatoPurchaseCode}" />
 
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
+        <!-- Facebook login/events are disabled for Kanz. Prevent the SDK from
+             restoring an obsolete token and making failing startup requests. -->
+        <meta-data
+            android:name="com.facebook.sdk.AutoInitEnabled"
+            android:value="false" />
+        <meta-data
+            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
+            android:value="false" />
 
         <!-- Other configurations like meta-data, services, etc. -->
         <meta-data android:name="flutterEmbedding" android:value="2" />
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
 
+        <!-- Suppress inherited ad initialization until unused SDKs are removed. -->
+        <provider
+            android:name="com.google.android.gms.ads.MobileAdsInitProvider"
+            tools:node="remove" />
         <property
             android:name="android.adservices.AD_SERVICES_CONFIG"
-            android:resource="@xml/gma_ad_services_config"
-            tools:replace="android:resource" />
+            tools:node="remove" />
 
         <property
             android:name="android.graphics.HARDWARE_BUFFER_MAX_LAYERS"

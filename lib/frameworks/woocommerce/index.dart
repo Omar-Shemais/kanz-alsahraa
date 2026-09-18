@@ -42,6 +42,8 @@ import '../../modules/subscription/views/recurring_totals.dart';
 import '../../routes/flux_navigate.dart';
 import '../../screens/index.dart'
     show PaymentWebview, WebviewCheckoutSuccessScreen;
+import '../../services/cart_validation.dart';
+import '../../services/checkout_preparation.dart';
 import '../../services/index.dart';
 import '../frameworks.dart';
 import '../product_variant_mixin.dart';
@@ -167,12 +169,33 @@ class WooWidget extends BaseFrameworks
     final cartModel = Provider.of<CartModel>(context, listen: false);
     final userModel = Provider.of<UserModel>(context, listen: false);
 
+    if (!await _revalidateCart(context,
+        (String message) => error?.call(CartValidationNotice(message)))) {
+      if (context.mounted) loading?.call(false);
+      return;
+    }
+    if (!context.mounted) return;
+
     if (kPaymentConfig.enableOnePageCheckout || cartModel.isB2BKingCart()) {
       loading!(true);
       var params = Order().toJson(cartModel, userModel.user?.id, true);
       params['token'] = userModel.user?.cookie;
-      var url = await Services().api.getCheckoutUrl(
-          params, Provider.of<AppModel>(context, listen: false).langCode)!;
+      String? url;
+      try {
+        url = await prepareCheckout(() => Services().api.getCheckoutUrl(
+            params, Provider.of<AppModel>(context, listen: false).langCode)!);
+        if (!context.mounted) return;
+        if (url == null || url.isEmpty) {
+          throw StateError('Checkout URL unavailable');
+        }
+      } catch (_) {
+        if (context.mounted) {
+          loading(false);
+          error?.call(
+              'تعذر الانتقال إلى الدفع. تحقق من الاتصال ثم أعد المحاولة.');
+        }
+        return;
+      }
       loading(false);
 
       /// Navigate to Webview payment
@@ -193,8 +216,8 @@ class WooWidget extends BaseFrameworks
       );
 
       if (orderNum != null && !kIsWeb) {
-        cartModel.clearCart();
         Analytics.triggerPurchased(Order(number: orderNum), context);
+        cartModel.clearCart();
         if (kPaymentConfig.showWebviewCheckoutSuccessScreen) {
           await Navigator.push(
             context,
@@ -209,7 +232,7 @@ class WooWidget extends BaseFrameworks
     }
 
     /// return success to navigate to Native payment
-    success!();
+    await success!();
   }
 
   @override
@@ -270,14 +293,19 @@ class WooWidget extends BaseFrameworks
       PaymentMethod? paymentMethod,
       Function? onLoading,
       Function? success,
-      Function? error}) {
+      Function? error}) async {
+    onLoading?.call(true);
+    final valid = await _revalidateCart(context, error);
+    if (!context.mounted) return;
+    onLoading?.call(false);
+    if (!valid) return;
     Provider.of<CartModel>(context, listen: false)
         .setPaymentMethod(paymentMethod);
 
     final user = Provider.of<UserModel>(context, listen: false).user;
 
     if (paymentMethod!.id == 'cod' || paymentMethod.id == 'wallet') {
-      createOrder(context, cod: true, onLoading: onLoading,
+      await createOrder(context, cod: true, onLoading: onLoading,
           success: (Order order) {
         success!(order);
         if (paymentMethod.id == 'wallet' &&
@@ -295,14 +323,69 @@ class WooWidget extends BaseFrameworks
         /// Thai PromptPay
         (paymentMethod.id == kThaiPromptPayConfig['paymentMethodId'] &&
             kThaiPromptPayConfig['enabled'] == true)) {
-      createOrder(context,
+      await createOrder(context,
           bacs: true, onLoading: onLoading, success: success, error: error);
       return;
     }
 
     var params = Order().toJson(cartModel!, user?.id, true);
     params['token'] = user?.cookie;
-    makePaymentWebview(context, params, onLoading, success, error);
+    await makePaymentWebview(context, params, onLoading, success, error);
+  }
+
+  Future<bool> _revalidateCart(BuildContext context, Function? error) async {
+    final cart = context.read<CartModel>();
+    final users = context.read<UserModel>();
+    final account = users.user?.id;
+    final cookie = users.user?.cookie;
+    String fingerprint() => cart.productsInCart.entries.map((entry) {
+          final id = Product.cleanProductID(entry.key);
+          final variant = cart.getProductVariationById(entry.key);
+          return '${entry.key}:${entry.value}:$id:${cart.item[id]?.price}:'
+              '${variant?.id}:${variant?.price}';
+        }).join('|');
+    final before = fingerprint();
+    try {
+      final lines = cart.productsInCart.entries.map((entry) {
+        final product = cart.item[Product.cleanProductID(entry.key)];
+        if (product == null) throw StateError('Missing cart product');
+        return CartValidationLine(
+          key: entry.key,
+          product: product,
+          quantity: entry.value ?? 0,
+          variation: cart.getProductVariationById(entry.key),
+        );
+      }).toList();
+      final api = Services().api;
+      final result = await validateWooCart(
+        lines: lines,
+        loadProduct: (id) => api.getProduct(id) ?? Future.value(null),
+        loadVariation: (id, variantId) =>
+            api.getVariationProduct(id, variantId),
+      ).timeout(const Duration(seconds: 20));
+      if (!context.mounted) return false;
+      if (account != users.user?.id ||
+          cookie != users.user?.cookie ||
+          before != fingerprint()) {
+        error?.call(
+            'تغيرت السلة أو جلسة الحساب أثناء التحقق. راجعها ثم تابع الدفع.');
+        return false;
+      }
+      for (final entry in result.products.entries) {
+        cart.updateProduct(entry.key, entry.value);
+      }
+      for (final entry in result.variations.entries) {
+        cart.updateProductVariant(entry.key, entry.value);
+      }
+      if (!result.canProceed) error?.call(result.message);
+      return result.canProceed;
+    } catch (_) {
+      if (context.mounted) {
+        error?.call(
+            'تعذر تأكيد أسعار المنتجات وتوفرها. تحقق من الاتصال ثم أعد المحاولة.');
+      }
+      return false;
+    }
   }
 
   Future<void> makePaymentWebview(context, Map<String, dynamic> params,
@@ -310,8 +393,13 @@ class WooWidget extends BaseFrameworks
     try {
       onLoading!(true);
 
-      var url = await Services().api.getCheckoutUrl(
-          params, Provider.of<AppModel>(context, listen: false).langCode)!;
+      final lang = Provider.of<AppModel>(context, listen: false).langCode;
+      final url = await prepareCheckout(
+          () => Services().api.getCheckoutUrl(params, lang)!);
+      if (!context.mounted) return;
+      if (url.isEmpty) {
+        throw StateError('Checkout URL unavailable');
+      }
       onLoading(false);
       await Navigator.push(
         context,
@@ -322,9 +410,12 @@ class WooWidget extends BaseFrameworks
                   success!(number != null ? Order(number: number) : null);
                 })),
       );
-    } catch (e, trace) {
-      error!(e.toString());
-      printLog(trace.toString());
+    } catch (_) {
+      if (context.mounted) {
+        onLoading?.call(false);
+        error
+            ?.call('تعذر الانتقال إلى الدفع. تحقق من الاتصال ثم أعد المحاولة.');
+      }
     }
   }
 
@@ -681,8 +772,7 @@ class WooWidget extends BaseFrameworks
     List<Country>? countries = <Country>[];
     if (kDefaultCountry.isNotEmpty) {
       for (var item in kDefaultCountry) {
-        countries.add(Country.fromConfig(
-            item['iosCode'], item['name'], item['icon'], []));
+        countries.add(Country.fromShippingConfig(item));
       }
     } else {
       try {
@@ -696,6 +786,12 @@ class WooWidget extends BaseFrameworks
 
   @override
   Future<List<CountryState>> loadStates(Country country) async {
+    if (country.states?.isNotEmpty ?? false) {
+      return List<CountryState>.of(country.states!);
+    }
+    if (country.id == null || country.id!.isEmpty) {
+      return [];
+    }
     final items = await Tools.loadStatesByCountry(country.id!);
     var states = <CountryState>[];
     if (items.isNotEmpty) {

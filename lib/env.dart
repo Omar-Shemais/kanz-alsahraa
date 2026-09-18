@@ -1,15 +1,15 @@
 // ignore_for_file: prefer_single_quotes, lines_longer_than_80_chars final
 Map<String, dynamic> environment = {
-  //"appConfig": "lib/config/config_en.json",
-  // "appConfig": "https://ap-apps.com/kanzalsahra/config_en.json",
-     "appConfig": "lib/config/config_ar.json",
+  "appConfig": "https://kanzalsahra.com/wp-content/uploads/flutter_config_files/config_ar.json",
 
 
   "serverConfig": {
     "url": "https://kanzalsahra.com",
     "type": "woo",
-    "consumerKey": "ck_3a6a2f5388bf3a924beea14d38e51ac373a3413d",
-    "consumerSecret": "cs_50257be1e041f4cce7cb05b5c16a5501ba589871"
+    // Supply these at build time from Codemagic encrypted environment
+    // variables. Never commit WooCommerce credentials to the app source.
+    "consumerKey": const String.fromEnvironment('KANZ_WOO_CONSUMER_KEY'),
+    "consumerSecret": const String.fromEnvironment('KANZ_WOO_CONSUMER_SECRET')
 
     /// Wordpress blog, it could be removed if using the same above url
     //'blog': 'https://mstore.io',
@@ -18,7 +18,7 @@ Map<String, dynamic> environment = {
   /// ➡️ lib/common/config/general.dart
   "defaultDarkTheme": false,
   "enableRemoteConfigFirebase": false,
-  "enableFirebaseAnalytics": false,
+  "enableFirebaseAnalytics": true,
   "enableFacebookAppEvents": false,
 
   /// Web Proxy: use only for web FluxStore
@@ -48,7 +48,7 @@ Map<String, dynamic> environment = {
 
   "appRatingConfig": {
     'showOnOpen': false,
-    'android': 'com.kanzalsahra.store',
+    'android': 'com.khtwah.kanzalsahra',
     'ios': '1469772800',
     'minDays': 7,
     'minLaunches': 10,
@@ -83,7 +83,7 @@ Map<String, dynamic> environment = {
     /// set isCaching to true if you have upload the config file to mstore-api
     /// set kIsResizeImage to true if you have finished running Re-generate image plugin
     /// ref: https://support.inspireui.com/help-center/articles/3/8/19/app-performance
-    "isCaching": false,
+    "isCaching": true,
     "kIsResizeImage": false,
     "httpCache": true,
 
@@ -111,7 +111,7 @@ Map<String, dynamic> environment = {
 
     /// if the woo commerce website supports multi languages
     /// set false if the website only have one language
-    "isMultiLanguages": true,
+    "isMultiLanguages": false,
 
     /// Review gets approved automatically on woocommerce admin without
     /// requiring administrator to approve.
@@ -138,7 +138,7 @@ Map<String, dynamic> environment = {
     "ShowAllCoupons": true,
 
     /// Show expired coupons in Coupon list.
-    "ShowExpiredCoupons": true,
+    "ShowExpiredCoupons": false,
     "AlwaysShowTabBar": true,
 
     /// Privacy Policies page ID. If page ID is null, use the URL instead.
@@ -157,19 +157,9 @@ Map<String, dynamic> environment = {
 
     "SocialConnectUrl": [
       {
-        "name": "Youtube",
-        "icon": "assets/icons/brands/youtube.svg",
-        "url": "https://www.youtube.com/inspireui?sub_confirmation=1"
-      },
-      {
-        "name": "Facebook",
-        "icon": "assets/icons/brands/facebook.svg",
-        "url": "https://www.facebook.com/inspireUI/"
-      },
-      {
-        "name": "Twitter",
-        "icon": "assets/icons/brands/twitter.svg",
-        "url": "https://twitter.com/InspireUI"
+        "name": "الموقع الرسمي",
+        "icon": "assets/icons/tabs/icon-home.png",
+        "url": "https://kanzalsahra.com"
       },
     ],
 
@@ -202,14 +192,14 @@ Map<String, dynamic> environment = {
     /// so webview can navigate to external app.
     /// Useful for webview checkout which need to handle payment in another app.
     "inAppWebView": true,
-    'AlwaysClearWebViewCache': false,
-    'AlwaysClearWebViewCookie': false,
+    'AlwaysClearWebViewCache': true,
+    'AlwaysClearWebViewCookie': true,
     "WebViewScript": "",
 
     'AlwaysRefreshBlog': false,
 
     ///support multi currency via WOOCS – Currency Switcher for WooCommerce plugin (https://wordpress.org/plugins/woocommerce-currency-switcher/)
-    "EnableWOOCSCurrencySwitcher": true,
+    "EnableWOOCSCurrencySwitcher": false,
 
     /// Enable product backdrop layout - https://tppr.me/L5Pnf
     "enableProductBackdrop": false,
@@ -240,17 +230,17 @@ Map<String, dynamic> environment = {
 
     /// Just accept select the country on this list
     /// example: {"vn", "ae"}
-    "supportCountriesShipping": null,
+    "supportCountriesShipping": ["SA"],
 
     // Enable the request Notify permission from onboarding
-    "showRequestNotification": true,
+    "showRequestNotification": false,
 
     "versionCheck": {
-      "enable": false,
-      "iOSAppStoreCountry": "US",
+      "enable": true,
+      "iOSAppStoreCountry": "SA",
     },
     "inAppUpdateForAndroid": {
-      "enable": false,
+      "enable": true,
       // "flexible, immediate"
       "typeUpdate": "flexible",
     },
@@ -275,8 +265,7 @@ Map<String, dynamic> environment = {
 
     "b2bKingConfig": {
       "enabled": false,
-      "guestAccessRestriction":
-      "replace_prices_quote", //none, replace_prices_quote
+      "guestAccessRestriction": "none",
     },
 
     /// PW WooCommerce Gift Cards (https://wordpress.org/plugins/pw-woocommerce-gift-cards/)
@@ -293,7 +282,7 @@ Map<String, dynamic> environment = {
     "background": null,
     "items": [
       {"type": "home", "show": true},
-      {"type": "blog", "show": true},
+      {"type": "blog", "show": false},
       {"type": "categories", "show": true},
       {"type": "cart", "show": true},
       {"type": "profile", "show": true},
@@ -304,11 +293,10 @@ Map<String, dynamic> environment = {
   "defaultSettings": [
     "biometrics",
     "products",
-    "wallet",
     "chat",
     "wishlist",
     "notifications",
-    "language",
+    //"language",
     //"currencies",
     "darkTheme",
     "order",
@@ -324,7 +312,7 @@ Map<String, dynamic> environment = {
     /// Set to false to disable only registration option
     "enableRegister": true,
     "IsRequiredLogin": false,
-    "showAppleLogin": false,
+    "showAppleLogin": true,
     "showFacebook": false,
     "showSMSLogin": true,
     "showGoogleLogin": false,
@@ -359,7 +347,7 @@ Map<String, dynamic> environment = {
     'version': 1,
     'autoCropImageByDesign': true,
     'isOnlyShowOnFirstTime': true,
-    "showLanguage": true,
+    "showLanguage": false,
     'data': [
       {
         'title': 'Welcome to FluxStore',
@@ -461,8 +449,8 @@ Map<String, dynamic> environment = {
 
   /// ➡️ lib/common/dynamic_link.dart
   "firebaseDynamicLinkConfig": {
-    "isEnabled": true,
-    "shortDynamicLinkEnable": true,
+    "isEnabled": false,
+    "shortDynamicLinkEnable": false,
 
     /// Domain is the domain name for your product.
     /// Let’s assume here that your product domain is “example.com”.
@@ -471,17 +459,17 @@ Map<String, dynamic> environment = {
     //The link your app will open
     "link": "https://kanzalsahra.com/",
     //----------* Android Setting *----------//
-    "androidPackageName": "com.kanzalsahra.store",
+    "androidPackageName": "com.khtwah.kanzalsahra",
     "androidAppMinimumVersion": 1,
     //----------* iOS Setting *----------//
-    "iOSBundleId": "com.inspireui.mstore.flutter",
+    "iOSBundleId": "com.khtwah.kanzalsahra",
     "iOSAppMinimumVersion": "1.0.1",
-    "iOSAppStoreId": "1469772800"
+    "iOSAppStoreId": "1564098406"
   },
 
   "dynamicLinkConfig": {
     "enable": true,
-    "type": "firebase",
+    "type": "native",
     "branchIO": {
       "liveMode": false,
     }
@@ -509,9 +497,9 @@ Map<String, dynamic> environment = {
 
   /// ➡️  lib/common/config/payments.dart
   "paymentConfig": {
-    "DefaultCountryISOCode": "US",
+    "DefaultCountryISOCode": "SA",
 
-    "DefaultStateISOCode": "LA",
+    "DefaultStateISOCode": "RIY",
 
     /// Enable the Shipping option from Checkout, support for the Digital Download
     "EnableShipping": true,
@@ -535,16 +523,16 @@ Map<String, dynamic> environment = {
     /// Enable the Google Maps picker from Billing Address.
     "allowSearchingAddress": true,
 
-    "GuestCheckout": true,
+    "GuestCheckout": false,
 
-    /// Enable Payment option
-    "EnableOnePageCheckout": true,
-    "NativeOnePageCheckout": true,
+    /// Enable Payment option (Disable OnePageCheckout to use stable native checkout flow)
+    "EnableOnePageCheckout": false,
+    "NativeOnePageCheckout": false,
 
     "ShowWebviewCheckoutSuccessScreen": true,
 
     /// This config is same with checkout page slug in the website
-    "CheckoutPageSlug": {"en": "checkout"},
+    "CheckoutPageSlug": {"en": "checkout", "ar": "checkout"},
 
     /// Enable Credit card payment (only available for Fluxstore Shopipfy)
     "EnableCreditCard": false,
@@ -555,23 +543,21 @@ Map<String, dynamic> environment = {
     /// Show order notes in order history detail.
     "ShowOrderNotes": true,
 
-    /// Show Refund and Cancel button on Order Detail
-    "EnableRefundCancel": true,
+    /// Show Refund and Cancel button on Order Detail (Policy: No automatic cancellations post-confirmation)
+    "EnableRefundCancel": false,
 
     /// If the order completed date is after this period (days), the refund button will be hidden.
-    "RefundPeriod": 7,
+    "RefundPeriod": 1,
 
-    /// If you wish to display the Cancel and Refund button for a specific payment method on Order Detail screen, please enter the payment method ID. For example: "PaymentListAllowsCancelAndRefund": ["paypal","stripe"],
-
-    /// Alternatively, if you want to show the Cancel and Refund button for all payment methods, leave it blank.
-    "PaymentListAllowsCancelAndRefund": [],
+    /// Allowed payment methods for cancellation inquiry
+    "PaymentListAllowsCancelAndRefund": ["bacs"],
 
     /// Apply the extra fee for the COD method
     /// amountStop: Amount to stop charge the extra fee
     "SmartCOD": {"enabled": false, "extraFee": 10, "amountStop": 200},
 
     /// List ids to hide some unnecessary payment methods
-    "excludedPaymentIds": [],
+    "excludedPaymentIds": ["wallet"],
 
     /// Show Transaction Details in Order History Screen
     "ShowTransactionDetails": true,
@@ -596,179 +582,179 @@ Map<String, dynamic> environment = {
     "thawani_gw": "assets/icons/payment/thawani.png",
   },
   "shopifyPaymentConfig": {
-    "shopName": "FluxStore",
-    "countryCode": "US",
+    "shopName": "Kanz Al-Sahra",
+    "countryCode": "SA",
     "productionMode": false,
     "paymentCardConfig": {
-      "enable": true,
-      "serverEndpoint": "https://test-stripe-nine.vercel.app",
+      "enable": false,
+      "serverEndpoint": "",
     },
     "applePayConfig": {
-      "enable": true,
-      "merchantId": "merchant.com.kanzalsahra.store",
+      "enable": false,
+      "merchantId": "merchant.com.khtwah.kanzalsahra.flutter",
     },
     "googlePayConfig": {
-      "enable": true,
-      "stripePublishableKey": "pk_test_O3awus9i5mA2wIX9a7pU3MSi00gZPcpJWX",
-      "merchantId": "merchant.com.kanzalsahra.store"
+      "enable": false,
+      "stripePublishableKey": "",
+      "merchantId": "merchant.com.khtwah.kanzalsahra.flutter"
     },
   },
   "stripeConfig": {
-    "serverEndpoint": "https://stripe-server-node.vercel.app",
-    "publishableKey": "pk_test_syl720IY4iwLkNzmOeL7nz3J",
+    "serverEndpoint": "",
+    "publishableKey": "",
     "paymentMethodIds": ["stripe"],
-    "enabled": true,
-    "enableApplePay": true,
-    "enableGooglePay": true,
-    "merchantDisplayName": "FluxStore",
-    "merchantIdentifier": "merchant.com.inspireui.mstore.flutter",
-    "merchantCountryCode": "US",
-    "returnUrl": "fluxstore://inspireui.com",
-
-    /// Enable this automatically captures funds when the customer authorizes the payment.
-    /// Disable will Place a hold on the funds when the customer authorizes the payment,
-    /// but don’t capture the funds until later. (Not all payment methods support this.)
-    /// https://stripe.com/docs/payments/capture-later
-    /// Default: false
+    "enabled": false,
+    "enableApplePay": false,
+    "enableGooglePay": false,
+    "merchantDisplayName": "Kanz Al-Sahra",
+    "merchantIdentifier": "merchant.com.khtwah.kanzalsahra.flutter",
+    "merchantCountryCode": "SA",
+    "returnUrl": "com.khtwah.kanzalsahra://stripe",
     "enableManualCapture": false,
     "saveCardAfterCheckout": false,
     "stripeApiVersion": 3,
   },
   "paypalConfig": {
-    "clientId":
-    "ASlpjFreiGp3gggRKo6YzXMyGM6-NwndBAQ707k6z3-WkSSMTPDfEFmNmky6dBX00lik8wKdToWiJj5w",
-    "secret":
-    "ECbFREri7NFj64FI_9WzS6A0Az2DqNLrVokBo0ZBu4enHZKMKOvX45v9Y1NBPKFr6QJv2KaSp5vk5A1G",
-    "returnUrl":
-    "com.kanzalsahra.store://paypalpay",
-    // Example: "your.android.package.name:://paypalpay"
+    "clientId": "",
+    "secret": "",
+    "returnUrl": "com.khtwah.kanzalsahra://paypalpay",
     "production": false,
     "paymentMethodId": "paypal",
-    //ppcp-gateway
-    "enabled": true,
+    "enabled": false,
     "nativeMode": false,
   },
   "paypalExpressConfig": {
-    "username": "sb-wea3q30917031_api1.business.example.com",
-    "password": "9MN73T4JHTBDY5W7",
-    "signature": "A-X91d6dvj07IIDTUn5hM8p8w8LxA-5D.cnvNUgufzpxxf1NNZBYh3kq",
-    "paymentAction": "Sale", //Sale, Order, Authorization.
+    "username": "",
+    "password": "",
+    "signature": "",
+    "paymentAction": "Sale",
     "production": false,
     "paymentMethodId": "paypal_express",
     "enabled": false,
   },
   "razorpayConfig": {
-    "keyId": "rzp_test_SDo2WKBNQXDk5Y",
-    "keySecret": "RrgfT3oxbJdaeHSzvuzaJRZf",
+    "keyId": "",
+    "keySecret": "",
     "paymentMethodId": "razorpay",
-    "enabled": true
+    "enabled": false
   },
   "tapConfig": {
-    "SecretKey": "sk_test_XKokBfNWv6FIYuTMg5sLPjhJ",
+    "SecretKey": "",
     "paymentMethodId": "tap",
-    "enabled": true
+    "enabled": false
   },
   "mercadoPagoConfig": {
-    "accessToken":
-    "TEST-5726912977510261-102413-65873095dc5b0a877969b7f6ffcceee4-613803978",
+    "accessToken": "",
     "production": false,
     "paymentMethodId": "woo-mercado-pago-basic",
-    "enabled": true
+    "enabled": false
   },
   "payTmConfig": {
     "paymentMethodId": "paytm",
-    "merchantId": "your-merchant-id",
+    "merchantId": "",
     "production": false,
-    "enabled": true
+    "enabled": false
   },
   "payStackConfig": {
     'paymentMethodId': 'paystack',
-    'publicKey': 'pk_test_a1a37615c9ca90dead5dd84dedbb5e476b640a6f',
-    'secretKey': 'sk_test_d833fcaa6c02a61a9431d2026046c0517888a4a7',
-    'supportedCurrencies': ['ZAR'],
-    'enableMobileMoney': true,
+    'publicKey': '',
+    'secretKey': '',
+    'supportedCurrencies': ['SAR'],
+    'enableMobileMoney': false,
     'production': false,
-    'enabled': true
+    'enabled': false
   },
   "flutterwaveConfig": {
     'paymentMethodId': 'rave',
-    'publicKey': 'FLWPUBK_TEST-72b90e0734da8c9e43916adf63cd711e-X',
+    'publicKey': '',
     'production': false,
-    'enabled': true
+    'enabled': false
   },
   "myFatoorahConfig": {
     "paymentMethodId": "myfatoorah_v2",
-    "apiToken":
-    "rLtt6JWvbUHDDhsZnfpAhpYk4dxYDQkbcPTyGaKp2TYqQgG7FGZ5Th_WD53Oq8Ebz6A53njUoo1w3pjU1D4vs_ZMqFiz_j0urb_BH9Oq9VZoKFoJEDAbRZepGcQanImyYrry7Kt6MnMdgfG5jn4HngWoRdKduNNyP4kzcp3mRv7x00ahkm9LAK7ZRieg7k1PDAnBIOG3EyVSJ5kK4WLMvYr7sCwHbHcu4A5WwelxYK0GMJy37bNAarSJDFQsJ2ZvJjvMDmfWwDVFEVe_5tOomfVNt6bOg9mexbGjMrnHBnKnZR1vQbBtQieDlQepzTZMuQrSuKn-t5XZM7V6fCW7oP-uXGX-sMOajeX65JOf6XVpk29DP6ro8WTAflCDANC193yof8-f5_EYY-3hXhJj7RBXmizDpneEQDSaSz5sFk0sV5qPcARJ9zGG73vuGFyenjPPmtDtXtpx35A-BVcOSBYVIWe9kndG3nclfefjKEuZ3m4jL9Gg1h2JBvmXSMYiZtp9MR5I6pvbvylU_PP5xJFSjVTIz7IQSjcVGO41npnwIxRXNRxFOdIUHn0tjQ-7LwvEcTXyPsHXcMD8WtgBh-wxR8aKX7WPSsT1O8d8reb2aR7K3rkV3K82K_0OgawImEpwSvp9MNKynEAJQS6ZHe_J_l77652xwPNxMRTMASk1ZsJL",
-    'accountCountry': 'KW',
-    // KW (KUWAIT), SA (SAUDI_ARABIA), BH (BAHRAIN), AR (UNITED_ARAB_EMIRATES), QA (QATAR), OM (OMAN), JO (JORDAN), EG (EGYPT)
+    "apiToken": "",
+    'accountCountry': 'SA',
     "production": false,
-    "enabled": true
+    "enabled": false
   },
   "midtransConfig": {
     'paymentMethodId': 'midtrans',
-    'clientKey': 'SB-Mid-client-he8W_FIlvugfA2RD',
-    'enabled': true
+    'clientKey': '',
+    'enabled': false
   },
   "inAppPurchaseConfig": {
-    'consumableProductIDs': [
-      'com.kanzalsahra.store.test',
-    ],
+    'consumableProductIDs': [],
     'nonConsumableProductIDs': [],
-    'subscriptionProductIDs': [
-      'com.kanzalsahra.store.subscription.test',
-    ],
+    'subscriptionProductIDs': [],
     "enabled": false
   },
   "xenditConfig": {
     'paymentMethodId': 'xendit',
-    'secretApiKey':
-    'xnd_development_4E9ql5zFiC1BBmhK2r7wr9mNYyyvjLs0fIal00tGuHEj1iEYCu7B7tCUudv3Xe',
-    'enabled': true
+    'secretApiKey': '',
+    'enabled': false
   },
   "expressPayConfig": {
     'paymentMethodId': 'shahbandrpay',
-    'merchantKey': 'b2be2ffc-c8b9-11ed-82a9-42eb4e39c8ae',
-    'merchantPassword': '4a00a5fd3c63dd2b743c75746af6ffe2',
-    "merchantId": "merchant.com.inspireui.mstore.flutter",
+    'merchantKey': '',
+    'merchantPassword': '',
+    "merchantId": "merchant.com.khtwah.kanzalsahra.flutter",
     "production": false,
-    'enabled': true
+    'enabled': false
   },
   "thaiPromptPayConfig": {
     'paymentMethodId': 'thai-promptpay-easy',
-    'enabled': true
+    'enabled': false
   },
   "fibConfig": {
     'paymentMethodId': 'fib',
-    'clientId': 'narin-beauty',
-    'clientSecret': '7ffcd642-87b7-4cc0-b75d-c25d5276cffe',
+    'clientId': '',
+    'clientSecret': '',
     'enabled': false
   },
   "thawaniConfig": {
     'paymentMethodId': 'thawani_gw',
-    'secretKey': 'rRQ26GcsZzoEhbrP2HZvLYDbn9C9et',
-    'publishableKey': 'HGvTMLDssJghr9tlN9gr4DVYt0qyBy',
+    'secretKey': '',
+    'publishableKey': '',
     'production': false,
-    'enabled': true
+    'enabled': false
   },
 
   /// Ref: https://support.inspireui.com/help-center/articles/35/37/120/multi-shipping-countries-and-states
-  "defaultCountryShipping": [],
+  "defaultCountryShipping": [
+    {
+      "code": "SA",
+      "name": "المملكة العربية السعودية",
+      "states": [
+        {"code": "RIY", "name": "الرياض"},
+        {"code": "MAK", "name": "مكة المكرمة"},
+        {"code": "MED", "name": "المدينة المنورة"},
+        {"code": "EAS", "name": "المنطقة الشرقية"},
+        {"code": "QAS", "name": "القصيم"},
+        {"code": "ASI", "name": "عسير"},
+        {"code": "TAB", "name": "تبوك"},
+        {"code": "HAI", "name": "حائل"},
+        {"code": "NOR", "name": "الحدود الشمالية"},
+        {"code": "JAZ", "name": "جازان"},
+        {"code": "NAJ", "name": "نجران"},
+        {"code": "BAH", "name": "الباحة"},
+        {"code": "JOW", "name": "الجوف"}
+      ]
+    }
+  ],
 
-  /// Ref: https://support.inspireui.com/help-center/articles/35/37/169/aftership
   "afterShip": {
-    "api": "e2e9bae8-ee39-46a9-a084-781d0139274f",
-    "tracking_url": "https://fluxstore.aftership.com"
+    "api": "",
+    "tracking_url": "https://kanzalsahra.com"
   },
 
   /// Ref: https://support.inspireui.com/help-center/articles/3/25/16/google-map-address
   "googleApiKey": {
-    'android': 'AIzaSyDSNYVC-8DU9BTcyqkeN9c5pgVhwOBAvGg',
-    'ios': 'AIzaSyDSNYVC-8DU9BTcyqkeN9c5pgVhwOBAvGg',
-    'web': 'AIzaSyDSNYVC-8DU9BTcyqkeN9c5pgVhwOBAvGg'
+    'android': '',
+    'ios': '',
+    'web': ''
   },
 
-  "productCard": {"defaultImage": 'https://mstore.io/wp-content/uploads/2017/04/placeholder.jpg'},
+  "productCard": {"defaultImage": 'assets/images/no_product_image.png'},
 
   /// ➡️ lib/common/products.dart
   "productDetail": {
@@ -832,11 +818,7 @@ Map<String, dynamic> environment = {
     "productListItemHeight": 125,
 
     /// Limit the time a user can make an appointment. Units are in days.
-    /// If the value is not set, there will be no limit on the appointment date.
-    /// For example:
-    ///  Today is October 11, 2020 and limitDayBooking is 7 days.
-    /// --> So users can only book appointments from October 11, 2020 to October 18, 2020
-    "limitDayBooking": 14,
+    "limitDayBooking": 0,
 
     // Hide or show related products in product detail screen.
     "showRelatedProductFromSameStore": true,
@@ -965,8 +947,8 @@ Map<String, dynamic> environment = {
     "version": "2",
     "realtimeChatConfig": {
       "enable": false,
-      "adminEmail": "admininspireui@gmail.com",
-      "adminName": "InspireUI",
+      "adminEmail": "support@kanzalsahra.com",
+      "adminName": "كنز الصحراء",
       "userCanDeleteChat": false,
       "userCanBlockAnotherUser": false,
       "adminCanAccessAllChatRooms": false,
@@ -974,59 +956,27 @@ Map<String, dynamic> environment = {
   },
   "openAIConfig": {
     'enableChat': false,
-    'supabaseUrl': 'https://rtkrqvtslujdzjxhjocu.supabase.co',
-    'supabaseAnonKey':
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0a3JxdnRzbHVqZHpqeGhqb2N1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzU5OTI5MzMsImV4cCI6MTk5MTU2ODkzM30.qKtfNHhL6AKqGsmDfjMq90bIWIWlnN3UVgnwcLF_vGY',
-    'revenueAppleApiKey': 'appl_XNtOUZPHwUzelbvwdSezFsMrNeT',
-    'revenueGoogleApiKey': 'goog_kpDTQdItiHkSrdjDdvLIwAdjOzG',
-    'revenueProductsIos': [
-      'gpt_3999_1y_1w0',
-      'gpt_399_1m_1w0',
-    ],
-    'revenueProductsAndroid': [
-      'gpt_pro_v1',
-    ],
+    'supabaseUrl': '',
+    'supabaseAnonKey': '',
+    'revenueAppleApiKey': '',
+    'revenueGoogleApiKey': '',
+    'revenueProductsIos': [],
+    'revenueProductsAndroid': [],
     'enableSubscription': false,
     'enableInputKey': false,
   },
 
-  /// config for the chat app
-  /// config Whatapp: https://faq.whatsapp.com/en/iphone/23559013
+  /// Official support channels for Kanz Al-Sahra
   "smartChat": [
     {
-      "app": "firebase",
-      "imageData":
-      "https://trello.com/1/cards/611a38c89ebde41ec7cf10e2/attachments/611a392cceb1b534aa92a83e/previews/611a392dceb1b534aa92a84d/download",
-      "description": "Realtime Chat",
+      "app": "mailto:support@kanzalsahra.com",
+      "iconData": "email",
+      "description": "الدعم الفني",
     },
     {
-      "app": "chatGPT",
-      "imageData": "https://i.imgur.com/pp1qlPd.png",
-      "description": "Chat GPT"
-    },
-    {
-      "app": "https://wa.me/849908854",
-      "iconData": "whatsapp",
-      "description": "WhatsApp"
-    },
-    {"app": "tel:8499999999", "iconData": "phone", "description": "Call Us"},
-    {"app": "sms://8499999999", "iconData": "sms", "description": "Send SMS"},
-    {
-      "app": "https://tawk.to/chat/5d830419c22bdd393bb69888/default",
-      "iconData": "whatsapp",
-      "description": "Tawk Chat"
-    },
-    {
-      "app": "http://m.me/inspireui",
-      "iconData": "facebookMessenger",
-      "description": "Facebook Chat"
-    },
-    {
-      "app":
-      "https://twitter.com/messages/compose?recipient_id=821597032011931648",
-      "imageData":
-      "https://trello.com/1/cards/611a38c89ebde41ec7cf10e2/attachments/611a38d026894f10dc1091c8/previews/611a38d126894f10dc1091d6/download",
-      "description": "Twitter Chat"
+      "app": "https://kanzalsahra.com/contact-us/",
+      "iconData": "contactUs",
+      "description": "اتصل بنا",
     }
   ],
 
@@ -1036,10 +986,10 @@ Map<String, dynamic> environment = {
     "VendorRegister": false,
 
     /// Disable show shipping methods by vendor
-    "DisableVendorShipping": false,
+    "DisableVendorShipping": true,
 
     /// Enable/Disable showing all vendor markers on Map screen
-    "ShowAllVendorMarkers": true,
+    "ShowAllVendorMarkers": false,
 
     /// Enable/Disable native store management
     "DisableNativeStoreManagement": true,
@@ -1049,7 +999,7 @@ Map<String, dynamic> environment = {
     "wcfm": "store-manager?vendor_admin=true",
 
     /// Disable multivendor checkout
-    "DisableMultiVendorCheckout": false,
+    "DisableMultiVendorCheckout": true,
 
     /// If this is false, then when creating/modifying products in FluxStore Manager
     /// The publish status will be removed.

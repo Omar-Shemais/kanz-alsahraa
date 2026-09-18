@@ -41,6 +41,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  app_links:
+    dependency: "direct main"
+    description:
+      name: app_links
+      sha256: "85ed8fc1d25a76475914fff28cc994653bd900bc2c26e4b57a49e097febb54ba"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.4.0"
+  app_links_linux:
+    dependency: transitive
+    description:
+      name: app_links_linux
+      sha256: f5f7173a78609f3dfd4c2ff2c95bd559ab43c80a87dc6a095921d96c05688c81
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3"
+  app_links_platform_interface:
+    dependency: transitive
+    description:
+      name: app_links_platform_interface
+      sha256: "05f5379577c513b534a29ddea68176a4d4802c46180ee8e2e966257158772a3f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
+  app_links_web:
+    dependency: transitive
+    description:
+      name: app_links_web
+      sha256: af060ed76183f9e2b87510a9480e56a5352b6c249778d07bd2c95fc35632a555
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
   app_tracking_transparency:
     dependency: "direct main"
     description:
@@ -417,14 +449,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-  eventify:
-    dependency: transitive
-    description:
-      name: eventify
-      sha256: b829429f08586cc2001c628e7499e3e3c2493a1d895fd73b00ecb23351aa5a66
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   extended_image:
     dependency: "direct main"
     description:
@@ -522,7 +546,7 @@ packages:
     source: hosted
     version: "0.9.3+5"
   firebase_analytics:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: firebase_analytics
       sha256: dbf1e7ab22cfb1f4a4adb103b46a26276b4edc593d4a78ef6fb942bafc92e035
@@ -593,22 +617,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.24.0"
-  firebase_dynamic_links:
-    dependency: transitive
+  firebase_crashlytics:
+    dependency: "direct main"
     description:
-      name: firebase_dynamic_links
-      sha256: "47b8c8a8546d8a7f9000edb90848549f20b137d814ee7e0407b3d43b8445e282"
+      name: firebase_crashlytics
+      sha256: "9897c01efaa950d2f6da8317d12452749a74dc45f33b46390a14cfe28067f271"
       url: "https://pub.dev"
     source: hosted
-    version: "5.5.7"
-  firebase_dynamic_links_platform_interface:
+    version: "3.5.7"
+  firebase_crashlytics_platform_interface:
     dependency: transitive
     description:
-      name: firebase_dynamic_links_platform_interface
-      sha256: "72e7810635f908ce060c5803c7acb29116c5b6befc73e90446c52722bc9506a2"
+      name: firebase_crashlytics_platform_interface
+      sha256: "16a71e08fbf6e00382816e1b13397898c29a54fa0ad969c2c2a3b82a704877f0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.6+35"
+    version: "3.6.35"
   firebase_messaging:
     dependency: transitive
     description:
@@ -633,6 +657,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.5.18"
+  firebase_performance:
+    dependency: "direct main"
+    description:
+      name: firebase_performance
+      sha256: dbcfc300755c4bb866988de20a491f0b53e1a0d14c375a2c31aa53ca82174c5b
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.4+7"
+  firebase_performance_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_performance_platform_interface
+      sha256: "191c9945c2ea4359cb57dc086463b2a25b0f9d8d42f66a0be4c1a7133e26ebc8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.4+35"
+  firebase_performance_web:
+    dependency: transitive
+    description:
+      name: firebase_performance_web
+      sha256: "9f03a53f55697b206393366bf138e382cbd845d5021b5be6f7fc97b338da2cb5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.6+7"
   firebase_remote_config:
     dependency: transitive
     description:
@@ -950,15 +998,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.4"
-  flutter_paystack:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: d5355aa84e0884730e259d6c46f5e5dcf46e658a
-      resolved-ref: d5355aa84e0884730e259d6c46f5e5dcf46e658a
-      url: "https://github.com/inspireui/flutter_paystack.git"
-    source: git
-    version: "1.0.7"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -1073,7 +1112,7 @@ packages:
     source: git
     version: "1.0.2"
   flutter_test:
-    dependency: transitive
+    dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -1113,15 +1152,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.0.0"
-  flutterwave_standard:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: "upgrade/deps"
-      resolved-ref: "86c83e0a8b2804a8b9ff05b4de97f1c3b1b6a9a2"
-      url: "https://github.com/inspireui/Flutterwave-v3.git"
-    source: git
-    version: "1.0.7"
   flux_firebase:
     dependency: "direct main"
     description:
@@ -1434,6 +1464,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  gtk:
+    dependency: transitive
+    description:
+      name: gtk
+      sha256: "4ff85b2a16724029dd9e5bbb5a94b6918f9973f74ba571c949d2002801879cf5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   hive:
     dependency: "direct main"
     description:
@@ -1474,14 +1512,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.0"
-  http_auth:
-    dependency: "direct main"
-    description:
-      name: http_auth
-      sha256: b7625acba2987fa69140d9600c679819f33227d665f525fbb2f394e08cf917d1
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.4"
   http_client_helper:
     dependency: transitive
     description:
@@ -1875,14 +1905,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  modal_bottom_sheet:
-    dependency: transitive
-    description:
-      name: modal_bottom_sheet
-      sha256: eac66ef8cb0461bf069a38c5eb0fa728cee525a531a8304bd3f7b2185407c67e
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   multiple_localization:
     dependency: "direct main"
     description:
@@ -1932,7 +1954,7 @@ packages:
     source: hosted
     version: "2.2.0"
   package_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: package_info_plus
       sha256: "7e76fad405b3e4016cd39d08f455a4eb5199723cf594cd1b8916d47140d93017"
@@ -2011,22 +2033,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  pay_with_paystack:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: "34163d42305f92e4071ab2fcf6fc8c16429397f5"
-      resolved-ref: "34163d42305f92e4071ab2fcf6fc8c16429397f5"
-      url: "https://github.com/inspireui/pay_with_paystack"
-    source: git
-    version: "1.0.2"
-  paytm_allinonesdk:
-    dependency: "direct main"
-    description:
-      path: "packages/paytm_allinonesdk"
-      relative: true
-    source: path
-    version: "1.2.8"
   pedantic:
     dependency: transitive
     description:
@@ -2220,14 +2226,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
-  razorpay_flutter:
-    dependency: "direct main"
-    description:
-      name: razorpay_flutter
-      sha256: "2057bfaa769813f58bdc23b9cdc4d5ea493e92154f216f1d2edac507d0936b31"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.4"
   readmore:
     dependency: "direct main"
     description:
@@ -2915,7 +2913,7 @@ packages:
     source: hosted
     version: "1.1.0"
   xml:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: xml
       sha256: "971043b3a0d3da28727e40ed3e0b5d18b742fa5a68665cca88e74b7876d5e025"
@@ -2923,7 +2921,7 @@ packages:
     source: hosted
     version: "6.6.1"
   yaml:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: yaml
       sha256: b9da305ac7c39faa3f030eccd175340f968459dae4af175130b3fc47e40d76ce

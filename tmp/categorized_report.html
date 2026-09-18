@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>تقرير مشكلات تطبيق كنز الصحراء وخطة المعالجة الشاملة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 14mm 18mm 14mm;
+    @top-center {
+      content: "كنز الصحراء  |  تقرير المشكلات الشامل وخطة المعالجة المعتمدة";
+      font-family: 'Tajawal', 'Segoe UI', sans-serif;
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: #8A6717;
+      border-bottom: 1.5px solid #EAD8B5;
+      width: 100%;
+      padding-bottom: 4px;
+    }
+    @bottom-left {
+      content: "صفحة " counter(page);
+      font-family: 'Tajawal', 'Segoe UI', sans-serif;
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: #706757;
+    }
+    @bottom-right {
+      content: "وثيقة عمل موجهة لإدارة متجر وتطبيق كنز الصحراء";
+      font-family: 'Tajawal', 'Segoe UI', sans-serif;
+      font-size: 8pt;
+      color: #8A857B;
+    }
+  }
+
+  @page :first {
+    margin: 0;
+    @top-center { content: none; border-bottom: none; }
+    @bottom-left { content: none; }
+    @bottom-right { content: none; }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+    background-color: #FFFFFF;
+    color: #1F1F1F;
+    line-height: 1.6;
+    direction: rtl;
+    text-align: right;
+    font-size: 11pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Cover Page */
+  .cover-page {
+    page-break-after: always;
+    height: 100vh;
+    min-height: 297mm;
+    background: radial-gradient(circle at 50% 20%, #2D2314 0%, #17130D 70%, #0D0A07 100%);
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24mm 20mm;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .cover-page::before {
+    content: "";
+    position: absolute;
+    top: 10mm;
+    bottom: 10mm;
+    left: 10mm;
+    right: 10mm;
+    border: 1px solid rgba(177, 135, 41, 0.4);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  .cover-page::after {
+    content: "";
+    position: absolute;
+    top: 12mm;
+    bottom: 12mm;
+    left: 12mm;
+    right: 12mm;
+    border: 1.5px solid rgba(229, 195, 120, 0.7);
+    border-radius: 6px;
+    pointer-events: none;
+  }
+
+  .cover-header {
+    text-align: center;
+    padding-top: 15mm;
+  }
+
+  .cover-logo-wrapper {
+    background: rgba(255, 255, 255, 0.96);
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4), 0 0 20px rgba(177, 135, 41, 0.3);
+    border: 1.5px solid #B18729;
+    margin-bottom: 25px;
+  }
+
+  .cover-logo {
+    height: 52px;
+    display: block;
+  }
+
+  .cover-tagline {
+    color: #E5C378;
+    font-size: 13pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .cover-title {
+    font-size: 26pt;
+    font-weight: 900;
+    line-height: 1.35;
+    color: #FFFFFF;
+    margin-bottom: 14px;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.6);
+  }
+
+  .cover-title span {
+    color: #F3D690;
+    font-weight: 900;
+  }
+
+  .cover-subtitle {
+    font-size: 13.5pt;
+    font-weight: 500;
+    color: #D4CDBC;
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .cover-stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .cover-stat-card {
+    background: rgba(45, 35, 20, 0.65);
+    border: 1px solid rgba(177, 135, 41, 0.4);
+    border-radius: 10px;
+    padding: 12px 20px;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .cover-stat-num {
+    font-size: 20pt;
+    font-weight: 900;
+    color: #F3D690;
+    line-height: 1.1;
+  }
+
+  .cover-stat-label {
+    font-size: 9.5pt;
+    color: #D4CDBC;
+    margin-top: 4px;
+  }
+
+  .cover-footer {
+    background: rgba(24, 19, 13, 0.7);
+    border-radius: 10px;
+    padding: 16px 24px;
+    border: 1px solid rgba(177, 135, 41, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10pt;
+    color: #CBC3B3;
+  }
+
+  .cover-footer strong {
+    color: #F3D690;
+  }
+
+  /* Inner Pages Content */
+  .page-break {
+    page-break-after: always;
+  }
+
+  .section-header {
+    margin-top: 8px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 2px solid #EAD8B5;
+    padding-bottom: 8px;
+  }
+
+  .section-header h2 {
+    font-size: 18pt;
+    font-weight: 800;
+    color: #17130D;
+  }
+
+  .section-header .section-badge {
+    background: #B18729;
+    color: #FFFFFF;
+    font-size: 10pt;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+
+  .executive-box {
+    background: #FAF7F2;
+    border-right: 4px solid #B18729;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  }
+
+  .executive-box p {
+    margin-bottom: 10px;
+    font-size: 11pt;
+    color: #2D2A26;
+    line-height: 1.65;
+  }
+
+  .executive-box p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Category Grid Dashboard */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .category-summary-card {
+    background: #FFFFFF;
+    border: 1px solid #EAD8B5;
+    border-right: 4px solid #B18729;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 5px rgba(177, 135, 41, 0.05);
+    page-break-inside: avoid;
+  }
+
+  .category-info {
+    flex: 1;
+  }
+
+  .category-info-title {
+    font-size: 12pt;
+    font-weight: 800;
+    color: #17130D;
+    margin-bottom: 2px;
+  }
+
+  .category-info-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .category-count-badge {
+    font-size: 9pt;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .category-info-desc {
+    font-size: 9.5pt;
+    color: #555047;
+    line-height: 1.4;
+  }
+
+  /* Category Section Banner */
+  .category-banner {
+    background: linear-gradient(135deg, #241C10 0%, #17130D 100%);
+    color: #FFFFFF;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-top: 14px;
+    margin-bottom: 14px;
+    border: 1.5px solid #B18729;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    page-break-inside: avoid;
+  }
+
+  .category-banner-right {
+    display: flex;
+    align-items: center;
+  }
+
+  .category-banner-title h3 {
+    font-size: 14pt;
+    font-weight: 800;
+    color: #F3D690;
+  }
+
+  .category-banner-title p {
+    font-size: 9.5pt;
+    color: #D4CDBC;
+  }
+
+  .category-banner-badge {
+    background: #B18729;
+    color: #FFFFFF;
+    font-weight: 800;
+    font-size: 11pt;
+    padding: 6px 14px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  /* Issue Cards */
+  .issue-card {
+    background: #FFFFFF;
+    border: 1px solid #E6DBC9;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.03);
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .issue-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #EFE8DA;
+    padding-bottom: 8px;
+    margin-bottom: 9px;
+  }
+
+  .issue-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .issue-number-badge {
+    background: #FAF4E8;
+    color: #8A6717;
+    border: 1px solid #D6BC7C;
+    font-size: 10pt;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 5px;
+  }
+
+  .issue-title {
+    font-size: 12pt;
+    font-weight: 800;
+    color: #17130D;
+  }
+
+  .severity-pill {
+    font-size: 9pt;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .severity-critical {
+    background: #FEF3F2;
+    color: #B42318;
+    border: 1px solid #FECDCA;
+  }
+
+  .severity-warning {
+    background: #FEF8EC;
+    color: #8A6717;
+    border: 1px solid #F3E0B5;
+  }
+
+  .severity-info {
+    background: #EFF6FF;
+    color: #1D4ED8;
+    border: 1px solid #BFDBFE;
+  }
+
+  .issue-row {
+    display: flex;
+    margin-bottom: 6px;
+    font-size: 10.5pt;
+    line-height: 1.5;
+  }
+
+  .issue-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .issue-tag {
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 9.5pt;
+    margin-left: 8px;
+    flex-shrink: 0;
+    height: fit-content;
+    align-self: flex-start;
+  }
+
+  .tag-problem {
+    background: #FFF1F0;
+    color: #CF1322;
+    border: 1px solid #FFA39E;
+  }
+
+  .tag-finding {
+    background: #FEFBE8;
+    color: #8A6717;
+    border: 1px solid #FFE58F;
+  }
+
+  .tag-outcome {
+    background: #F4FBF7;
+    color: #18794E;
+    border: 1px solid #B7EB8F;
+  }
+
+  .issue-text {
+    color: #262626;
+    flex: 1;
+  }
+
+  /* Table styling */
+  .clean-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 12px 0;
+    font-size: 9pt;
+    background: #FFFFFF;
+    border: 1px solid #EAD8B5;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .clean-table th {
+    background: #241C10;
+    color: #F3D690;
+    padding: 7px 10px;
+    font-weight: 800;
+    text-align: right;
+    border-bottom: 2px solid #B18729;
+    font-size: 9.5pt;
+  }
+
+  .clean-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #EFE8DA;
+    color: #2D2A26;
+    font-size: 9pt;
+    line-height: 1.45;
+  }
+
+  .clean-table tr:nth-child(even) {
+    background: #FAF7F2;
+  }
+
+  /* Outcomes Box */
+  .outcomes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .outcome-item {
+    background: #FFFFFF;
+    border: 1px solid #CDEEDF;
+    border-right: 4px solid #18794E;
+    border-radius: 7px;
+    padding: 7px 10px;
+    font-size: 8.5pt;
+    color: #1F2937;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    page-break-inside: avoid;
+    line-height: 1.45;
+  }
+
+  .outcome-item strong {
+    color: #18794E;
+  }
+
+  .sign-off-box {
+    margin-top: 12px;
+    background: #FAF7F2;
+    border: 1px solid #EAD8B5;
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    page-break-inside: avoid;
+  }
+
+  .sign-off-text h4 {
+    font-size: 10.5pt;
+    font-weight: 800;
+    color: #17130D;
+    margin-bottom: 2px;
+  }
+
+  .sign-off-text p {
+    font-size: 9.5pt;
+    color: #6B6355;
+  }
+
+  .seal-box {
+    text-align: center;
+    border: 1.5px dashed #B18729;
+    padding: 6px 16px;
+    border-radius: 8px;
+    background: rgba(177, 135, 41, 0.05);
+  }
+
+  .seal-box span {
+    font-size: 9pt;
+    font-weight: 800;
+    color: #8A6717;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover-page">
+  <div class="cover-header">
+    <div class="cover-logo-wrapper">
+      <img src="data:image/png;base64,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" class="cover-logo" alt="كنز الصحراء">
+    </div>
+    <div class="cover-tagline">وثيقة المراجعة الفنية والهندسية المعتمدة</div>
+    <h1 class="cover-title">تقرير مشكلات تطبيق <span>كنز الصحراء</span> وخطة المعالجة</h1>
+    <p class="cover-subtitle">دليل شامل ومصنف للمشكلات المؤكدة وفحوصات الأكواد والنتائج التشغيلية بعد التطوير لرفع كفاءة المتجر والتطبيق</p>
+  </div>
+
+  <div>
+    <div class="cover-stats-bar">
+      <div class="cover-stat-card">
+        <div class="cover-stat-num">38</div>
+        <div class="cover-stat-label">إجمالي المشكلات المفحوصة</div>
+      </div>
+      <div class="cover-stat-card">
+        <div class="cover-stat-num">6</div>
+        <div class="cover-stat-label">مجالات وتصنيفات تخصصية</div>
+      </div>
+      <div class="cover-stat-card">
+        <div class="cover-stat-num">100%</div>
+        <div class="cover-stat-label">تغطية رحلة الشراء والامتثال</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <div><strong>النطاق الفني:</strong> تطبيقات الهواتف الذكية (iOS & Android) ومتجر WooCommerce</div>
+    <div><strong>إعداد وتطوير:</strong> Eng. Omar Shemais (Mobile Developer) • سبتمبر 2026</div>
+  </div>
+</div>
+
+<!-- EXECUTIVE SUMMARY & DASHBOARD -->
+<div class="section-header">
+  <span class="section-badge">نظرة عامة</span>
+  <h2>الملخص التنفيذي ولوحة مؤشرات التقرير</h2>
+</div>
+
+<div class="executive-box">
+  <p><strong>طبيعة التطبيق الحالية:</strong> التطبيق نسخة مخصصة من قالب FluxStore اشتراها المطور السابق. يحتوي القالب على وظائف كثيرة صممت لأنواع مختلفة من المتاجر الكبرى والمتعددة، بينما يحتاج متجر «كنز الصحراء» تطبيقاً يقدم وظائف علامته التجارية الفعلية بدقة وسلاسة وفخامة تليق بتجارة الذهب والمجوهرات.</p>
+  <p><strong>أهم النتائج المؤكدة:</strong> كشف الفحص الدقيق عن توقف الانتقال من السلة إلى الدفع بسبب فقدان حلقة الربط المساندة بين التطبيق والموقع. كما كشف الفحص أن مفاتيح المتجر الحية مكشوفة داخل ملفات النسخة الحالية وتصل فعلياً لبيانات العملاء، مما يقتضي عزلها وإلغاءها فوراً، بالإضافة إلى ضبط هويات النشر وتوحيد قنوات الدعم وتصحيح شراء الضيف.</p>
+  <p><strong>الرؤية بعد المعالجة:</strong> تحويل التطبيق إلى واجهة مستقرة وفائقة السرعة لمتجر كنز الصحراء: منتجات وأسعار ومخزون متطابق لحظياً مع الموقع، بوابات دفع معتمدة (Paymob، بطاقات، Apple Pay، تحويل بنكي)، إدارة حسابات آمنة، وتجربة عربية خالصة وخالية من أي شوائب للقالب العام.</p>
+</div>
+
+<div class="section-header" style="margin-top: 14px; margin-bottom: 10px;">
+  <span class="section-badge">6 فئات</span>
+  <h2>توزيع المشكلات حسب المجالات المتخصصة</h2>
+</div>
+
+<div class="category-grid">
+  <div class="category-summary-card">
+    <div class="category-info">
+      <div class="category-info-title">المجال 1: الأمان وحماية البيانات والخصوصية</div>
+      <div class="category-info-meta">
+        <span class="category-count-badge" style="background: #FEF3F2; color: #B42318; border: 1px solid #FECDCA;">7 مشكلات مفحوصة</span>
+      </div>
+      <div class="category-info-desc">حماية بيانات المتجر والمفاتيح الحساسة، وضبط صلاحيات النظام والتحقق، وحماية جلسات العملاء والامتثال للخصوصية.</div>
+    </div>
+  </div>
+  <div class="category-summary-card">
+    <div class="category-info">
+      <div class="category-info-title">المجال 2: الأداء واستقرار النظام والمراقبة</div>
+      <div class="category-info-meta">
+        <span class="category-count-badge" style="background: #FEF8EC; color: #B18729; border: 1px solid #F3E0B5;">5 مشكلات مفحوصة</span>
+      </div>
+      <div class="category-info-desc">تسريع استجابة الواجهات، تحديث كاش المنتجات والمخزون، ومعالجة الحزم القديمة وإدارة استقرار التطبيق.</div>
+    </div>
+  </div>
+  <div class="category-summary-card">
+    <div class="category-info">
+      <div class="category-info-title">المجال 3: التكامل والربط مع المتجر والخدمات</div>
+      <div class="category-info-meta">
+        <span class="category-count-badge" style="background: #EDFDF5; color: #18794E; border: 1px solid #A6F4C5;">9 مشكلات مفحوصة</span>
+      </div>
+      <div class="category-info-desc">ربط السلة والدفع، مزامنة التصميم الديناميكي، خدمات تسجيل الدخول والحسابات، والإشعارات المباشرة.</div>
+    </div>
+  </div>
+  <div class="category-summary-card">
+    <div class="category-info">
+      <div class="category-info-title">المجال 4: واجهة وتجربة المستخدم وتوطين المتجر</div>
+      <div class="category-info-meta">
+        <span class="category-count-badge" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">6 مشكلات مفحوصة</span>
+      </div>
+      <div class="category-info-desc">ضبط اتجاهات ومحاذاة اللغة العربية (RTL)، تخصيص شاشات الذهب والمجوهرات، وتوطين العنوان والشحن السعودي.</div>
+    </div>
+  </div>
+  <div class="category-summary-card">
+    <div class="category-info">
+      <div class="category-info-title">المجال 5: مطابقة السياسات وقواعد الشراء</div>
+      <div class="category-info-meta">
+        <span class="category-count-badge" style="background: #F5F3FF; color: #6D28D9; border: 1px solid #DDD6FE;">3 مشكلات مفحوصة</span>
+      </div>
+      <div class="category-info-desc">مواءمة شروط الإلغاء والاسترجاع، سياسة شراء الضيوف، وضوابط العروض الخاصة مع الموقع الرسمي لعلامة كنز الصحراء.</div>
+    </div>
+  </div>
+  <div class="category-summary-card">
+    <div class="category-info">
+      <div class="category-info-title">المجال 6: إعدادات النشر وحوكمة المتجر وتنظيف القالب</div>
+      <div class="category-info-meta">
+        <span class="category-count-badge" style="background: #F8FAFC; color: #334155; border: 1px solid #E2E8F0;">8 مشكلات مفحوصة</span>
+      </div>
+      <div class="category-info-desc">توحيد معرّفات التطبيق، إزالة بوابات الدفع والوظائف غير المستخدمة، وتنقية صفحات المتجر وقنوات الدعم الفني.</div>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<div class="category-banner">
+  <div class="category-banner-right">
+    <div class="category-banner-title">
+      <h3>المجال 1: الأمان وحماية البيانات والخصوصية</h3>
+      <p>Security, Privacy & Data Protection — حماية بيانات المتجر والمفاتيح الحساسة، وضبط صلاحيات النظام والتحقق، وحماية جلسات العملاء والامتثال للخصوصية.</p>
+    </div>
+  </div>
+  <div class="category-banner-badge">7 مشكلات</div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#1</span>
+      <h4 class="issue-title">مفاتيح المتجر الحية مكشوفة داخل نسخة التطبيق</h4>
+    </div>
+    <span class="severity-pill severity-critical">أولوية قصوى - حرج جداً</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">يمكن استخراج مفاتيح مرتبطة بالمتجر الحي من ملفات المشروع ومن نسخة التطبيق المبنية. هذه المفاتيح ليست تجريبية أو منتهية.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">أكد الفحص أن المفاتيح الحالية تصل فعلياً إلى خدمات الطلبات والعملاء في المتجر. لم يفتح الفحص أي سجل عميل، واكتفى بالتأكد من قبول الصلاحية. توجد أيضاً ملفات توقيع وكلمات مرور ضمن المشروع.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستلغى المفاتيح الحالية فوراً وتصدر بدائل محدودة، وتنقل قراءة الطلبات والعملاء والعمليات الحساسة إلى خادم محمي. كما ستفصل أسرار التوقيع عن ملفات التطبيق والمشروع المتداول.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#2</span>
+      <h4 class="issue-title">صلاحيات واتصالات أوسع من حاجة المتجر</h4>
+    </div>
+    <span class="severity-pill severity-warning">أمنية وتشغيلية هامة</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">نسخة أندرويد الحالية تطلب الموقع والكاميرا والإشعارات والبصمة وتقنية الاتصال القريب ومعرف الإعلانات ومعلومات أساسية عن الهاتف، رغم أن معظمها لا يدخل في رحلة الشراء الحالية.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">هذه الصلاحيات جاءت من مكونات القالب والإعلانات والخرائط والماسح. كما تسمح إعدادات أندرويد وiPhone باتصالات أوسع من اللازم، وقد تجعل وصف الخصوصية في المتجر أكبر من الوظائف التي يستخدمها كنز الصحراء فعلياً.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستقتصر الصلاحيات على ما يحتاجه المتجر، وسيطلب كل إذن عند استخدام ميزته فقط. كما ستمنع الاتصالات غير الآمنة في نسخة النشر وتحذف مكونات الإعلان والتتبع غير المعتمدة.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#3</span>
+      <h4 class="issue-title">جلسة صفحات الدفع لا تمسح عند تسجيل الخروج</h4>
+    </div>
+    <span class="severity-pill severity-warning">أمنية وخصوصية</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">على هاتف مشترك قد يفتح المستخدم التالي صفحة دفع أو صفحة موقع ما زالت تحتفظ بجلسة المستخدم السابق.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">تسجيل الخروج يمسح بيانات الحساب والسلة داخل التطبيق، لكنه لا يمسح ملفات جلسة المتصفح المدمج لأن تنظيفها معطل في الإعداد الحالي.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيمسح التطبيق جلسة صفحات الدفع عند تسجيل الخروج وتبديل الحساب، مع الحفاظ على السلة فقط بالطريقة التي تعتمدها سياسة المتجر.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#4</span>
+      <h4 class="issue-title">صفحات الويب داخل التطبيق تحصل على صلاحيات أوسع من اللازم</h4>
+    </div>
+    <span class="severity-pill severity-warning">أمنية وحماية النظام</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">إذا طلبت صفحة مفتوحة داخل التطبيق الوصول إلى مورد في الهاتف، فقد يوافق المتصفح المدمج على طلب الصفحة قبل التأكد من أنها تحتاجه فعلاً.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">المتصفح المدمج مضبوط على قبول موارد الصلاحية التي تطلبها الصفحة بصورة عامة، ويعالج الموقع الجغرافي بشكل منفصل. هذا أوسع من حاجة صفحات الدفع والتواصل الحالية ويزيد أثر أي تحويل إلى صفحة غير متوقعة.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سترفض صلاحيات صفحات الويب تلقائياً، ثم يسمح فقط بالمورد والصفحة المعتمدين عند وجود حاجة واضحة وبعد موافقة العميل.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#5</span>
+      <h4 class="issue-title">طلبات الإذن تظهر قبل شرح فائدتها للعميل</h4>
+    </div>
+    <span class="severity-pill severity-info">تجربة مستخدم وامتثال</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يبدأ التطبيق بطلب الإشعارات أو إذن التتبع قبل أن يتصفح العميل المتجر أو يعرف لماذا يحتاج التطبيق هذا الإذن.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">شاشة طلب الإشعارات مفعلة عند أول تشغيل، بينما عرض سياسة الخصوصية أولاً معطل. كما يطلب تطبيق iPhone إذن التتبع عند البدء حتى مع تعطيل التحليلات والإعلانات في الإعداد الحالي.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيطلب كل إذن وقت استخدام ميزته وبعد شرح مختصر، ولن يطلب التتبع إذا لم توجد خدمة معتمدة تحتاجه.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#6</span>
+      <h4 class="issue-title">طلبات الضيف محفوظة على الجهاز نفسه فقط</h4>
+    </div>
+    <span class="severity-pill severity-warning">سلامة بيانات المستخدم</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يفقد العميل غير المسجل سجل طلبه إذا حذف التطبيق أو غير هاتفه أو مسح بياناته، ولا يستطيع الرجوع إليه من جهاز آخر.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">عند الشراء كضيف يحفظ التطبيق نسخة الطلب في التخزين المحلي للجهاز، ولا يربطها بحساب يمكن استعادته لاحقاً.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيصل العميل إلى طلبه بطريقة آمنة باستخدام رقم الطلب ووسيلة تحقق، مع رسالة تأكيد واضحة وتشجيع إنشاء الحساب عند الحاجة إلى متابعة الطلبات بين الأجهزة.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#7</span>
+      <h4 class="issue-title">سياسة الخصوصية لا تغطي بيانات التطبيق الفعلية</h4>
+    </div>
+    <span class="severity-pill severity-warning">امتثال ومتاجر التطبيقات</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">لا يستطيع العميل معرفة سبب جمع بيانات الهاتف أو التتبع والإشعارات من السياسة المنشورة، رغم أن صفحات المتاجر تذكر أنواعاً من هذه البيانات.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">صفحة App Store تعلن استخدام بيانات لتتبع المستخدم، وصفحة Google Play تعلن جمع الموقع والبيانات الشخصية وأنواع أخرى. أما سياسة الموقع فتركز على التسوق عبر الموقع ولا تشرح بوضوح صلاحيات التطبيق أو معرفات الجهاز والإشعارات وخدمات الطرف الثالث.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستكتب سياسة واحدة واضحة للموقع والتطبيق، وتحدث بيانات الخصوصية في المتجرين بعد حذف خدمات التتبع والصلاحيات غير المستخدمة وتوثيق ما بقي فعلياً.</div>
+  </div>
+</div>
+
+<div class="category-banner">
+  <div class="category-banner-right">
+    <div class="category-banner-title">
+      <h3>المجال 2: الأداء واستقرار النظام والمراقبة</h3>
+      <p>Performance, Stability & Crash Monitoring — تسريع استجابة الواجهات، تحديث كاش المنتجات والمخزون، ومعالجة الحزم القديمة وإدارة استقرار التطبيق.</p>
+    </div>
+  </div>
+  <div class="category-banner-badge">5 مشكلات</div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#8</span>
+      <h4 class="issue-title">تأخر ظهور المنتجات والأسعار والمخزون</h4>
+    </div>
+    <span class="severity-pill severity-warning">تشغيلية هامة</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يبقى منتج محذوف ظاهراً، أو يتأخر سعر أو مخزون جديد، وقد تظهر صفحة فارغة عند حدوث مشكلة اتصال.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">التطبيق يحتفظ ببعض البيانات مدة طويلة، وزر التحديث لا يجدد كل القوائم دائماً. وفي بعض الحالات يعامل خطأ الاتصال كأنه لا توجد منتجات.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيعرض التطبيق آخر بيانات معتمدة، وسيحدثها عند الطلب بصورة حقيقية. كما سيميز بين متجر فارغ ومشكلة اتصال، ويتيح إعادة المحاولة بدلاً من إخفاء الخطأ.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#9</span>
+      <h4 class="issue-title">إدارة الجلسة والبيانات المحفوظة قد تفقد معلومات المستخدم</h4>
+    </div>
+    <span class="severity-pill severity-warning">استقرار ونظام</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يؤدي خطأ مؤقت أثناء قراءة البيانات المحفوظة إلى خروج المستخدم أو فقد بعض البيانات المحلية بدلاً من محاولة استعادتها.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">طريقة معالجة بعض الأخطاء الحالية تتعامل مع أنواع مختلفة من الأعطال بالطريقة نفسها، وقد تمسح مساحة التخزين عند حدوث خطأ عام.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيميز التطبيق بين خطأ مؤقت وبيانات تالفة ومفتاح انتهت صلاحيته، ولن يحذف جلسة المستخدم أو بياناته المحلية إلا عند وجود سبب واضح وآمن.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#10</span>
+      <h4 class="issue-title">لا توجد اختبارات أو مراقبة كافية للأعطال</h4>
+    </div>
+    <span class="severity-pill severity-warning">جودة وضمان الإصدارات</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">لا يستطيع فريق العمل حالياً معرفة نسبة نجاح الدفع أو أكثر الشاشات تعطلًا بصورة موثوقة، وقد يظهر عطل جديد بعد تحديث دون اكتشاف مبكر.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">المشروع لا يحتوي مجموعة اختبارات رئيسية، ولا توجد آلية مكتملة تشغل الفحص تلقائياً مع كل إصدار أو تجمع الأعطال بصورة واضحة.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستضاف اختبارات للشراء وتسجيل الدخول والتحديث والتخزين والعربية، مع فحص تلقائي لكل إصدار ومراقبة أعطال تحترم سياسة الخصوصية.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#11</span>
+      <h4 class="issue-title">تراكم التحديثات والحزم القديمة</h4>
+    </div>
+    <span class="severity-pill severity-warning">صيانة وتوافق مستقبلي</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">المشروع يعتمد على عدد كبير من المكونات، وبينها مكونات قديمة أو متوقفة. هذا يجعل تحديث التطبيق ليتوافق مع الإصدارات الجديدة من أنظمة الهاتف أصعب، وقد يسبب تعارضات مستقبلية.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">بقيت حزم كثيرة من القالب العام حتى عندما لا تستخدمها تجربة كنز الصحراء. كما أن بعض فحوص جودة الإصدار والتقليص غير مفعلة حالياً.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستحذف الحزم غير المطلوبة أولاً، ثم تحدث الحزم المتبقية على دفعات مع بناء واختبار بعد كل دفعة. سيقاس حجم التطبيق قبل التنظيف وبعده من دون وعد بنسبة غير مثبتة.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#12</span>
+      <h4 class="issue-title">مشاركة المنتجات تعتمد على خدمة توقفت عن العمل</h4>
+    </div>
+    <span class="severity-pill severity-warning">تشغيلية وفنية</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يرسل العميل رابط منتج لا يفتح التطبيق أو ينتهي بصفحة خطأ بدلاً من المنتج المطلوب.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">التطبيق ما زال يعتمد على Firebase Dynamic Links التي توقفت في أغسطس 2025. كذلك لا ينشر موقع كنز الصحراء ملفات الربط المطلوبة حالياً لأندرويد وiPhone.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستنقل روابط المشاركة إلى روابط مباشرة تابعة لنطاق كنز الصحراء، وتضاف ملفات التحقق للموقع ثم تختبر الروابط مع التطبيق مثبتاً وغير مثبت.</div>
+  </div>
+</div>
+
+<div class="category-banner">
+  <div class="category-banner-right">
+    <div class="category-banner-title">
+      <h3>المجال 3: التكامل والربط مع المتجر والخدمات</h3>
+      <p>Backend Integration, APIs & Store Sync — ربط السلة والدفع، مزامنة التصميم الديناميكي، خدمات تسجيل الدخول والحسابات، والإشعارات المباشرة.</p>
+    </div>
+  </div>
+  <div class="category-banner-badge">9 مشكلات</div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#13</span>
+      <h4 class="issue-title">تعطل الانتقال من السلة إلى الدفع</h4>
+    </div>
+    <span class="severity-pill severity-critical">أولوية قصوى - حرج جداً</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">يضيف العميل المنتجات إلى السلة، لكن الضغط على إتمام الطلب قد لا ينقله إلى صفحة الدفع، وقد يبقى مؤشر التحميل أو تبدو الشاشة وكأنها توقفت.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">التطبيق ينتظر خدمة مساندة من الموقع لإنشاء رابط الدفع، وهذه الخدمة غير ظاهرة حالياً ضمن خدمات الموقع المتاحة. كما أن التطبيق لا يعرض سبب الفشل للمستخدم بصورة واضحة.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سينتقل العميل إلى صفحة الدفع بصورة مستقرة، وسيجد بطاقة الدفع و<bdi>Apple Pay</bdi> عبر <bdi>Paymob</bdi> والتحويل البنكي كما تظهر في الموقع. عند تعذر العملية ستظهر رسالة مفهومة مع إعادة المحاولة، من دون إنشاء طلب مكرر.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#14</span>
+      <h4 class="issue-title">تغييرات الموقع لا تظهر بالكامل في التطبيق</h4>
+    </div>
+    <span class="severity-pill severity-warning">تكامل وإدارة محتوى</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">إضافة منتج أو حذفه قد تظهر في التطبيق، لكن تغيير البانرات أو ترتيب الأقسام أو شكل الصفحة الرئيسية في الموقع لا ينتقل إليه.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">المنتجات تأتي من المتجر مباشرة، بينما تصميم الصفحة الرئيسية وترتيب مجموعاتها محفوظان داخل نسخة التطبيق القديمة. لهذا يعرض التطبيق بيانات جديدة داخل تصميم قديم.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستصبح أقسام التطبيق وبانراته مرتبطة بإعداد معتمد يمكن تحديثه بأمان، مع نسخة احتياطية تعمل عند انقطاع الشبكة. لن يتطلب كل تعديل في ترتيب الصفحة إصداراً جديداً من المتجر.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#15</span>
+      <h4 class="issue-title">خدمات الدخول والحساب غير موجودة في الموقع الحالي</h4>
+    </div>
+    <span class="severity-pill severity-critical">حرجة تشغيلياً</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يبدو التطبيق طبيعياً أثناء تصفح المنتجات، لكن تسجيل الدخول وإنشاء الحساب وتعديل البيانات واستعادة كلمة المرور وحذف الحساب وإرسال التقييم قد تفشل عند التنفيذ.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">فحص قائمة الخدمات المنشورة في الموقع لم يجد أي خدمة من مجموعة الربط الخاصة بتطبيق الهاتف. هذه المجموعة هي التي يعتمد عليها التطبيق في الحساب والدفع والكوبونات والتقييمات، بينما تصفح المنتجات يستخدم طريقاً مختلفاً وما زال يعمل.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستعاد فقط خدمات الحساب التي يحتاجها كنز الصحراء، مع حماية الدخول واختبار إنشاء الحساب والدخول والتعديل والاستعادة والحذف والكوبون والتقييم من الهاتف حتى النهاية.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#16</span>
+      <h4 class="issue-title">السلة لا تنتقل بين الموقع والتطبيق</h4>
+    </div>
+    <span class="severity-pill severity-info">تكامل وتجربة شراء</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">إذا أضاف العميل منتجاً من الموقع ثم فتح التطبيق فلن يجد السلة نفسها، والعكس صحيح. كما لا تنتقل السلة تلقائياً إلى جهاز آخر.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">مزامنة السلة من الموقع إلى التطبيق ومن التطبيق إلى الموقع معطلة في الاتجاهين داخل الإعداد الحالي.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">بعد تسجيل الدخول ستتبع السلة حساب العميل وفق سياسة واضحة، مع معالجة اختلاف السعر أو المخزون قبل الدمج ومنع تكرار الكميات.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#17</span>
+      <h4 class="issue-title">الإشعارات غير مرتبطة بحساب العميل أو طلبه</h4>
+    </div>
+    <span class="severity-pill severity-warning">تكامل وإشعارات</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد لا تصل إشعارات حالة الطلب للعميل الصحيح، أو قد تصل إشعارات عامة إلى جميع الأجهزة من دون تمييز الحساب.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">كل الأجهزة تشترك حالياً في قناة عامة، بينما وظيفة ربط جهاز العميل برقم حسابه غير منفذة. لذلك لا توجد قاعدة آمنة يمكن الاعتماد عليها لإرسال تحديث خاص بطلب معين.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيربط كل جهاز بحساب العميل بعد موافقته، وستفصل رسائل العروض العامة عن رسائل الطلبات الخاصة، مع إلغاء الربط عند تسجيل الخروج أو حذف الحساب.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#18</span>
+      <h4 class="issue-title">تسجيل الدخول بالجوال يعرض رسالة تقنية للعميل</h4>
+    </div>
+    <span class="severity-pill severity-warning">تكامل وتجربة مستخدم</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">يظهر خيار تسجيل الدخول برقم الجوال، لكن المحاولة قد تنتهي برسالة تطلب تثبيت إضافة تقنية بدلاً من توضيح المشكلة للمستخدم.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">الخيار وخدمة تسجيل الجوال مفعّلان داخل التطبيق، بينما مسارات الخدمة المطلوبة غير منشورة في الموقع. عند غياب الاستجابة المتوقعة جهز الكود رسالة تذكر إضافة DIGITS وWordPress مباشرة للعميل.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيخفى الخيار إلى أن تجهز الخدمة، ثم تختبر خطوات الإرسال وإعادة الإرسال والتحقق وتسجيل الدخول، وتستبدل الرسائل التقنية برسائل عربية تساعد العميل.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#19</span>
+      <h4 class="issue-title">حذف الحساب منشور كخدمة لكنه غير قابل للإتمام من التطبيق</h4>
+    </div>
+    <span class="severity-pill severity-warning">امتثال ومتاجر</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">تعطي سياسة الخصوصية العميل تعليمات لحذف حسابه من إعدادات التطبيق، لكن الطلب قد يفشل عند استخدام الخيار.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">خيار حذف الحساب مفعّل والسياسة تؤكد إمكان استخدامه من داخل التطبيق، بينما خدمة الحذف التي يستدعيها التطبيق غير موجودة ضمن خدمات الموقع المنشورة حالياً.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سينفذ مسار حذف آمن مع تأكيد هوية العميل ونتيجة واضحة للطلب، ثم تختبر التعليمات المنشورة فعلياً من التطبيق أو تعدل إذا اعتمدت الإدارة قناة أخرى.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#20</span>
+      <h4 class="issue-title">بعض رموز المنتجات مكررة أو ناقصة</h4>
+    </div>
+    <span class="severity-pill severity-warning">بيانات ومخزون</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يعرض البحث برمز المنتج نتيجة غير صحيحة، أو يصعب على فريق المتجر تحديد المنتج المقصود عند مراجعة المخزون والطلب.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">من بين المنتجات المنشورة حالياً يوجد منتج بلا رمز مخزون، كما يوجد زوجان من المنتجات يحمل كل زوج منهما الرمز نفسه، مع أن البحث برمز المنتج مفعّل داخل التطبيق.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيمنع حفظ منتج بلا رمز أو برمز مستخدم سابقاً، وستراجع الرموز الحالية قبل مزامنة المخزون والطلبات مع التطبيق.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#21</span>
+      <h4 class="issue-title">قائمة الكوبونات تسمح بعرض عروض منتهية</h4>
+    </div>
+    <span class="severity-pill severity-info">تجربة شراء ومبيعات</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">بعد تشغيل خدمة الكوبونات قد يرى العميل كوبوناً منتهياً ويحاول استخدامه ثم يرفض عند الدفع.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">الإعداد الحالي يطلب عرض جميع الكوبونات، بما فيها الكوبونات التي انتهى تاريخها، بدلاً من تصفيتها قبل عرضها.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستظهر للعميل الكوبونات السارية والمسموح بها لحسابه فقط، وستوضح شروط الحد الأدنى والمنتجات المستثناة قبل تطبيق الكوبون.</div>
+  </div>
+</div>
+
+<div class="category-banner">
+  <div class="category-banner-right">
+    <div class="category-banner-title">
+      <h3>المجال 4: واجهة وتجربة المستخدم وتوطين المتجر</h3>
+      <p>UI / UX, Arabic Localization & Store Tailoring — ضبط اتجاهات ومحاذاة اللغة العربية (RTL)، تخصيص شاشات الذهب والمجوهرات، وتوطين العنوان والشحن السعودي.</p>
+    </div>
+  </div>
+  <div class="category-banner-badge">6 مشكلات</div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#22</span>
+      <h4 class="issue-title">تجربة العربية واتجاه بعض العناصر غير متناسقة</h4>
+    </div>
+    <span class="severity-pill severity-warning">واجهة ومحاذاة عربية</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">توجد شاشات يظهر فيها سهم أو هامش أو ترتيب عنصر بصورة غير مناسبة للغة العربية. الرقم المذكور سابقاً عن أكثر من أربعين شاشة لم يثبت بالكامل.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">بعض عناصر التطبيق تتكيف تلقائياً مع العربية، بينما توجد عناصر أخرى صممت باتجاه ثابت أو بهوامش مناسبة للإنجليزية.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستراجع الشاشات الأساسية بالعربية والإنجليزية، وتصحح الحالات الفعلية في الرجوع والبحث والفلاتر والسلة والحساب والدفع، مع اختبار أحجام الشاشات المختلفة.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#23</span>
+      <h4 class="issue-title">صفحة المنتج والبحث والفلاتر تحتاج تخصيصاً للذهب</h4>
+    </div>
+    <span class="severity-pill severity-info">تجربة متجر المجوهرات</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">لا تظهر دائماً معلومات مثل العيار والوزن والمعدن ورسوم المصنعية بالطريقة الأسرع لفهمها، كما قد تعرض الفلاتر خيارات عامة جاءت من القالب.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">بعض المواصفات مخزنة كنصوص غير منظمة أو لا تصل إلى التطبيق في حقول ثابتة، والفلترة العامة لم تصمم خصيصاً لطبيعة منتجات المتجر.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستظهر المواصفات المهمة بوضوح عندما تكون مسجلة في بيانات المنتج، وستقتصر الفلاتر على الخيارات المفيدة مثل نوع المعدن والعيار والوزن والسعر.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#24</span>
+      <h4 class="issue-title">نموذج العنوان والدفع يحتاج توافقاً سعودياً</h4>
+    </div>
+    <span class="severity-pill severity-warning">توطين وتجربة طلب</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يبدأ عنوان الشحن بالولايات المتحدة وولاية لويزيانا، أو تظهر للعميل دول لا يشحن إليها المتجر، خصوصاً عند أول استخدام أو تعذر تحميل قائمة الدول.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">القالب مضبوط افتراضياً على الولايات المتحدة، بينما المتجر الحي يعرّف منطقة شحن للسعودية فقط. كما أن خدمة تحميل الدول والمحافظات التي ينتظرها التطبيق غير موجودة حالياً في الموقع.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيطابق التطبيق الحقول التي يعتمدها المتجر وشركة الشحن والفوترة، ولن يحذف حقلاً مطلوباً نظامياً. ستختبر تجربة الضيف والمستخدم المسجل والعنوان المختلف.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#25</span>
+      <h4 class="issue-title">اختيار دولة الشحن لا يلتزم بنطاق خدمة المتجر</h4>
+    </div>
+    <span class="severity-pill severity-warning">تشغيلية وتوطين الشحن</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يختار العميل دولة خارج السعودية ويكمل نموذج العنوان، ثم يكتشف عند الدفع أنه لا توجد طريقة شحن أو أن الطلب غير مقبول.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">المتجر الحي يعرّف الشحن للسعودية فقط، بينما التطبيق لا يحدد قائمة الدول المسموحة. وعند فشل خدمة الدول غير الموجودة يعرض القالب قائمة دول عامة بدلاً من حصر الاختيار في السعودية.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيظهر خيار السعودية فقط ما دام هذا هو نطاق الشحن المعتمد، وستظهر المناطق والمدينة والعنوان الوطني بصورة واضحة قبل الانتقال إلى الدفع.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#26</span>
+      <h4 class="issue-title">سجل الطلبات العربي يعرض كلمات إنجليزية</h4>
+    </div>
+    <span class="severity-pill severity-info">لغة وتعريب دقيق</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يرى العميل في سجل الطلبات كلمة item أو items بجوار عدد القطع رغم استخدام التطبيق باللغة العربية.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">النص العربي المسؤول عن عدد القطع في بطاقة الطلب ما زال مكتوباً بصيغة إنجليزية، وهذه العبارة مستخدمة مباشرة في شاشة سجل الطلبات.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستستخدم صياغة عربية صحيحة للمفرد والمثنى والجمع، وتراجع شاشات الطلب والسلة والدفع للتأكد من عدم بقاء نصوص إنجليزية غير مقصودة.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#27</span>
+      <h4 class="issue-title">اختيار الإنجليزية لا يقدم متجراً إنجليزياً كاملاً</h4>
+    </div>
+    <span class="severity-pill severity-info">تعدد اللغات</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد تتحول أسماء الأزرار والقوائم إلى الإنجليزية، بينما تبقى عناوين الصفحة الرئيسية وأسماء المنتجات ووصفها بالعربية.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">التطبيق يعرض خيار العربية والإنجليزية، لكنه يحمل تصميماً رئيسياً عربياً ثابتاً. كما يعيد الموقع المنتجات العربية نفسها عند طلب المحتوى باللغة الإنجليزية.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيعرض التطبيق العربية فقط ما دام المتجر عربياً، أو تجهز نسخة إنجليزية كاملة للواجهة والأقسام والمنتجات قبل إظهار خيار اللغة للعميل.</div>
+  </div>
+</div>
+
+<div class="category-banner">
+  <div class="category-banner-right">
+    <div class="category-banner-title">
+      <h3>المجال 5: مطابقة السياسات وقواعد الشراء</h3>
+      <p>Store Policies & Purchase Business Logic — مواءمة شروط الإلغاء والاسترجاع، سياسة شراء الضيوف، وضوابط العروض الخاصة مع الموقع الرسمي لعلامة كنز الصحراء.</p>
+    </div>
+  </div>
+  <div class="category-banner-badge">3 مشكلات</div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#28</span>
+      <h4 class="issue-title">أزرار الإلغاء والاسترجاع لا تطابق سياسة المتجر</h4>
+    </div>
+    <span class="severity-pill severity-warning">سياسات وتشغيل</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">يستطيع التطبيق إظهار زر إلغاء لطلبات قيد التجهيز أو الانتظار، كما يسمح بطلب استرجاع خلال سبعة أيام ولجميع طرق الدفع.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">سياسة كنز الصحراء المنشورة تنص على عدم قبول الإلغاء بعد تأكيد الطلب، وتقصر الاسترجاع على حالات محددة مع إشعار خلال أربع وعشرين ساعة. إعداد التطبيق الحالي لا يطبق هذه الشروط.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستظهر للعميل الإجراءات التي تسمح بها السياسة فقط، وترسل الطلب إلى الإدارة للمراجعة بدل تغيير حالة الطلب مباشرة، مع عرض الشروط المطلوبة قبل الإرسال.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#29</span>
+      <h4 class="issue-title">الشراء كضيف لا يطابق تعليمات الموقع المنشورة</h4>
+    </div>
+    <span class="severity-pill severity-warning">سياسات وإعدادات الحساب</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">التطبيق يسمح للعميل ببدء الطلب من دون تسجيل الدخول، ثم قد يرفضه المتجر عند الخطوة الأخيرة بعد أن يكون العميل أدخل بياناته.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">إعداد التطبيق يسمح بالشراء كضيف، لكن إعداد المتجر الحي يمنع شراء الضيف. كما تقول صفحة الأسئلة الشائعة إن تسجيل الحساب مطلوب لرفع الطلب.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستحدد الإدارة قاعدة واحدة، ثم يطبقها الموقع والتطبيق والنص المنشور بالطريقة نفسها. إذا سمح بالضيف فتوفر له متابعة آمنة، وإذا كان الحساب إلزامياً يطلب قبل إدخال بيانات الدفع.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#30</span>
+      <h4 class="issue-title">العروض ذات الشروط الخاصة لا تراجع مبكراً في السلة</h4>
+    </div>
+    <span class="severity-pill severity-info">قواعد بيع وسلة التسوق</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">يحتوي الموقع على عروض يجب طلبها منفصلة وبالتحويل البنكي فقط، وبعض المنتجات تتطلب كتابة اسم أو اختياراً إضافياً. التطبيق لا يميز هذه الشروط قبل وصول العميل إلى نهاية الشراء.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">قواعد هذه العروض مكتوبة داخل صفحات المنتجات في الموقع، ولا توجد في إعداد التطبيق قاعدة تمنع جمعها مع منتجات عادية أو تقيد طريقة دفعها داخل السلة.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيتحقق التطبيق من الحقول المطلوبة وقواعد العرض عند الإضافة إلى السلة، وسيمنع الجمع غير المسموح به ويوضح طريقة الدفع قبل أن يبدأ العميل تعبئة بيانات الطلب.</div>
+  </div>
+</div>
+
+<div class="category-banner">
+  <div class="category-banner-right">
+    <div class="category-banner-title">
+      <h3>المجال 6: إعدادات النشر وحوكمة المتجر وتنظيف القالب</h3>
+      <p>App Store Governance, Deployment & Template Cleanup — توحيد معرّفات التطبيق، إزالة بوابات الدفع والوظائف غير المستخدمة، وتنقية صفحات المتجر وقنوات الدعم الفني.</p>
+    </div>
+  </div>
+  <div class="category-banner-badge">8 مشكلات</div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#31</span>
+      <h4 class="issue-title">إعدادات النشر تستخدم أكثر من هوية للتطبيق</h4>
+    </div>
+    <span class="severity-pill severity-warning">نشر وحوكمة المتجر</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يفشل رفع تحديث جديد، أو يجهز فريق العمل إصداراً مرتبطاً بصفحة أو خدمة مختلفة عن التطبيق الموجود لدى العملاء.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">هوية التطبيق المنشور على أندرويد هي com.khtwah.kanzalsahra، لكن إعداد الرفع الآلي وبعض إعدادات الروابط والدفع ما زالت تستخدم com.kanzalsahra.store. وعلى iPhone بقيت معرفات قديمة تخص تطبيق القالب في أكثر من موضع.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستوحّد هوية أندرويد وiPhone في البناء والنشر والدفع والإشعارات والروابط، ثم يختبر تحديث نسخة موجودة فعلياً للتأكد من وصول الإصدار إلى التطبيق الصحيح من دون فقد بيانات المستخدم.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#32</span>
+      <h4 class="issue-title">أزرار التحديث والتقييم تشير إلى بيانات تطبيق مختلفة</h4>
+    </div>
+    <span class="severity-pill severity-info">متاجر وروابط خارجية</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يذهب زر تحديث التطبيق أو تقييمه إلى صفحة تطبيق قديم أو إلى صفحة غير صحيحة.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">الإعدادات الداخلية تستخدم معرفاً قديماً لأندرويد ومعرفاً مختلفاً لـiPhone، بينما النسختان المنشورتان حالياً تحملان معرفات أخرى. رابط أندرويد القديم لا يقود إلى تطبيق منشور.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستوحّد معرفات التطبيق مع النسخ المنشورة، ويختبر زر التحديث والتقييم على أندرويد وiPhone قبل النشر.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#33</span>
+      <h4 class="issue-title">إعداد إشعارات iPhone غير مكتمل للإصدار النهائي</h4>
+    </div>
+    <span class="severity-pill severity-warning">إعدادات منصة Apple iOS</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد تعمل الإشعارات على بعض الأجهزة أو أثناء التطوير ثم لا تصل إلى مستخدمي نسخة iPhone المنشورة.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">إعداد بيئة إشعارات Apple مضبوط حالياً على قيمة غير معتمدة بدلاً من بيئة التطوير أو الإنتاج. وهذا منفصل عن مشكلة ربط الإشعار بحساب العميل.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيضبط إصدار المتجر على بيئة الإنتاج الصحيحة، وتختبر الإشعارات على نسخة TestFlight ثم على نسخة منشورة قبل الاعتماد عليها في تحديثات الطلب.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#34</span>
+      <h4 class="issue-title">لا يوجد تنبيه فعال عند صدور تحديث مهم</h4>
+    </div>
+    <span class="severity-pill severity-info">حوكمة وتحديثات التطبيق</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يبقى العميل على نسخة قديمة بعد إصلاح الدفع أو مشكلة أمنية، من دون أن يعرف أن تحديثاً ضرورياً متاح.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">فحص النسخة الجديدة معطل على iPhone، والتحديث داخل التطبيق معطل على أندرويد في الإعداد الحالي.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيضاف فحص يعتمد على صفحات المتجر الصحيحة، مع تنبيه اختياري للتحديثات العادية وتنبيه إلزامي فقط عند وجود سبب تشغيلي أو أمني واضح.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#35</span>
+      <h4 class="issue-title">بيانات التواصل مع الدعم غير موحدة</h4>
+    </div>
+    <span class="severity-pill severity-info">خدمة عملاء وهوية مؤسسية</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">قد يرسل العميل استفساره أو طلب حذف حسابه إلى جهة مختلفة حسب الصفحة التي فتحها، ولا يعرف أي قناة هي المعتمدة.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">تعرض صفحة Google Play البريد info@khtwah.com التابع لجهة التطوير السابقة، وتعرض صفحة التواصل info@kanzalsahra.com، بينما تذكر سياسة الخصوصية support@kanzalsahra.com لطلبات حذف الحساب.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستعتمد الإدارة قناة دعم واحدة أو توضح وظيفة كل قناة، ثم تحدث بيانات المتاجر وصفحات الموقع والتطبيق وتختبر استقبال الرسائل عليها.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#36</span>
+      <h4 class="issue-title">صفحات المساعدة التي يفتحها التطبيق تحتوي بقايا تجريبية</h4>
+    </div>
+    <span class="severity-pill severity-info">هوية ومحتوى المتجر</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">عند فتح الخصوصية أو التواصل من التطبيق قد يرى العميل عبارات تجريبية وخيارات دول وعملات لا تخص المتجر.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">التطبيق يفتح هذه الصفحات مباشرة من الموقع. الفحص الحي وجد عبارة القالب ADD ANYTHING HERE OR JUST REMOVE IT وخيارات تجريبية للولايات المتحدة وألمانيا واليابان في رأس الصفحات.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">ستنظف صفحات الموقع المرتبطة بالتطبيق، وستعرض فقط بيانات كنز الصحراء ووسائل التواصل والدولة والعملة المعتمدة.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#37</span>
+      <h4 class="issue-title">بوابات دفع غير مستخدمة ما زالت داخل المشروع</h4>
+    </div>
+    <span class="severity-pill severity-info">تنظيف الحزم والقالب</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">توجد إعدادات وأجزاء برمجية لبوابات دولية لا يستخدمها المتجر، رغم أن صفحة الدفع الحية تعرض Paymob وApple Pay والتحويل البنكي فقط.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">هذه البوابات جاءت مع القالب العام. وجودها لا يفيد العميل، وقد يضيف تعقيداً وصلاحيات واعتماديات تزيد فرص الأعطال.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيحتفظ التطبيق بطرق الدفع المعتمدة فقط، وستختبر كل طريقة في حالات النجاح والفشل والإلغاء والعودة إلى التطبيق ورفع إيصال التحويل.</div>
+  </div>
+</div>
+
+<div class="issue-card">
+  <div class="issue-card-header">
+    <div class="issue-title-wrapper">
+      <span class="issue-number-badge">#38</span>
+      <h4 class="issue-title">وجود وظائف كثيرة لا تخص كنز الصحراء</h4>
+    </div>
+    <span class="severity-pill severity-warning">هيكلة وتنظيف شامل</span>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-problem">المشكلة</span>
+    <div class="issue-text">المشروع يحتوي أجزاء مخصصة لمتاجر متعددة وبائعين ومندوبي توصيل ومحافظ ونقاط وعضويات ودردشة وإعلانات وخرائط وميزات أخرى لا تظهر في متجر كنز الصحراء.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-finding">ما كشفه الفحص</span>
+    <div class="issue-text">التطبيق مشتق من قالب متجر عام اشتراه المطور السابق، وبقيت داخله وظائف القالب حتى لو كانت غير مفعلة. هذا يزيد صعوبة الصيانة واحتمالات التعارض عند التحديث.</div>
+  </div>
+
+  <div class="issue-row">
+    <span class="issue-tag tag-outcome">النتيجة بعد الإصلاح</span>
+    <div class="issue-text">سيقتصر التطبيق على وظائف المتجر الفعلية. ستزال الواجهات والحزم والصلاحيات غير المطلوبة على دفعات وبعد اختبار كل دفعة، مع الإبقاء على الأجزاء المشتركة التي يحتاجها المتجر والدفع.</div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<div class="section-header">
+  <span class="section-badge">تنظيف القالب</span>
+  <h2>الميزات والوظائف الزائدة التي ستراجع للإزالة</h2>
+</div>
+
+<p style="font-size: 10.5pt; color: #4A443A; margin-bottom: 10px;">
+  سيتم حذف هذه الوحدات تدريجياً بعد التحقق الكامل من عدم حاجة المتجر الفعلي أو بوابات الدفع أو الشحن إليها، بهدف تقليص حجم التطبيق، تسريع الأداء، وإغلاق أي ثغرات برمجية غير مستخدمة:
+</p>
+
+<table class="clean-table">
+  <thead>
+    <tr>
+      <th style="width: 26%;">المجموعة</th>
+      <th style="width: 37%;">أمثلة موجودة في القالب السابق</th>
+      <th style="width: 37%;">الحالة والسياسة المعتمدة لكنز الصحراء</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>بوابات دفع غير معتمدة</strong></td>
+      <td>بوابات دولية متعددة جاءت مع القالب ولا تظهر في المتجر</td>
+      <td style="color: #18794E; font-weight: 600;">بطاقة الدفع، و<bdi>Apple Pay</bdi> عبر <bdi>Paymob</bdi>، والتحويل البنكي فقط، ما لم تعتمد الإدارة غير ذلك</td>
+    </tr>
+    <tr>
+      <td><strong>أنظمة الأسواق المشتركة</strong></td>
+      <td>تسجيل البائع وتعدد التجار ولوحات البائع وإدارة مندوب التوصيل</td>
+      <td style="color: #18794E; font-weight: 600;">متجر علامة واحدة وحساب عميل وطلبات</td>
+    </tr>
+    <tr>
+      <td><strong>برامج الولاء العامة</strong></td>
+      <td>المحفظة والنقاط والعضويات والاشتراكات والجملة</td>
+      <td style="color: #18794E; font-weight: 600;">تزال ما لم توجد سياسة عمل معتمدة لها</td>
+    </tr>
+    <tr>
+      <td><strong>ميزات التسويق القالبية</strong></td>
+      <td>الإعلانات والدردشة والذكاء الاصطناعي وتمرير تيك توك</td>
+      <td style="color: #18794E; font-weight: 600;">تواصل وروابط اجتماعية معتمدة فقط</td>
+    </tr>
+    <tr>
+      <td><strong>أدوات لا تظهر في المتجر</strong></td>
+      <td>خرائط وبحث جغرافي ومسح رموز وصوت وفيديو وربط بمنصات أخرى</td>
+      <td style="color: #18794E; font-weight: 600;">تبقى فقط الأداة التي يحتاجها العنوان أو الدفع فعلياً</td>
+    </tr>
+    <tr>
+      <td><strong>ملفات وأصول زائدة</strong></td>
+      <td>لغات وإعدادات وأيقونات وأصول تخص أمثلة ومتاجر أخرى</td>
+      <td style="color: #18794E; font-weight: 600;">العربية والإنجليزية وهوية كنز الصحراء</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="section-header" style="margin-top: 18px;">
+  <span class="section-badge">القيمة الملموسة</span>
+  <h2>ما الذي سيلاحظه العميل بعد إتمام خطة الإصلاح؟</h2>
+</div>
+
+<div class="outcomes-grid">
+  <div class="outcome-item">
+    <strong>1. تجربة شراء مستقرة:</strong> إتمام الطلب يعمل بسلاسة دون بقاء العميل أمام زر معلق أو شاشة تحميل لا تنتهي.
+  </div>
+  <div class="outcome-item">
+    <strong>2. تطابق تام للمنتجات:</strong> المنتجات والأسعار والمخزون وبانرات العرض متطابقة تماماً مع الموقع دون الحاجة لإعادة رفع التطبيق للمتاجر.
+  </div>
+  <div class="outcome-item">
+    <strong>3. وسائل دفع موثوقة ومحددة:</strong> ظهور خيارات الدفع المعتمدة فقط (Paymob، بطاقة مدى، فيزا، ماستركارد، Apple Pay، والتحويل البنكي).
+  </div>
+  <div class="outcome-item">
+    <strong>4. تطبيق أسرع وأخف وزناً:</strong> إزالة عشرات الحزم والصلاحيات غير المطلوبة، وتخفيف حجم التثبيت وتسريع فتح الشاشات.
+  </div>
+  <div class="outcome-item">
+    <strong>5. رسائل خطأ واضحة بالعربية:</strong> إرشادات مفهومة وواضحة عند تعذر الاتصال أو انتهاء جلسة، مع توفير خيار إعادة المحاولة الفورية.
+  </div>
+  <div class="outcome-item">
+    <strong>6. جودة عالية ومراقبة مستمرة:</strong> اختبارات شاملة قبل إطلاق التحديثات، مع نظام ذكي لمراقبة الأعطال وحماية استقرار المتجر.
+  </div>
+</div>
+
+<div class="sign-off-box">
+  <div class="sign-off-text">
+    <h4>إعداد وتوثيق مطور التطبيقات</h4>
+    <p>تم إعداد وتصنيف هذا التقرير الفني بناءً على مراجعة الكود المصدري، وفحص المتجر الحي، وتجربة الشراء المباشرة.</p>
+  </div>
+  <div class="seal-box">
+    <span style="display: block; font-size: 10.5pt; font-weight: 800; color: #8A6717;">Eng. Omar Shemais</span>
+    <span style="display: block; font-size: 8.5pt; font-weight: 600; color: #555047; margin-top: 2px;">Mobile Developer</span>
+  </div>
+</div>
+
+</body>
+</html>

@@ -12,7 +12,6 @@ import '../../../models/cart/cart_base.dart';
 import '../../../models/entities/product.dart';
 import '../../../models/payment_method_model.dart';
 import '../../../modules/dynamic_layout/helper/helper.dart';
-import '../../../modules/native_payment/razorpay/services.dart';
 import '../../../widgets/product/cart_item/cart_item_state_ui.dart';
 import '../../../widgets/web_layout/web_layout.dart';
 import '../../../widgets/web_layout/widgets/path_header_widget.dart';
@@ -197,7 +196,7 @@ class OrderSummaryWidget extends StatefulWidget {
 }
 
 class _OrderSummaryWidgetState extends State<OrderSummaryWidget>
-    with RazorDelegate, CheckoutMixin {
+    with CheckoutMixin {
   @override
   Function? get onBack => widget.onBack;
 

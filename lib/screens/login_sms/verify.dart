@@ -44,6 +44,7 @@ class _VerifyCodeState extends State<VerifyCode>
   var onTapRecognizer;
   int? _resendToken;
   String? _verId;
+  StreamSubscription<String?>? _verifySuccessSubscription;
 
   @override
   void codeUpdated() {
@@ -64,7 +65,8 @@ class _VerifyCodeState extends State<VerifyCode>
     super.initState();
     _resendToken = widget.resendToken;
     _verId = widget.verId;
-    widget.verifySuccessStream?.listen(_verifySuccessStreamListener);
+    _verifySuccessSubscription =
+        widget.verifySuccessStream?.listen(_verifySuccessStreamListener);
 
     listenForCode();
 
@@ -104,7 +106,7 @@ class _VerifyCodeState extends State<VerifyCode>
 
   @override
   void dispose() {
-    widget.verifySuccessStream?.listen(null);
+    _verifySuccessSubscription?.cancel();
     _loginButtonController.dispose();
     _pinCodeController.dispose();
     cancel();
@@ -193,7 +195,7 @@ class _VerifyCodeState extends State<VerifyCode>
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Icon(
-            Icons.arrow_back_ios,
+            Tools.getBackIcon(context),
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),

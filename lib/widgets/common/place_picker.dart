@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
 
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../generated/l10n.dart';
 import '../../screens/common/google_map_mixin.dart';
 
@@ -183,8 +184,8 @@ class PlacePickerState extends State<PlacePicker> with GoogleMapMixin {
         title: SearchInput(searchPlace),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
+          icon: Icon(
+            Tools.getBackIcon(context),
             size: 20,
           ),
           color: Theme.of(context).colorScheme.secondary,

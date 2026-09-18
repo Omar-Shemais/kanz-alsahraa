@@ -163,7 +163,7 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Icon(
-            Icons.arrow_back_ios,
+            Tools.getBackIcon(context),
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),

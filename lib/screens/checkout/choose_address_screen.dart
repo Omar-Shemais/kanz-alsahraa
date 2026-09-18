@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../common/config.dart';
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../data/boxes.dart';
 import '../../generated/l10n.dart';
 import '../../models/index.dart' show Address, CartModel, User, UserModel;
@@ -402,7 +403,7 @@ class _StateChooseAddress extends BaseScreen<ChooseAddressScreen> {
           onTap: () {
             Navigator.of(context).pop();
           },
-          child: const Icon(Icons.arrow_back_ios),
+          child: Icon(Tools.getBackIcon(context)),
         ),
         title: Text(
           S.of(context).selectAddress,

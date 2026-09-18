@@ -300,7 +300,8 @@ mixin ConfigMixin {
   void setAppConfig(appConfig, {bool ignoreInitCart = false}) {
     ServerConfig().setConfig(appConfig);
 
-    printLog('[🌍appConfig] ${appConfig['type']} $appConfig');
+    // Never print the full configuration: it contains WooCommerce credentials.
+    printLog('[🌍appConfig] type=${appConfig['type']} url=${appConfig['url']}');
 
     switch (appConfig['type']) {
       case 'opencart':

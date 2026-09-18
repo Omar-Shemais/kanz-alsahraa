@@ -38,7 +38,6 @@ import 'slider_testimonial/index.dart';
 import 'spacer/spacer.dart';
 import 'story/index.dart';
 import 'testimonial/index.dart';
-import 'tiktok/index.dart';
 import 'video/index.dart';
 import 'web_embed/web_embed_layout.dart';
 
@@ -315,12 +314,7 @@ class DynamicLayout extends StatelessWidget {
           config: InstagramStoryConfig.fromJson(config),
         );
       case Layout.tiktokVideos:
-        if (ServerConfig().isBuilder || !isMobile) {
-          return TikTokVideosPlaceholder();
-        }
-        return TikTokVideos(
-          config: TikTokVideosConfig.fromJson(config),
-        );
+        return const SizedBox();
       case Layout.webEmbed:
         return WebEmbedLayout(
           config: WebEmbedConfig.fromJson(config),

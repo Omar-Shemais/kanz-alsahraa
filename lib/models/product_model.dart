@@ -18,6 +18,11 @@ import 'entities/product.dart';
 import 'entities/product_variation.dart';
 
 class ProductModel with ChangeNotifier {
+  ProductModel({Future<List<Product>?> Function()? fetchProducts})
+      : _fetchProducts = fetchProducts;
+  final Future<List<Product>?> Function()? _fetchProducts;
+  int _requestSerial = 0;
+  bool _disposed = false;
   final Services _service = Services();
   List<List<Product?>> products = [];
   String? message;
@@ -168,12 +173,16 @@ class ProductModel with ChangeNotifier {
     List<String>? brandIds,
     Map? attributes,
   }) async {
+    if (_disposed) return;
+    final requestSerial = ++_requestSerial;
     try {
       if (isFetching) {
         await _cancelLoadProduct?.cancel();
       }
+      if (requestSerial != _requestSerial) return;
 
       isFetching = true;
+      errMsg = null;
 
       categoryIds = categoryId;
       this.search = search;
@@ -191,36 +200,40 @@ class ProductModel with ChangeNotifier {
         }
       }
 
-      _cancelLoadProduct =
-          CancelableOperation.fromFuture(_service.api.fetchProductsByCategory(
-        categoryId: categoryId?.join(','),
-        tagId: tagId?.join(','),
-        minPrice: minPrice,
-        maxPrice: maxPrice,
-        orderBy: orderBy,
-        order: order,
-        page: page,
-        featured: featured,
-        onSale: onSale,
-        listingLocation: listingLocation,
-        userId: userId,
-        nextCursor: cursor,
-        include: include?.join(','),
-        search: search,
-        productType: productType,
-        boostEngine: boostEngine,
-        brandIds: brandIds,
-        attributes: attributes,
-      ));
+      _cancelLoadProduct = CancelableOperation.fromFuture(_fetchProducts != null
+          ? _fetchProducts!()
+          : _service.api.fetchProductsByCategory(
+              categoryId: categoryId?.join(','),
+              tagId: tagId?.join(','),
+              minPrice: minPrice,
+              maxPrice: maxPrice,
+              orderBy: orderBy,
+              order: order,
+              page: page,
+              featured: featured,
+              onSale: onSale,
+              listingLocation: listingLocation,
+              userId: userId,
+              nextCursor: cursor,
+              include: include?.join(','),
+              search: search,
+              productType: productType,
+              boostEngine: boostEngine,
+              brandIds: brandIds,
+              attributes: attributes,
+            ));
 
-      final products = await _cancelLoadProduct!.value;
+      final operation = _cancelLoadProduct!;
+      final products = await operation.valueOrCancellation();
+      if (requestSerial != _requestSerial) return;
+      if (products == null) throw StateError('Catalog response unavailable');
 
-      isEnd = products!.isEmpty;
+      isEnd = products.isEmpty;
 
       if (page == 0 || page == 1) {
         productsList = products;
       } else {
-        productsList = [...productsList!, ...products];
+        productsList = [...?productsList, ...products];
       }
 
       if (search?.isNotEmpty ?? false) {
@@ -232,8 +245,9 @@ class ProductModel with ChangeNotifier {
 
       notifyListeners();
     } catch (err, trace) {
-      errMsg =
-          'There is an issue with the app during request the data, please contact admin for fixing the issues $err';
+      if (requestSerial != _requestSerial) return;
+      errMsg = 'تعذر تحميل بيانات المتجر. تحقق من الاتصال وأعد المحاولة.';
+      isEnd = false;
       isFetching = false;
       printError(err, trace);
       notifyListeners();
@@ -247,6 +261,14 @@ class ProductModel with ChangeNotifier {
     productsList = products;
     isEnd = false;
     if (notify) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    ++_requestSerial;
+    unawaited(_cancelLoadProduct?.cancel());
+    super.dispose();
   }
 
   Future<void> createProduct(

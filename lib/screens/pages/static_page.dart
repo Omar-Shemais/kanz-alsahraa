@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../widgets/common/flux_image.dart';
 import '../common/app_bar_mixin.dart';
 
@@ -141,8 +142,8 @@ class _StateStaticPage extends State<StaticPage> with AppBarMixin {
                   leading: !canPop
                       ? null
                       : IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios,
+                          icon: Icon(
+                            Tools.getBackIcon(context),
                             size: 20,
                           ),
                           color: Theme.of(context).colorScheme.secondary,

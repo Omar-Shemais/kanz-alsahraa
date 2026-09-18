@@ -5,7 +5,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart'
 // ignore: implementation_imports
 import 'package:flutter_cache_manager/src/web/mime_converter.dart';
 import 'package:http/http.dart' as http;
-import 'package:inspireui/utils/http_client.dart';
+import 'secure_http_client.dart';
 
 // Time keep the file without a cache-control header
 const Duration keepDuration = Duration(hours: 1);
@@ -14,7 +14,7 @@ class HttpFileService extends FileService {
   final http.Client _httpClient;
 
   HttpFileService({http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client();
+      : _httpClient = SecureHttpClient(httpClient);
 
   @override
   Future<FileServiceResponse> get(String url,
@@ -98,6 +98,6 @@ class HttpCacheManager extends CacheManager with ImageCacheManager {
   HttpCacheManager._()
       : super(Config(
           key,
-          fileService: HttpFileService(httpClient: HttpBase()),
+          fileService: HttpFileService(),
         ));
 }

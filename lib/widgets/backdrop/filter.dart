@@ -345,7 +345,7 @@ class _FilterWidgetState extends State<FilterWidget> {
                       }
                       Navigator.of(context).pop();
                     },
-                    child: const Icon(Icons.arrow_back_ios,
+                    child: Icon(Tools.getBackIcon(context),
                         size: 22, color: Colors.white70),
                   ),
                   const SizedBox(width: 20),

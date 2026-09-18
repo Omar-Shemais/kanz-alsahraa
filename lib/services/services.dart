@@ -1,7 +1,6 @@
 // Enable Audio feature
 // import 'package:flux_audio/index.dart';
 import 'package:flux_firebase/firebase_notification_service.dart';
-import 'package:flux_firebase/impl/firebase_dynamic_link_service.dart';
 
 import '../common/config.dart';
 import '../common/constants.dart';
@@ -18,6 +17,7 @@ import 'chat/all_chat_services.dart';
 import 'dynamic_link_service.dart';
 import 'firebase_service.dart';
 import 'link_service.dart';
+import 'native_product_link_service.dart';
 import 'notification/notification_service.dart';
 import 'notification/notification_service_impl.dart';
 import 'service_config.dart';
@@ -61,7 +61,7 @@ class Services
           branchIOConfig: dynamicLinkConfig.branchIOConfig,
         );
       } else {
-        _dynamicLinkService = FirebaseDynamicLinkService(
+        _dynamicLinkService = NativeProductLinkService(
           linkService: linkService,
         );
       }

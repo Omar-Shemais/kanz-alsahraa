@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../common/constants.dart';
+import '../common/tools.dart';
 import '../models/index.dart';
 import '../modules/dynamic_layout/index.dart';
 import '../routes/route.dart';
@@ -27,7 +28,7 @@ class PageTabScreen extends StatelessWidget {
           onTap: () {
             Navigator.pop(context);
           },
-          child: const Icon(Icons.arrow_back_ios),
+          child: Icon(Tools.getBackIcon(context)),
         ),
         title: Text(
           config.label ?? config.menuLabel,

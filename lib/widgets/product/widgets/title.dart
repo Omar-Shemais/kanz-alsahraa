@@ -56,7 +56,10 @@ class ProductTitle extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: const Color(0xFF1A1A1A),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
                           ),
                           borderRadius: BorderRadius.circular(5),
                         ),
@@ -84,12 +87,13 @@ class ProductTitle extends StatelessWidget {
               style: style?.copyWith(
                     fontWeight: FontWeight.w600,
                     fontSize: 14.0,
-                    color: const Color(0xFF1A1A1A),
+                    color: style?.color ??
+                        Theme.of(context).colorScheme.onSurface,
                   ) ??
-                  const TextStyle(
+                  TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14.0,
-                    color: Color(0xFF1A1A1A),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
             ),
           ),

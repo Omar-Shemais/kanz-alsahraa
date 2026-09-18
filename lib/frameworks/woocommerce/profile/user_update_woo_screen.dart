@@ -300,8 +300,8 @@ class _UserUpdateScreenState extends State<UserUpdateWooScreen> {
               child: Container(
                 padding: const EdgeInsets.all(10),
                 margin: const EdgeInsets.only(left: 10),
-                child: const Icon(
-                  Icons.arrow_back_ios,
+                child: Icon(
+                  Tools.getBackIcon(context),
                   color: Colors.white,
                 ),
               ),

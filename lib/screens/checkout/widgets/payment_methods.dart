@@ -11,7 +11,6 @@ import '../../../models/index.dart'
     show AppModel, CartModel, PaymentMethodModel, TaxModel;
 import '../../../models/tera_wallet/index.dart';
 import '../../../modules/dynamic_layout/helper/helper.dart';
-import '../../../modules/native_payment/razorpay/services.dart';
 import '../../../services/index.dart';
 import '../../cart/widgets/shopping_cart_sumary.dart';
 import '../mixins/checkout_mixin.dart';
@@ -34,8 +33,7 @@ class PaymentMethods extends StatefulWidget {
   State<PaymentMethods> createState() => _PaymentMethodsState();
 }
 
-class _PaymentMethodsState extends State<PaymentMethods>
-    with RazorDelegate, CheckoutMixin {
+class _PaymentMethodsState extends State<PaymentMethods> with CheckoutMixin {
   @override
   Function? get onBack => widget.onBack;
 
@@ -109,8 +107,26 @@ class _PaymentMethodsState extends State<PaymentMethods>
                 ignoreWallet = total > walletModel.balance;
               }
 
-              if (selectedId == null && model.paymentMethods.isNotEmpty) {
-                selectedId = model.paymentMethods.firstWhereOrNull((item) {
+              final hasBullion = cartModel.hasBullionOrRestrictedItems;
+              final hasBacs = model.paymentMethods
+                  .any((item) => item.id == 'bacs' && (item.enabled ?? false));
+              final availableMethods = (hasBullion && hasBacs)
+                  ? model.paymentMethods
+                      .where((item) => item.id == 'bacs')
+                      .toList()
+                  : model.paymentMethods;
+
+              if (hasBullion && hasBacs && selectedId != 'bacs') {
+                final bacsMethod = model.paymentMethods
+                    .firstWhereOrNull((item) => item.id == 'bacs');
+                if (bacsMethod != null) {
+                  selectedId = 'bacs';
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    cartModel.setPaymentMethod(bacsMethod);
+                  });
+                }
+              } else if (selectedId == null && availableMethods.isNotEmpty) {
+                selectedId = availableMethods.firstWhereOrNull((item) {
                   if (ignoreWallet) {
                     return item.id != 'wallet' && item.enabled!;
                   } else {
@@ -118,19 +134,50 @@ class _PaymentMethodsState extends State<PaymentMethods>
                   }
                 })?.id;
                 cartModel.setPaymentMethod(
-                  model.paymentMethods.firstWhereOrNull(
+                  availableMethods.firstWhereOrNull(
                     (item) => item.id == selectedId,
                   ),
                 );
               }
 
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  for (int i = 0; i < model.paymentMethods.length; i++)
-                    model.paymentMethods[i].enabled!
+                  if (hasBullion && hasBacs)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade50,
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(color: Colors.amber.shade400),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.info_outline,
+                              color: Colors.amber.shade900),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              Tools.isRTL(context)
+                                  ? 'تنبيه: تحتوي السلة على سبائك ذهبية، وتقتصر طريقة الدفع المعتمدة لها على التحويل البنكي المباشر فقط وفقاً لسياسة المتجر.'
+                                  : 'Notice: Your cart contains gold bullion items, which require payment exclusively by direct bank transfer per store policy.',
+                              style: TextStyle(
+                                color: Colors.amber.shade900,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  for (int i = 0; i < availableMethods.length; i++)
+                    availableMethods[i].enabled!
                         ? Services().widget.renderPaymentMethodItem(
                             context,
-                            model.paymentMethods[i],
+                            availableMethods[i],
                             (i) {
                               setState(() {
                                 selectedId = i;

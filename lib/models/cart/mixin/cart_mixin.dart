@@ -51,6 +51,59 @@ mixin CartMixin {
 
   int get totalCartQuantity => productsInCart.values.fold(0, (v, e) => v + e!);
 
+  bool get hasBullionOrRestrictedItems {
+    for (final product in item.values) {
+      if (product == null) continue;
+      if (isBullionOrRestrictedProduct(product)) return true;
+    }
+    return false;
+  }
+
+  static bool isBullionOrRestrictedProduct(Product product) {
+    final name = (product.name ?? '').toLowerCase();
+    if (name.contains('سبائك') ||
+        name.contains('سبيكة') ||
+        name.contains('bullion') ||
+        name.contains('ذهب خالص')) {
+      return true;
+    }
+    for (final cat in product.categories) {
+      final catName = (cat.name ?? '').toLowerCase();
+      if (catName.contains('سبائك') ||
+          catName.contains('سبيكة') ||
+          catName.contains('bullion')) {
+        return true;
+      }
+    }
+    for (final tag in product.tags) {
+      final tagName = (tag.name ?? '').toLowerCase();
+      if (tagName.contains('سبائك') ||
+          tagName.contains('سبيكة') ||
+          tagName.contains('bullion')) {
+        return true;
+      }
+    }
+    for (final attr in product.attributes ?? <ProductAttribute>[]) {
+      for (final opt in attr.options ?? []) {
+        final optStr = opt.toString().toLowerCase();
+        if (optStr.contains('سبائك') ||
+            optStr.contains('سبيكة') ||
+            optStr.contains('bullion')) {
+          return true;
+        }
+      }
+    }
+    for (final brand in product.brands) {
+      final bName = (brand.name ?? '').toLowerCase();
+      if (bName.contains('سبائك') ||
+          bName.contains('سبيكة') ||
+          bName.contains('bullion')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   bool _hasProductVariation(String id) {
     var productVariation = cartItemMetaDataInCart[id]?.variation;
     return productVariation?.price?.isNotEmpty ?? false;

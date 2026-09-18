@@ -4,7 +4,6 @@ import 'dart:convert' as convert;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../common/config.dart';
@@ -14,7 +13,10 @@ import '../common/constants.dart';
 import '../data/boxes.dart';
 import '../modules/dynamic_layout/config/app_config.dart';
 // import '../modules/salesiq_mobilisten/salesiq_services.dart';
+import '../services/home_config_repository.dart';
+import '../services/home_config_sources.dart';
 import '../services/index.dart';
+import '../services/remote_home_config.dart';
 import 'advertisement/index.dart' show AdvertisementConfig;
 import 'cart/cart_model.dart';
 import 'category/category_model.dart';
@@ -25,6 +27,17 @@ import 'recent_product_model.dart';
 import 'user_model.dart';
 
 class AppModel with ChangeNotifier {
+  final HomeConfigRepository _homeConfigs;
+  final Future<AppConfig> Function(String) _loadRemoteHome;
+  final Future<String> Function(String) _loadHomeAsset;
+  final String Function() _homeSource;
+  HomeConfigScope? _homeScope;
+  int _homeLoadGeneration = 0;
+  bool _homeDisposed = false;
+  Future<void>? _homeRefresh;
+  int? _homeRefreshGeneration;
+  HomeConfigOrigin? homeConfigOrigin;
+  DateTime? homeConfigSavedAt;
   MultiSiteConfig? multiSiteConfig;
   AppConfig? appConfig;
   AdvertisementConfig advertisement = const AdvertisementConfig();
@@ -89,7 +102,22 @@ class AppModel with ChangeNotifier {
   String? get countryCode => SettingsBox().countryCode;
 
   /// App Model Constructor
-  AppModel([String? lang]) {
+  AppModel([String? lang]) : this.withHomeConfig(lang: lang);
+
+  AppModel.withHomeConfig({
+    String? lang,
+    HomeConfigRepository? homeConfigs,
+    Future<AppConfig> Function(String)? loadRemote,
+    Future<String> Function(String)? loadAsset,
+    String Function()? source,
+  })  : _homeConfigs = homeConfigs ??
+            HomeConfigRepository(
+              read: (key) => SettingsBox().box.get(key),
+              write: (key, value) => SettingsBox().box.put(key, value),
+            ),
+        _loadRemoteHome = loadRemote ?? loadRemoteHomeConfig,
+        _loadHomeAsset = loadAsset ?? rootBundle.loadString,
+        _homeSource = source ?? (() => kAppConfig) {
     _langCode = lang ?? _langCode;
 
     advertisement = AdvertisementConfig.fromJson(adConfig: kAdConfig);
@@ -97,6 +125,11 @@ class AppModel with ChangeNotifier {
   }
 
   void _updateAndSaveDefaultLanguage(String? lang) {
+    if (!kAdvanceConfig.isMultiLanguages) {
+      _langCode = kAdvanceConfig.defaultLanguage;
+      SettingsBox().languageCode = _langCode;
+      return;
+    }
     final prefLang = SettingsBox().languageCode;
     _langCode =
         prefLang != null && prefLang.isNotEmpty ? prefLang : lang ?? _langCode;
@@ -128,6 +161,11 @@ class AppModel with ChangeNotifier {
 
   Future<bool> changeLanguage(String languageCode, BuildContext context) async {
     try {
+      if (!kAdvanceConfig.isMultiLanguages) {
+        _langCode = kAdvanceConfig.defaultLanguage;
+        SettingsBox().languageCode = _langCode;
+        return true;
+      }
       _langCode = languageCode;
       SettingsBox().languageCode = _langCode;
 
@@ -188,39 +226,154 @@ class AppModel with ChangeNotifier {
   }
 
   void loadStreamConfig(config) {
+    if (_homeDisposed) return;
+    _homeLoadGeneration++;
+    _homeConfigs.invalidate();
+    _homeScope = null;
     appConfig = AppConfig.fromJson(config);
     isLoading = false;
     notifyListeners();
   }
 
   Future<void> fetchCloudAppConfig(String url) async {
-    /// Do not enable cache here because we need to get the latest config JSON.
-    final appJson = await http.get(
-      Uri.encodeFull(url).toUri()!,
-      headers: {
-        'Accept': 'application/json',
-      },
-    );
-    appConfig = AppConfig.fromJson(
-      convert.jsonDecode(
-        convert.utf8.decode(appJson.bodyBytes),
-      ),
-    );
+    // Assignment is atomic: an invalid response cannot replace usable settings.
+    final generation = _homeLoadGeneration;
+    final next = await _loadRemoteHome(url);
+    if (!_homeDisposed && generation == _homeLoadGeneration) {
+      _adoptHomeConfig(next, HomeConfigOrigin.remote);
+    }
   }
 
-  Future applyAppCaching() async {
-    /// apply App Caching if isCaching is enable
-    /// not use for Fluxbuilder
-    if (!ServerConfig().isBuilder) {
-      await Services().widget.onLoadedAppConfig(langCode, (configCache) {
-        appConfig = AppConfig.fromJson(configCache);
-      });
+  Future<void> applyAppCaching() {
+    if (_homeDisposed || isLoading || ServerConfig().isBuilder) {
+      return Future.value();
+    }
+    final generation = _homeLoadGeneration;
+    if (_homeRefresh != null && _homeRefreshGeneration == generation) {
+      return _homeRefresh!;
+    }
+    final refresh = _refreshHomeConfig(generation);
+    _homeRefresh = refresh;
+    _homeRefreshGeneration = generation;
+    return refresh.whenComplete(() {
+      if (identical(_homeRefresh, refresh)) _homeRefresh = null;
+    });
+  }
+
+  Future<void> _refreshHomeConfig(int generation) async {
+    final scope = _homeScope;
+    final language = langCode;
+    final folder = multiSiteConfig?.configFolder;
+    try {
+      if (scope != null && isRemoteHomeSource(scope.source)) {
+        final urls = homeRemoteUrls(
+            source: scope.source, language: language, folder: folder);
+        if (urls.isEmpty) return;
+        final snapshot =
+            await _homeConfigs.refresh(scope, loadRemote: () async {
+          for (final url in urls) {
+            try {
+              return await _loadRemoteHome(url);
+            } catch (_) {}
+          }
+          throw const FormatException('Remote home configuration unavailable.');
+        });
+        if (snapshot != null &&
+            !_homeDisposed &&
+            generation == _homeLoadGeneration &&
+            language == langCode) {
+          _adoptHomeConfig(snapshot.config, snapshot.origin,
+              savedAt: snapshot.savedAt);
+        }
+        return;
+      }
+      // Preserve the legacy Woo layout hook, but never persist personalized data.
+      var accepting = true;
+      try {
+        final operation =
+            Services().widget.onLoadedAppConfig(language, (configCache) {
+          if (accepting &&
+              !_homeDisposed &&
+              generation == _homeLoadGeneration &&
+              language == langCode) {
+            try {
+              _adoptHomeConfig(
+                  AppConfig.fromJson(configCache), HomeConfigOrigin.remote);
+            } catch (_) {
+              printLog('Home cache ignored: invalid layout.');
+            }
+          }
+        });
+        await (operation ?? Future<void>.value())
+            .timeout(const Duration(seconds: 10));
+      } finally {
+        accepting = false;
+      }
+    } catch (_) {
+      // The baseline remains visible; no raw server/config errors in the UI.
+      printLog('Home refresh unavailable; keeping the usable local layout.');
+    }
+  }
+
+  void _adoptHomeConfig(AppConfig next, HomeConfigOrigin origin,
+      {DateTime? savedAt}) {
+    if (_homeDisposed) return;
+    // Keep active routes (especially checkout) intact during banner refresh.
+    // The full remote TabBar remains in stored JSON for the next startup.
+    if (appConfig != null) {
+      final activeTabs = appConfig!.tabBar;
+      for (final nextTab in next.tabBar) {
+        final existingTab =
+            activeTabs.firstWhereOrNull((e) => e.layout == nextTab.layout);
+        if (existingTab != null) {
+          existingTab.categories = nextTab.categories;
+          existingTab.images = nextTab.images;
+          existingTab.categoryLayout = nextTab.categoryLayout;
+          existingTab.vendorLayout = nextTab.vendorLayout;
+          existingTab.remapCategories = nextTab.remapCategories;
+        }
+      }
+      next.tabBar = activeTabs;
+    }
+    appConfig = next;
+    homeConfigOrigin = origin;
+    homeConfigSavedAt = savedAt;
+    _syncHomeNavigation();
+    notifyListeners();
+    eventBus.fire(const EventLoadedAppConfig());
+  }
+
+  void _syncHomeNavigation() {
+    categories = null;
+    remapCategories = null;
+    categoriesIcons = null;
+    categoryLayout = '';
+    vendorLayout = '';
+    final vendorTab =
+        appConfig!.tabBar.firstWhereOrNull((e) => e.layout == 'vendors');
+    final categoryTab =
+        appConfig!.tabBar.firstWhereOrNull((e) => e.layout == 'category');
+    if (vendorTab != null) {
+      handleCategoryTab(vendorTab);
+      vendorLayout = vendorTab.vendorLayout;
+    } else if (categoryTab != null) {
+      handleCategoryTab(categoryTab);
+    }
+    if (appConfig?.settings.tabBarConfig.alwaysShowTabBar != null) {
+      Configurations().setAlwaysShowTabBar(
+          appConfig?.settings.tabBarConfig.alwaysShowTabBar ?? false);
     }
   }
 
   void handleCategoryTab(TabBarMenuConfig categoryTab) {
     if (categoryTab.categories != null) {
-      categories = List<String>.from(categoryTab.categories ?? []);
+      if (categoryTab.categories is Iterable) {
+        categories = (categoryTab.categories as Iterable)
+            .map((e) => e.toString())
+            .toList();
+      } else {
+        categories = [categoryTab.categories.toString()];
+      }
       if (ServerConfig().isShopify) {
         /// Support old type category (base64) work with new API
         /// Old type is base64, new type is url like gid://shopify/Collection/123456789
@@ -252,6 +405,10 @@ class AppModel with ChangeNotifier {
 
   Future<AppConfig?> loadAppConfig(
       {isSwitched = false, Map<String, dynamic>? config}) async {
+    if (_homeDisposed) return null;
+    final generation = ++_homeLoadGeneration;
+    _homeConfigs.invalidate();
+    _homeScope = null;
     isLoading = true;
     notifyListeners();
 
@@ -265,9 +422,12 @@ class AppModel with ChangeNotifier {
       if (!isInit || _langCode.isEmpty) {
         await getPrefConfig();
       }
+      if (_homeDisposed || generation != _homeLoadGeneration) return null;
 
       if (config != null) {
         appConfig = AppConfig.fromJson(config);
+        homeConfigOrigin = null;
+        homeConfigSavedAt = null;
       } else {
         /// load config from Notion
         if (ServerConfig().type == ConfigType.notion) {
@@ -278,41 +438,24 @@ class AppModel with ChangeNotifier {
           }
         }
 
-        await _loadConfigJson();
+        await _loadConfigJson(generation);
       }
-
-      await applyAppCaching();
+      if (_homeDisposed || generation != _homeLoadGeneration) return null;
 
       /// Load categories config for the Tabbar menu
       /// User to sort the category Setting
       /// Prefer loading category configuration from the first vendor tab
 
-      final vendorTab = appConfig!.tabBar
-          .toList()
-          .firstWhereOrNull((e) => e.layout == 'vendors');
-
-      final categoryTab = appConfig!.tabBar
-          .toList()
-          .firstWhereOrNull((e) => e.layout == 'category');
-
-      if (vendorTab != null) {
-        handleCategoryTab(vendorTab);
-        vendorLayout = vendorTab.vendorLayout;
-      } else if (categoryTab != null) {
-        handleCategoryTab(categoryTab);
-      }
-
-      if (appConfig?.settings.tabBarConfig.alwaysShowTabBar != null) {
-        Configurations().setAlwaysShowTabBar(
-            appConfig?.settings.tabBarConfig.alwaysShowTabBar ?? false);
-      }
+      _syncHomeNavigation();
       isLoading = false;
 
       notifyListeners();
       printLog('[Debug] Finish Load AppConfig', startTime);
       eventBus.fire(const EventLoadedAppConfig());
+      if (config == null) unawaited(applyAppCaching());
       return appConfig;
     } catch (err, trace) {
+      if (_homeDisposed || generation != _homeLoadGeneration) return null;
       printLog('🔴 AppConfig JSON loading error');
       printError(err, trace);
       isLoading = false;
@@ -409,52 +552,38 @@ class AppModel with ChangeNotifier {
     return appConfig?.overrideTranslation;
   }
 
-  Future _loadConfigJson() async {
-    try {
-      var configFolderPath = multiSiteConfig?.configFolder;
-
-      if (kAppConfig.contains('http')) {
-        // load on cloud config and update on air
-        var path = kAppConfig;
-        if (path.contains('.json')) {
-          path = path.substring(0, path.lastIndexOf('/'));
-          if (configFolderPath?.isNotEmpty ?? false) {
-            path += '/$configFolderPath';
-          }
-          path += '/config_$langCode.json';
-        }
-        try {
-          await fetchCloudAppConfig(path);
-        } catch (_) {
-          /// In case config_$langCode.json is not found,
-          /// load user's original config URL.
-          printLog(
-              '🚑 Config at $path not found. Loading from $kAppConfig instead.');
-          await fetchCloudAppConfig(kAppConfig);
-        }
-      } else {
-        // load local config
-        var path = (configFolderPath?.isNotEmpty ?? false)
-            ? 'lib/config/$configFolderPath/config_$langCode.json'
-            : 'lib/config/config_$langCode.json';
-
-        try {
-          final appJson = await rootBundle.loadString(path);
-          appConfig = AppConfig.fromJson(convert.jsonDecode(appJson));
-        } catch (e) {
-          printLog(e);
-          var path = kAppConfig;
-          //load default template for site if config_xx.json is not existed in configFolderPath for multi sites
-          if (configFolderPath?.isNotEmpty ?? false) {
-            path =
-                'lib/config/$configFolderPath/config_${multiSiteConfig?.languageCode ?? 'en'}.json';
-          }
-          final appJson = await rootBundle.loadString(path);
-          appConfig = AppConfig.fromJson(convert.jsonDecode(appJson));
-        }
-      }
-    } catch (e) {
-      rethrow;
+  Future<void> _loadConfigJson(int generation) async {
+    final language = langCode;
+    final folder = multiSiteConfig?.configFolder;
+    final source = _homeSource();
+    // A separate site identity prevents two folders at the same host sharing data.
+    final isolatedScope = HomeConfigScope(
+        site: convert.jsonEncode([ServerConfig().url, folder]),
+        language: language,
+        source: source);
+    _homeScope = isolatedScope;
+    final paths = homeBundlePaths(
+        source: source,
+        language: language,
+        folder: folder,
+        fallbackLanguage: multiSiteConfig?.languageCode);
+    final snapshot = await _homeConfigs.loadBaseline(isolatedScope,
+        loadBundle: () => loadBundledHomeConfig(paths, _loadHomeAsset));
+    if (snapshot != null &&
+        !_homeDisposed &&
+        generation == _homeLoadGeneration &&
+        language == langCode) {
+      appConfig = snapshot.config;
+      homeConfigOrigin = snapshot.origin;
+      homeConfigSavedAt = snapshot.savedAt;
     }
+  }
+
+  @override
+  void dispose() {
+    _homeDisposed = true;
+    _homeLoadGeneration++;
+    _homeConfigs.dispose();
+    super.dispose();
   }
 }

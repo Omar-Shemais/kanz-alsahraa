@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/config.dart';
 import '../../services/index.dart';
+import '../../services/web_navigation_policy.dart';
 import '../../widgets/common/webview.dart';
 import '../base_screen.dart';
 
@@ -30,8 +31,25 @@ class PaymentWebview extends StatefulWidget {
 class PaymentWebviewState extends BaseScreen<PaymentWebview> {
   int selectedIndex = 1;
   String? orderId;
+  bool _finishNotified = false;
+
+  void _notifyFinish() {
+    if (_finishNotified) return;
+    _finishNotified = true;
+    widget.onFinish?.call(orderId);
+  }
 
   void handleUrlChanged(String url) {
+    if (ServerConfig().isWooType) {
+      final candidate = wooReturnOrderId(url, ServerConfig().url);
+      if (candidate == null || orderId != null || !mounted) return;
+      orderId = candidate;
+      _notifyFinish();
+      if (kPaymentConfig.showWebviewCheckoutSuccessScreen) {
+        Navigator.of(context).pop();
+      }
+      return;
+    }
     if (url.contains('/order-received/')) {
       var uri = Uri.parse(url);
       if (uri.queryParameters.containsKey('order_id')) {
@@ -72,7 +90,7 @@ class PaymentWebviewState extends BaseScreen<PaymentWebview> {
 
     /// Finally
     if (orderId != null) {
-      widget.onFinish?.call(orderId);
+      _notifyFinish();
       if (kPaymentConfig.showWebviewCheckoutSuccessScreen) {
         Navigator.of(context).pop();
       }
@@ -81,7 +99,7 @@ class PaymentWebviewState extends BaseScreen<PaymentWebview> {
     // Not sure about this case, maybe related to file lib/modules_ext/membership_ultimate/views/signup_screen.dart
     if (url.contains('/member-login/')) {
       orderId = '0';
-      widget.onFinish?.call(orderId);
+      _notifyFinish();
       Navigator.of(context).pop();
     }
 
@@ -137,7 +155,7 @@ class PaymentWebviewState extends BaseScreen<PaymentWebview> {
       headers: checkoutMap['headers'],
       onPageFinished: handleUrlChanged,
       onClosed: () {
-        widget.onFinish?.call(orderId);
+        _notifyFinish();
         widget.onClose?.call();
       },
     );

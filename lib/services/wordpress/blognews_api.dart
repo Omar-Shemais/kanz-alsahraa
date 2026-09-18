@@ -1,122 +1,98 @@
 import 'dart:convert';
-import 'dart:core';
 import 'dart:io' show File, HttpHeaders;
 
-import 'package:async/async.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 import 'package:path/path.dart';
 
-import '../../common/constants.dart';
-
-// class QueryString {
-//   static Map parse(String query) {
-//     var search = RegExp('([^&=]+)=?([^&]*)');
-//     var result = {};
-//
-//     if (query.startsWith('?')) query = query.substring(1);
-//     String decode(String s) => Uri.decodeComponent(s.replaceAll('+', ' '));
-//
-//     for (Match match in search.allMatches(query)) {
-//       result[decode(match.group(1)!)] = decode(match.group(2)!);
-//     }
-//     return result;
-//   }
-// }
+import '../secure_http_client.dart';
+import '../secure_requests.dart';
 
 class BlogNewsApi {
   final String url;
   final bool isRoot;
+  final http.Client Function() _createTransport;
 
-  BlogNewsApi(this.url, {this.isRoot = true});
+  BlogNewsApi(this.url,
+      {this.isRoot = true, http.Client Function()? createTransport})
+      : _createTransport = createTransport ?? http.Client.new;
 
-  Uri? _getOAuthURL(String requestMethod, String endpoint) {
-    return '$url/wp-json/wp/v2/$endpoint'.toUri();
-  }
+  Uri _endpoint(String endpoint) => Uri.parse(
+      '${url.replaceFirst(RegExp(r'/+$'), '')}/wp-json/wp/v2/$endpoint');
 
+  /// The caller must consume or cancel the stream; both release its client.
   Future<http.StreamedResponse> getStream(String endPoint) async {
-    var client = http.Client();
-    var request = http.Request('GET', Uri.parse(url));
-    return client.send(request);
-  }
+    final client = SecureHttpClient(_createTransport());
+    try {
+      final response =
+          await client.send(http.Request('GET', _endpoint(endPoint)));
+      Stream<List<int>> ownedStream() async* {
+        try {
+          yield* response.stream;
+        } finally {
+          client.close();
+        }
+      }
 
-  Future<dynamic> getAsync(String endPoint) async {
-    final url = _getOAuthURL('GET', endPoint)!;
-    Response? response;
-    if (isRoot) {
-      response = await httpGet(url);
-    } else {
-      response = await http.get(url);
+      return http.StreamedResponse(ownedStream(), response.statusCode,
+          headers: response.headers,
+          contentLength: response.contentLength,
+          request: response.request,
+          isRedirect: response.isRedirect,
+          persistentConnection: response.persistentConnection,
+          reasonPhrase: response.reasonPhrase);
+    } catch (_) {
+      client.close();
+      rethrow;
     }
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
+  }
+
+  dynamic _decode(http.Response response) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw http.ClientException('The blog service rejected the request.');
     }
-    return;
+    return json.decode(utf8.decode(response.bodyBytes));
   }
 
-  Future<dynamic> postAsync(String endPoint, Map? data, {String? token}) async {
-    var url = _getOAuthURL('POST', endPoint)!;
-    var client = http.Client();
-    var request = http.Request('POST', url);
-    request.headers[HttpHeaders.contentTypeHeader] =
-        'application/json; charset=utf-8';
-    request.headers[HttpHeaders.cacheControlHeader] = 'no-cache';
-    if (token != null) {
-      request.headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
-    }
-    request.body = json.encode(data);
-    var response =
-        await client.send(request).then((res) => res.stream.bytesToString());
+  Future<dynamic> getAsync(String endPoint) async => _decode(
+      await secureGet(_endpoint(endPoint), transport: _createTransport()));
 
-    var dataResponse = await json.decode(response);
-    return dataResponse;
-  }
+  Future<dynamic> postAsync(String endPoint, Map? data,
+          {String? token}) async =>
+      _decode(await securePost(_endpoint(endPoint),
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+            HttpHeaders.cacheControlHeader: 'no-cache',
+            if (token != null) HttpHeaders.authorizationHeader: 'Bearer $token',
+          },
+          body: json.encode(data),
+          transport: _createTransport()));
 
-  Future<dynamic> putAsync(String endPoint, Map data) async {
-    var url = _getOAuthURL('PUT', endPoint)!;
-
-    var client = http.Client();
-    var request = http.Request('PUT', url);
-    request.headers[HttpHeaders.contentTypeHeader] =
-        'application/json; charset=utf-8';
-    request.headers[HttpHeaders.cacheControlHeader] = 'no-cache';
-    request.body = json.encode(data);
-    var response =
-        await client.send(request).then((res) => res.stream.bytesToString());
-    var dataResponse = await json.decode(response);
-    return dataResponse;
-  }
+  Future<dynamic> putAsync(String endPoint, Map data) async =>
+      _decode(await securePut(_endpoint(endPoint),
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+            HttpHeaders.cacheControlHeader: 'no-cache',
+          },
+          body: json.encode(data),
+          transport: _createTransport()));
 
   Future<dynamic> uploadBlogImage(File imageFile, String token) async {
-    // open a bytestream
-    var stream = http.ByteStream(DelegatingStream(imageFile.openRead()));
-    // get file length
-    var length = await imageFile.length();
-    //client
-    var client = http.Client();
-    // string to uri
-    var uri = Uri.parse('$url/wp-json/wp/v2/media');
-    // create multipart request
-    var request = http.MultipartRequest('POST', uri);
-    request.headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
-    request.headers[HttpHeaders.contentTypeHeader] =
-        'application/json; charset=utf-8';
-    request.headers[HttpHeaders.cacheControlHeader] = 'no-cache';
-    // multipart that takes file
-    var multipartFile = http.MultipartFile('file', stream, length,
-        filename: basename(imageFile.path));
-    // add file to multipart
-    request.files.add(multipartFile);
-    // send
-    var response =
-        await client.send(request).then((res) => res.stream.bytesToString());
-
-    var dataResponse = await json.decode(response);
-
-    if (dataResponse['id'] != null) {
-      return dataResponse;
-    } else {
-      throw Exception('Error: $dataResponse');
+    final client = SecureHttpClient(_createTransport());
+    try {
+      final request = http.MultipartRequest('POST', _endpoint('media'));
+      request.headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
+      request.headers[HttpHeaders.cacheControlHeader] = 'no-cache';
+      // MultipartRequest supplies the correct boundary, not JSON content-type.
+      request.files.add(http.MultipartFile(
+          'file', imageFile.openRead(), await imageFile.length(),
+          filename: basename(imageFile.path)));
+      final data =
+          _decode(await http.Response.fromStream(await client.send(request)));
+      if (data is Map && data['id'] != null) return data;
+      throw http.ClientException(
+          'The blog image upload could not be confirmed.');
+    } finally {
+      client.close();
     }
   }
 }

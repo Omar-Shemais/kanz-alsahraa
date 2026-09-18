@@ -1,0 +1,13 @@
+# Rules for App Links & Universal Links
+<IfModule mod_headers.c>
+    <Files "apple-app-site-association">
+        ForceType application/json
+        Header set Content-Type "application/json; charset=utf-8"
+        Header set Access-Control-Allow-Origin "*"
+    </Files>
+    <Files "assetlinks.json">
+        ForceType application/json
+        Header set Content-Type "application/json; charset=utf-8"
+        Header set Access-Control-Allow-Origin "*"
+    </Files>
+</IfModule>

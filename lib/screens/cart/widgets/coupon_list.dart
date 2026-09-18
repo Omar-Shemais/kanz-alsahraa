@@ -331,8 +331,8 @@ class ListCouponLayoutScreen extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          icon: const Icon(
-            Icons.arrow_back_ios,
+          icon: Icon(
+            Tools.getBackIcon(context),
             size: 22,
           ),
         ),

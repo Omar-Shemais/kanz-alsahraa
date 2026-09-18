@@ -249,24 +249,23 @@ class _LoginPageState extends BaseScreen<LoginScreenMobile>
                                         )
                                       ],
                                     ),
-                                      Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                           // Text(S.of(context).dontHaveAccount),
-                            GestureDetector(
-                              onTap: () {
-                               // NavigateTools.navigateRegister(context);
-                              },
-                              child: Text(
-                                'او سجل الدخول عن طريق الجوال',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        GestureDetector(
+                                          onTap: () {
+                                            NavigateTools.navigateToLoginSms(context);
+                                          },
+                                          child: Text(
+                                            'او سجل الدخول عن طريق الجوال',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context).primaryColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   SocialLoginButtonRow(
                                     onApplePressed: () =>
                                         loginWithApple(context),

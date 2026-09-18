@@ -157,28 +157,23 @@ class DefaultConfig {
 
     /// Privacy Policies page ID. If page ID is null, use the URL instead.
     /// Accessible in the app via Settings > Privacy menu.
-    'PrivacyPoliciesPageUrlOrId': 'https://inspireui.com/privacy/',
+    'PrivacyPoliciesPageUrlOrId': 'https://kanzalsahra.com/privacy-policy/',
 
-    'SupportPageUrl': 'https://support.inspireui.com/',
+    'SupportPageUrl': 'https://kanzalsahra.com/contact-us/',
 
-    'DownloadPageUrl': 'https://fluxstore.app/',
+    'DownloadPageUrl': 'https://kanzalsahra.com/عن-كنز-الصحراء/',
 
-    'AboutUSPageUrl': 'https://codecanyon.net/user/inspireui',
+    'AboutUSPageUrl': 'https://kanzalsahra.com/عن-كنز-الصحراء/',
 
-    'NewsPageUrl': 'https://products.inspireui.com/',
+    'NewsPageUrl': 'https://kanzalsahra.com/faq/',
 
-    'FAQPageUrl': 'https://products.inspireui.com/have-a-question/',
+    'FAQPageUrl': 'https://kanzalsahra.com/faq/',
 
     'SocialConnectUrl': [
       {
-        'name': 'Facebook',
-        'icon': 'assets/icons/logins/facebook.png',
-        'url': 'https://www.facebook.com/inspireui'
-      },
-      {
-        'name': 'Instagram',
-        'icon': 'assets/icons/logins/instagram.png',
-        'url': 'https://www.instagram.com/inspireui9/'
+        'name': 'الموقع الرسمي',
+        'icon': 'assets/icons/tabs/icon-home.png',
+        'url': 'https://kanzalsahra.com'
       },
     ],
 
@@ -386,10 +381,10 @@ class DefaultConfig {
     //The link your app will open
     'link': 'https://mstore.io/',
     //----------* Android Setting *----------//
-    'androidPackageName': 'com.kanzalsahra.store',
+    'androidPackageName': 'com.khtwah.kanzalsahra',
     'androidAppMinimumVersion': 1,
     //----------* iOS Setting *----------//
-    'iOSBundleId': 'com.inspireui.mstore.flutter',
+    'iOSBundleId': 'com.khtwah.kanzalsahra',
     'iOSAppMinimumVersion': '1.0.1',
     'iOSAppStoreId': '1469772800'
   };

@@ -70,7 +70,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "لديك فقط ${currentBalance} متبقٍ في محفظتك";
 
   static String m24(count) =>
-      " ${Intl.plural(count, one: '${count} item', other: '${count} items')}";
+      "${Intl.plural(count, zero: 'لا توجد منتجات', one: 'منتج واحد', two: 'منتجان', few: '${count} منتجات', many: '${count} منتجاً', other: '${count} منتج')}";
 
   static String m25(message) =>
       "حدثت مشكلة في التطبيق أثناء طلب البيانات ، يرجى الاتصال بالمسؤول لإصلاح المشكلة: ${message}";
@@ -743,7 +743,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "informationTable":
             MessageLookupByLibrary.simpleMessage("جدول المعلومات"),
         "installDigitsPlugin": MessageLookupByLibrary.simpleMessage(
-            "يرجى تثبيت إضافة DIGITS: Wordpress Mobile Number Signup and Login"),
+            "تعذر التحقق عبر رسائل الجوال حالياً، يرجى المحاولة لاحقاً أو الدخول بكلمة المرور/البريد الإلكتروني"),
         "instantlyClose":
             MessageLookupByLibrary.simpleMessage("إغلاق على الفور"),
         "insufficientBalanceMessage": m23,

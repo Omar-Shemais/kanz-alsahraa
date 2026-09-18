@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../models/index.dart' show Order;
 import 'widgets/success.dart';
 
@@ -15,7 +16,9 @@ class WebviewCheckoutSuccessScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Tools.isRTL(context)
+                ? Icons.arrow_forward
+                : Icons.arrow_back),
             onPressed: () {
               Navigator.of(context).pop();
             }),

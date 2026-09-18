@@ -48,6 +48,7 @@ class Product {
   String? minPrice;
   bool? onSale;
   bool? inStock;
+  bool? purchasable;
   double? averageRating;
   int? totalSales;
   String? dateOnSaleFrom;
@@ -171,6 +172,7 @@ class Product {
 
   ///----FLUXSTORE LISTING----///
   Product({
+    this.purchasable,
     this.id = _defaultId,
     String? sku,
     String? name,
@@ -359,6 +361,7 @@ class Product {
     wholesalePrice = p.wholesalePrice;
     onSale = p.onSale;
     inStock = p.inStock;
+    purchasable = p.purchasable;
     averageRating = p.averageRating;
     ratingCount = p.ratingCount;
     totalSales = p.totalSales;
@@ -435,6 +438,7 @@ class Product {
       listingType = false;
       sku = parsedJson['sku'];
       status = parsedJson['status'];
+      purchasable = parsedJson['purchasable'];
       name = parsedJson['name'] != null
           ? HtmlUnescape().convert(parsedJson['name'])
           : parsedJson['post_title'];
@@ -2091,6 +2095,7 @@ class Product {
       minPrice: minPrice ?? this.minPrice,
       onSale: onSale ?? this.onSale,
       inStock: inStock ?? this.inStock,
+      purchasable: purchasable,
       averageRating: averageRating ?? this.averageRating,
       totalSales: totalSales ?? this.totalSales,
       dateOnSaleFrom: dateOnSaleFrom ?? this.dateOnSaleFrom,

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.khtwah.kanzalsahra",
+      "sha256_cert_fingerprints": [
+        "A6:3C:3F:AB:B8:F3:F5:2B:B9:F5:05:B9:5D:EE:90:DA:36:5F:5C:1C:59:F9:14:04:D0:96:15:69:72:73:D7:E7"
+      ]
+    }
+  }
+]

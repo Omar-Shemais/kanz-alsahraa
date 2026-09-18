@@ -253,7 +253,9 @@ class _HomeLayoutState extends State<HomeLayout> with AppBarMixin {
       bottom: false,
       child: verticalWidgetData == null
           ? CustomScrollView(
-              cacheExtent: 2000,
+              // Avoid eagerly building every product section and starting all
+              // WooCommerce requests at once during the first frame.
+              cacheExtent: 400,
               slivers: horizontalLayouts,
               controller: widget.scrollController,
               physics: const BouncingScrollPhysics(),
@@ -336,8 +338,8 @@ class _HomeLayoutState extends State<HomeLayout> with AppBarMixin {
                 value,
                 horizontalLayouts.isEmpty || _useNestedScrollView == false,
                 onRefresh: widget.enableRefresh && _useNestedScrollView == false
-                        ? onRefresh
-                        : null,
+                    ? onRefresh
+                    : null,
               );
         },
       );

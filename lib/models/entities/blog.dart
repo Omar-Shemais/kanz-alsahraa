@@ -4,13 +4,13 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:html_unescape/html_unescape.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 import '../../common/config.dart';
 import '../../common/constants.dart';
 import '../../common/tools.dart';
 import '../../services/index.dart';
+import '../../services/secure_requests.dart';
 import '../serializers/blog.dart';
 
 class Blog {
@@ -303,7 +303,7 @@ class Blog {
         param += '&lang=$lang';
       }
       final response =
-          await http.get('$url/wp-json/wp/v2/posts?$param'.toUri()!);
+          await secureGet('$url/wp-json/wp/v2/posts?$param'.toUri()!);
 
       if (response.statusCode != 200) {
         return [];

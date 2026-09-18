@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common/constants.dart';
+import '../../../common/tools.dart';
 import '../../../generated/l10n.dart';
 import '../../../models/app_model.dart';
 import '../../../models/category/category_model.dart';
@@ -219,8 +220,8 @@ class StateSearchScreen extends State<SearchWidget>
             ? Center(
                 child: GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(
-                    Icons.arrow_back_ios,
+                  child: Icon(
+                    Tools.getBackIcon(context),
                   ),
                 ),
               )

@@ -5,6 +5,7 @@ import '../../../common/config/models/onboarding_config.dart';
 import '../../../common/constants.dart';
 import '../../../common/extensions/string_ext.dart';
 import '../../../models/entities/seo/meta_seo.dart';
+import '../../../services/home_config_validation.dart';
 import 'app_setting.dart';
 import 'background_config.dart';
 
@@ -43,6 +44,7 @@ class AppConfig {
   }) : _privacyPoliciesPageUrlOrId = privacyPoliciesPageUrlOrId;
 
   AppConfig.fromJson(dynamic json) {
+    validateHomeConfig(json);
     if (json['Setting'] != null) {
       settings = AppSetting.fromJson(json['Setting']);
     }

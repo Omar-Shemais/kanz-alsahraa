@@ -76,7 +76,7 @@ class _OrderHistoryDetailScreenState
               onTap: () {
                 Navigator.of(context).pop();
               },
-              child: const Icon(Icons.arrow_back_ios),
+              child: Icon(Tools.getBackIcon(context)),
             ),
             title: Text(S.of(context).trackingPage),
           ),
@@ -113,7 +113,7 @@ class _OrderHistoryDetailScreenState
         appBar: AppBar(
           leading: IconButton(
               icon: Icon(
-                Icons.arrow_back_ios,
+                Tools.getBackIcon(context),
                 size: 20,
                 color: Theme.of(context).colorScheme.secondary,
               ),
@@ -368,12 +368,6 @@ class _OrderHistoryDetailScreenState
                     ),
                   ),
                 ...order.bacsInfo.map((e) => BankAccountInfo(bankInfo: e)),
-                const SizedBox(height: 15),
-
-                /// Thai PromptPay
-                /// false: hide show Thank you message - https://tppr.me/xrNh1
-                Services()
-                    .thaiPromptPayBuilder(showThankMsg: false, order: order),
                 const SizedBox(height: 15),
               ],
 

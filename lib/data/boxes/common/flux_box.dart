@@ -27,7 +27,7 @@ abstract class FluxBox {
       var key = SecureStorage().get(encryptionKeyName);
       if (key.isEmpty) {
         final hiveGeneratedKey = base64UrlEncode(Hive.generateSecureKey());
-        SecureStorage().set(encryptionKeyName, hiveGeneratedKey);
+        await SecureStorage().set(encryptionKeyName, hiveGeneratedKey);
         key = hiveGeneratedKey;
       }
       final encryptionKey = base64Url.decode(key);
@@ -37,12 +37,8 @@ abstract class FluxBox {
           encryptionCipher: HiveAesCipher(encryptionKey),
         );
       } catch (_) {
-        printLog('[FluxBox] Failed to open encrypted box $boxKey. Deleting...');
-        await Hive.deleteBoxFromDisk(boxKey);
-        _box = await Hive.openBox(
-          boxKey,
-          encryptionCipher: HiveAesCipher(encryptionKey),
-        );
+        // A transient I/O error must not erase user data.
+        rethrow;
       }
     } else {
       _box = await Hive.openBox(boxKey);

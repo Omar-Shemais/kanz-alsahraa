@@ -13,7 +13,7 @@ import '../../modules/dynamic_layout/config/product_config.dart';
 import '../../modules/dynamic_layout/helper/helper.dart';
 import '../../routes/flux_navigate.dart';
 import '../../services/index.dart';
-import '../common/no_internet_connection.dart';
+import '../common/catalog_load_error.dart';
 import '../web_layout/web_layout.dart';
 import '../web_layout/widgets/path_header_widget.dart';
 
@@ -129,10 +129,8 @@ class _ProductListWebState extends State<ProductListWeb> {
     final productsList =
         hasNoProduct && widget.isFetching ? emptyList : widget.products;
 
-    if (hasNoProduct &&
-        widget.errMsg != null &&
-        widget.errMsg!.isNoInternetError) {
-      return NoInternetConnection(onRefresh: _onRefresh);
+    if (widget.errMsg != null && !widget.isFetching) {
+      return CatalogLoadError(onRetry: _onRefresh);
     }
 
     Widget typeList = const SizedBox();

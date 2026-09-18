@@ -279,8 +279,9 @@ class _StateBannerSlider extends State<BannerSlider> {
       }
     }
 
-    return BackgroundColorWidget(
-      enable: widget.config.enableBackground,
+    return RepaintBoundary(
+      child: BackgroundColorWidget(
+        enable: widget.config.enableBackground,
       child: LayoutBuilder(
         builder: (context, constraint) {
           var bannerPercentWidth = widget.config.overrideBannerPercentWidth ??
@@ -369,8 +370,9 @@ class _StateBannerSlider extends State<BannerSlider> {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _LinePaginationBuilder extends SwiperPlugin {

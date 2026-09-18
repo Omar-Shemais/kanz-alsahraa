@@ -1,5 +1,8 @@
 <resources>
     <string name="default_notification_channel_id">high_importance_channel</string>
+    <string name="facebook_app_id">430258564493822</string>
+    <string name="fb_login_protocol_scheme">fb430258564493822</string>
+    <string name="facebook_client_token">430258564493822</string>
 
     <!-- Set default color for all OneSignal notification's accent color -->
     <!-- Color format is in ARGB. -->

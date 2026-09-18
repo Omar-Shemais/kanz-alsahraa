@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../generated/l10n.dart';
 import '../../models/entities/branch.dart';
 import '../../models/index.dart';
@@ -109,8 +110,8 @@ class _BranchesScreenState extends BaseScreen<BranchesScreen> with AppBarMixin {
                 onTap: () {
                   Navigator.pop(context);
                 },
-                child: const Icon(
-                  Icons.arrow_back_ios,
+                child: Icon(
+                  Tools.getBackIcon(context),
                   color: Colors.white,
                 ),
               ),

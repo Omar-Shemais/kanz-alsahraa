@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "T5T28K7SSZ.com.khtwah.kanzalsahra",
+        "paths": [
+          "/product/*",
+          "/product-category/*",
+          "/product-tag/*",
+          "/app-notification"
+        ]
+      }
+    ]
+  }
+}

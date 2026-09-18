@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../common/constants.dart';
 import '../../generated/l10n.dart';
+import '../../services/secure_requests.dart';
 import '../../services/service_config.dart';
 import '../app_model.dart';
 import '../cart/cart_base.dart';
@@ -22,7 +23,7 @@ class Coupons {
       final endpoint = '${ServerConfig().url}/wp-json/api/flutter_woo/coupon';
       var params = Order().toJson(cartModel, cartModel.user?.id, false);
       params['coupon_code'] = couponCode;
-      final response = await httpPost(endpoint.toUri()!,
+      final response = await securePost(endpoint.toUri()!,
           body: json.encode(params),
           headers: {
             'Content-Type': 'application/json',

@@ -20,6 +20,8 @@ class FirebaseServices extends BaseFirebaseServices {
   FirebaseServices._internal();
 
   bool _isEnabled = false;
+  User? _notificationUser;
+  StreamSubscription<String>? _tokenRefreshSubscription;
 
   @override
   bool get isEnabled => _isEnabled;
@@ -131,9 +133,53 @@ class FirebaseServices extends BaseFirebaseServices {
   }
 
   @override
+  Future<void> syncPublicNotificationDevice({User? user}) async {
+    _notificationUser = user;
+    if (user == null) {
+      await _tokenRefreshSubscription?.cancel();
+      _tokenRefreshSubscription = null;
+      return;
+    }
+    if (user.id == null ||
+        user.cookie?.isNotEmpty != true ||
+        !GmsCheck().isGmsAvailable) {
+      return;
+    }
+    _tokenRefreshSubscription ??=
+        FirebaseMessaging.instance.onTokenRefresh.listen((token) {
+      final activeUser = _notificationUser;
+      if (activeUser == null) return;
+      unawaited(_registerPublicNotificationToken(activeUser, token));
+    });
+    try {
+      final token = await FirebaseMessaging.instance
+          .getToken()
+          .timeout(const Duration(seconds: 8));
+      if (token == null || token.isEmpty) return;
+      await _registerPublicNotificationToken(user, token);
+    } catch (_) {
+      // Do not log device tokens, cookies or raw server response data.
+      printLog(
+          '[Notifications] Device registration unavailable; retry at next sign-in.');
+    }
+  }
+
+  Future<void> _registerPublicNotificationToken(User user, String token) async {
+    if (token.isEmpty || user.cookie?.isNotEmpty != true) return;
+    try {
+      final registration =
+          Services().api.updateUserInfo({'deviceToken': token}, user.cookie);
+      if (registration != null) {
+        await registration.timeout(const Duration(seconds: 10));
+      }
+    } catch (_) {
+      printLog('[Notifications] Device registration unavailable.');
+    }
+  }
+
+  @override
   void saveUserToFirestore({User? user}) async {
     final token = await FirebaseServices().messaging?.getToken();
-    printLog('token: $token');
     final docPath = (user?.email?.isNotEmpty ?? false) ? user?.email : user?.id;
     await FirebaseServices().firestore?.collection('users').doc(docPath).set(
       {'deviceToken': token, 'isOnline': true},

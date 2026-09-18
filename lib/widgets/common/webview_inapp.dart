@@ -4,13 +4,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:inspireui/widgets/platform_error/platform_error.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../common/config.dart';
 import '../../common/constants.dart';
-import '../../common/extensions/extensions.dart';
+import '../../common/tools.dart';
 import '../../models/entities/cookie_data.dart';
+import '../../services/native_browser_session.dart';
+import '../../services/web_navigation_policy.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -58,6 +59,58 @@ class _WebViewInAppState extends State<WebViewInApp> {
   int selectedIndex = 1;
 
   InAppWebViewController? webViewController;
+  bool _sessionError = false;
+  final _sessionGeneration = browserSession.generation;
+
+  Future<void> _clearSession() async {
+    if (mounted && _sessionGeneration != browserSession.generation) {
+      setState(() => _sessionError = true);
+    }
+    final controller = webViewController;
+    if (controller == null) return;
+    await controller.stopLoading();
+    await controller.evaluateJavascript(
+        source:
+            'try { localStorage.clear(); sessionStorage.clear(); } catch (_) {}');
+    await controller.loadUrl(
+        urlRequest: URLRequest(url: WebUri('about:blank')));
+    if (mounted && _sessionGeneration != browserSession.generation) {
+      setState(() => _sessionError = true);
+    }
+  }
+
+  Future<void> _openSession() async {
+    try {
+      if (webUrlAction(widget.url) != WebUrlAction.embed ||
+          widget.url == 'about:blank') {
+        throw StateError('Unsafe initial web URL');
+      }
+      await browserSession.ensureReady();
+      if (!mounted) return;
+      if (_sessionGeneration != browserSession.generation) {
+        throw StateError('Account session changed');
+      }
+      await browserSession.open(_sessionGeneration, () async {
+        for (final cookie in widget.cookies ?? <CookieData>[]) {
+          if (cookie.valid) {
+            await CookieManager.instance().setCookie(
+              url: WebUri(widget.url),
+              name: cookie.name,
+              value: cookie.value,
+              isSecure: true,
+            );
+          }
+        }
+        if (!mounted) return;
+        await webViewController?.loadUrl(
+            urlRequest:
+                URLRequest(url: WebUri(widget.url), headers: widget.headers));
+      });
+      if (mounted) setState(() => _sessionError = false);
+    } catch (_) {
+      if (mounted) setState(() => _sessionError = true);
+    }
+  }
 
   InAppWebViewSettings settings = InAppWebViewSettings(
     useShouldOverrideUrlLoading: true,
@@ -73,6 +126,7 @@ class _WebViewInAppState extends State<WebViewInApp> {
       ModalRoute.of(context)?.canPop ?? Navigator.of(context).canPop();
 
   void onTapBackButton() async {
+    if (_sessionGeneration != browserSession.generation) return;
     final value = await webViewController?.canGoBack();
     if (value == true) {
       await webViewController?.goBack();
@@ -83,6 +137,7 @@ class _WebViewInAppState extends State<WebViewInApp> {
   }
 
   void onTapForwardButton() {
+    if (_sessionGeneration != browserSession.generation) return;
     webViewController?.goForward();
   }
 
@@ -96,28 +151,13 @@ class _WebViewInAppState extends State<WebViewInApp> {
 
   @override
   void dispose() {
-    if (kAdvanceConfig.alwaysClearWebViewCache) {
-      InAppWebViewController.clearAllCache();
-    }
+    browserSession.unregister(_clearSession);
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    if (widget.cookies?.isNotEmpty ?? false) {
-      final cookieManager = CookieManager.instance();
-      for (var cookie in widget.cookies!) {
-        if (cookie.valid) {
-          cookieManager.setCookie(
-            url: WebUri(widget.url),
-            name: cookie.name,
-            value: cookie.value,
-            isSecure: true,
-          );
-        }
-      }
-    }
 
     pullToRefreshController = PullToRefreshController(
       settings: PullToRefreshSettings(
@@ -172,35 +212,42 @@ class _WebViewInAppState extends State<WebViewInApp> {
                       const SizedBox(width: 20),
                       if (widget.enableBackward)
                         IconButton(
-                          icon: const Icon(Icons.arrow_back_ios, size: 20),
+                          icon: Icon(Tools.getBackIcon(context), size: 20),
                           onPressed: onTapBackButton,
                         ),
                       if (webViewController?.canGoForward() != null &&
                           widget.enableForward)
                         IconButton(
                           onPressed: onTapForwardButton,
-                          icon: const Icon(Icons.arrow_forward_ios, size: 20),
+                          icon: Icon(Tools.getForwardIcon(context), size: 20),
                         ),
                     ],
                   );
                 }),
               ),
       body: IndexedStack(
-        index: selectedIndex,
+        index: _sessionError ? 2 : selectedIndex,
         children: [
           InAppWebView(
             key: webViewKey,
-            initialUrlRequest: URLRequest(
-              url: WebUri(
-                widget.url.addUrlQuery(kAdvanceConfig.alwaysClearWebViewCache
-                    ? 'dummy=${DateTime.now().millisecondsSinceEpoch}'
-                    : ''),
-              ),
-              headers: widget.headers,
-            ),
+            initialUrlRequest: URLRequest(url: WebUri('about:blank')),
             shouldOverrideUrlLoading: (controller, navigationAction) async {
+              if (_sessionGeneration != browserSession.generation &&
+                  navigationAction.request.url?.toString() != 'about:blank') {
+                return NavigationActionPolicy.CANCEL;
+              }
               final url = navigationAction.request.url.toString();
-              printLog('[WebViewInApp] should OverrideUrlLoading: $url');
+              final action = webUrlAction(url);
+              if (action == WebUrlAction.block) {
+                return NavigationActionPolicy.CANCEL;
+              }
+              if (action == WebUrlAction.external) {
+                try {
+                  await launchUrl(Uri.parse(url),
+                      mode: LaunchMode.externalApplication);
+                } catch (_) {}
+                return NavigationActionPolicy.CANCEL;
+              }
               final result = await widget.overrideNavigation?.call(url);
 
               if (result == true) {
@@ -212,7 +259,8 @@ class _WebViewInAppState extends State<WebViewInApp> {
             initialUserScripts: UnmodifiableListView<UserScript>([
               /// Demo the Javascript Style override
               UserScript(
-                source: widget.script ?? '',
+                source: originBoundWebScript(widget.script ?? '', widget.url),
+                forMainFrameOnly: true,
                 injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
               ),
             ]),
@@ -224,37 +272,32 @@ class _WebViewInAppState extends State<WebViewInApp> {
             pullToRefreshController: pullToRefreshController,
             onWebViewCreated: (controller) {
               webViewController = controller;
-              InAppWebViewController.clearAllCache();
+              browserSession.register(_clearSession);
+              _openSession();
             },
             onPermissionRequest: (controller, request) async {
               return PermissionResponse(
                 resources: request.resources,
-                action: PermissionResponseAction.GRANT,
+                action: PermissionResponseAction.DENY,
               );
             },
             onGeolocationPermissionsShowPrompt:
                 (InAppWebViewController controller, String origin) async {
-              final status = await Permission.locationWhenInUse.status;
-              if (status.isDenied) {
-                // For the first time if user have never asked for permission yet,
-                // this status will return [PermissionStatus.denied].
-                await Permission.location.request();
-              } else if (status.isPermanentlyDenied) {
-                // For the next time if user already denied permission, they
-                // must go to app settings to allow permission manually again.
-                await openAppSettings();
-              }
-
+              // No embedded store or payment origin needs geolocation.
               return GeolocationPermissionShowPromptResponse(
                 origin: origin,
-                allow: status.isGranted,
-                retain: true,
+                allow: false,
+                retain: false,
               );
             },
             onReceivedError: (controller, request, error) {
               pullToRefreshController.endRefreshing();
             },
             onLoadStop: (androidIsReload, uri) {
+              if (uri?.toString() == 'about:blank' ||
+                  _sessionGeneration != browserSession.generation) {
+                return;
+              }
               setState(() {
                 selectedIndex = 0;
               });
@@ -273,8 +316,14 @@ class _WebViewInAppState extends State<WebViewInApp> {
               }
             },
             onDownloadStartRequest: (_, request) async {
-              // ignore: deprecated_member_use
-              await launch(request.url.toString());
+              final value = request.url.toString();
+              if (webUrlAction(value) == WebUrlAction.embed &&
+                  value != 'about:blank') {
+                try {
+                  await launchUrl(Uri.parse(value),
+                      mode: LaunchMode.externalApplication);
+                } catch (_) {}
+              }
             },
           ),
           if (widget.showLoading)
@@ -283,16 +332,27 @@ class _WebViewInAppState extends State<WebViewInApp> {
             )
           else
             const SizedBox(),
+          Center(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('تعذر فتح الصفحة بأمان. أغلقها وافتحها مجددًا.'),
+            TextButton(
+                onPressed: _openSession, child: const Text('إعادة المحاولة')),
+          ])),
         ],
       ),
     );
   }
 
   Future<void> _onUrlChange(WebUri? uri) async {
+    if (uri == null ||
+        uri.toString() == 'about:blank' ||
+        _sessionGeneration != browserSession.generation) {
+      return;
+    }
     if (widget.onUrlChanged != null) {
       final html = await webViewController?.getHtml();
-      WidgetsBinding.instance.addPostFrameCallback((_) =>
-          widget.onUrlChanged!(uri?.toString(), html, webViewController));
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => widget.onUrlChanged!(uri.toString(), html, webViewController));
     }
   }
 }

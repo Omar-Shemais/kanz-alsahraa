@@ -13,6 +13,8 @@ plugins {
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id "com.google.gms.google-services"
+    id "com.google.firebase.crashlytics"
+    id "com.google.firebase.firebase-perf"
 }
 
 def localProperties = new Properties()
@@ -150,10 +152,13 @@ android {
 
     signingConfigs {
         release {
-            keyAlias envProperties.getProperty('keyAlias', '')
-            keyPassword envProperties.getProperty('keyPassword', '')
-            storeFile rootProject.file('../configs/' + envProperties.getProperty('storeFile', ''))
-            storePassword envProperties.getProperty('storePassword', '')
+            keyAlias System.getenv('KANZ_KEY_ALIAS')
+            keyPassword System.getenv('KANZ_KEY_PASSWORD')
+            def externalKeystore = System.getenv('KANZ_KEYSTORE_PATH')
+            if (externalKeystore) {
+                storeFile file(externalKeystore)
+            }
+            storePassword System.getenv('KANZ_STORE_PASSWORD')
         }
     }
 
@@ -165,11 +170,10 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so flutter run --release works.
+            // Production signing is supplied externally; never use it for QA.
             signingConfig signingConfigs.release
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro'
 
@@ -177,12 +181,29 @@ android {
         }
 
         debug {
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
         }
     }
     
     buildFeatures {
         buildConfig true
+    }
+}
+
+// Gate every Android release variant before compiling/signing artifacts.
+def releaseSecurityGate = tasks.register('verifyKanzReleaseSecurity', Exec) {
+    workingDir rootProject.projectDir.parentFile
+    def flutterSdk = localProperties.getProperty('flutter.sdk')
+    if (!flutterSdk) {
+        throw new GradleException('Flutter SDK is required for the release security gate.')
+    }
+    def dartExecutable = System.getProperty('os.name').toLowerCase().contains('windows') ? 'dart.exe' : 'dart'
+    commandLine new File(flutterSdk, 'bin/cache/dart-sdk/bin/' + dartExecutable).absolutePath,
+            'tools/release_security.dart'
+}
+tasks.configureEach { task ->
+    if (task.name.startsWith('pre') && task.name.endsWith('ReleaseBuild')) {
+        task.dependsOn releaseSecurityGate
     }
 }
 

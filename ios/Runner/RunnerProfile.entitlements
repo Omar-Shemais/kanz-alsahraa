@@ -11,7 +11,6 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:${websiteDomain}</string>
-		<string>applinks:${firebaseDynamicUrl}</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>

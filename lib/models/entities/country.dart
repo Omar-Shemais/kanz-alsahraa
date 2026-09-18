@@ -12,11 +12,19 @@ class Country {
 
   Country({this.id, this.name, this.states});
 
-  Country.fromConfig(this.id, this.name, this.icon, List states) {
+  Country.fromShippingConfig(Map config)
+      : this.fromConfig(
+          config['iosCode'] ?? config['code'],
+          config['name'],
+          config['icon'],
+          config['states'] is List ? config['states'] : [],
+        );
+
+  Country.fromConfig(this.id, this.name, this.icon, List configuredStates) {
     code = id;
     name = name ?? CountryPickerUtils.getCountryByIsoCode(id!).name;
-    for (var item in states) {
-      states.add(CountryState.fromConfig(item));
+    for (var item in configuredStates) {
+      states!.add(CountryState.fromConfig(item));
     }
   }
 

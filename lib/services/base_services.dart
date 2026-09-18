@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-import 'package:http_auth/http_auth.dart';
 
 import '../common/config.dart';
 import '../common/constants.dart';
@@ -25,6 +23,7 @@ import 'elastic/elastic_query.dart';
 import 'elastic/elastic_service.dart';
 import 'outside/index.dart';
 import 'review_service.dart';
+import 'secure_requests.dart';
 import 'service_config.dart';
 import 'wordpress/blognews_api.dart';
 
@@ -535,7 +534,7 @@ abstract class BaseServices {
           'input=$term&key=${isIos ? kGoogleApiKey.ios : kGoogleApiKey.android}'
           '&sessiontoken=$sessionToken';
 
-      var response = await httpGet(endpoint.toUri()!);
+      var response = await secureGet(endpoint.toUri()!);
       var result = convert.jsonDecode(response.body);
       if (result['error_message'] != null) {
         throw result['error_message'];
@@ -559,7 +558,7 @@ abstract class BaseServices {
           '&fields=geometry&key=${isIos ? kGoogleApiKey.ios : kGoogleApiKey.android}'
           '&sessiontoken=$sessionToken';
 
-      var response = await httpGet(endpoint.toUri()!);
+      var response = await secureGet(endpoint.toUri()!);
       var result = convert.jsonDecode(response.body);
       var lat = result['result']['geometry']['location']['lat'].toString();
       var long = result['result']['geometry']['location']['lng'].toString();
@@ -640,7 +639,7 @@ abstract class BaseServices {
       final param =
           '_embed&page=${cursor ?? 1}${kAdvanceConfig.alwaysRefreshBlog ? '&dummy=${DateTime.now().millisecondsSinceEpoch}' : ''}&lang=$languageCode';
       final response =
-          await http.get('${blogApi.url}/wp-json/wp/v2/posts?$param'.toUri()!);
+          await secureGet('${blogApi.url}/wp-json/wp/v2/posts?$param'.toUri()!);
       if (response.statusCode != 200) {
         return const PagingResponse();
       }
@@ -650,53 +649,6 @@ abstract class BaseServices {
       );
     } on Exception catch (_) {
       return const PagingResponse();
-    }
-  }
-
-  /// RAZORPAY PAYMENT
-  Future<String?> createRazorpayOrder(params) async {
-    try {
-      var client = BasicAuthClient(
-          kRazorpayConfig['keyId'], kRazorpayConfig['keySecret']);
-      final response = await client
-          .post('https://api.razorpay.com/v1/orders'.toUri()!, body: params);
-      final responseJson = jsonDecode(response.body);
-      if (responseJson != null && responseJson['id'] != null) {
-        return responseJson['id'];
-      } else if (responseJson['message'] != null) {
-        throw responseJson['message'];
-      } else if (responseJson['error'] != null &&
-          responseJson['error']['description'] != null) {
-        throw responseJson['error']['description'];
-      } else {
-        throw "Can't create order for Razorpay";
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> updateOrderIdForRazorpay(paymentId, orderId) async {
-    try {
-      final token = base64.encode(latin1.encode(
-          '${kRazorpayConfig['keyId']}:${kRazorpayConfig['keySecret']}'));
-
-      var body = {};
-      if (ServerConfig().isWooType) {
-        body = {
-          'notes': {'woocommerce_order_id': orderId}
-        };
-      }
-
-      await http.patch(
-          'https://api.razorpay.com/v1/payments/$paymentId'.toUri()!,
-          headers: {
-            'Authorization': 'Basic ${token.trim()}',
-            'Content-Type': 'application/json'
-          },
-          body: json.encode(body));
-    } catch (e) {
-      return;
     }
   }
 
@@ -800,7 +752,7 @@ abstract class BaseServices {
   }
 
   Future<Blog> getBlogById(dynamic id) async {
-    final response = await http.get(
+    final response = await secureGet(
         '${blogApi.url}/wp-json/wp/v2/posts/$id?_embed${kAdvanceConfig.alwaysRefreshBlog ? '&dummy=${DateTime.now().millisecondsSinceEpoch}' : ''}'
             .toUri()!);
     var body = jsonDecode(response.body);
@@ -877,7 +829,7 @@ abstract class BaseServices {
         'post_id': blogId.toString(),
         'token': token,
       };
-      final dataResponse = await http.post(
+      final dataResponse = await securePost(
           '${blogApi.url}/wp-json/api/flutter_blog/blog/comment'.toUri()!,
           body: data);
       final body = jsonDecode(dataResponse.body);
@@ -966,7 +918,7 @@ abstract class BaseServices {
       }
       printLog(endpoint);
 
-      final response = await httpGet(
+      final response = await secureGet(
         endpoint.toUri()!,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -994,7 +946,7 @@ abstract class BaseServices {
       required String paymentMethodId}) async {
     try {
       final urlReq = '${kStripeConfig["serverEndpoint"]}/payment-intent';
-      final result = await http.post(
+      final result = await securePost(
         urlReq.toUri()!,
         body: jsonEncode(
           {
@@ -1039,7 +991,7 @@ abstract class BaseServices {
       final version = kStripeConfig['stripeApiVersion'] ?? 3;
       final urlReq =
           '${kStripeConfig["serverEndpoint"]}/payment-intent-v$version';
-      final result = await http.post(
+      final result = await securePost(
         urlReq.toUri()!,
         body: jsonEncode(
           {
@@ -1088,7 +1040,7 @@ abstract class BaseServices {
   Future<StripePaymentIntent?> getPaymentIntentStripeV3(String id) async {
     try {
       final urlReq = '${kStripeConfig["serverEndpoint"]}/payment-intent/$id';
-      final result = await httpGet(urlReq.toUri()!);
+      final result = await secureGet(urlReq.toUri()!);
 
       var response = json.decode(result.body);
       if (result.statusCode == 200) {

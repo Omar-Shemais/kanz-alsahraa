@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../generated/l10n.dart';
-import '../../models/index.dart' show AppModel;
+import '../../models/index.dart' show AppModel, CategoryModel;
 import '../../services/index.dart';
 import '../../widgets/cardlist/index.dart';
+import '../../widgets/common/catalog_load_error.dart';
 import '../common/app_bar_mixin.dart';
 import 'layouts/card.dart';
 import 'layouts/column.dart';
@@ -46,11 +50,28 @@ class CategoriesScreenState extends State<CategoriesScreen>
   bool get wantKeepAlive => true;
 
   final ScrollController _scrollController = ScrollController();
+  StreamSubscription? _subLoadedAppConfig;
 
   @override
   void initState() {
     super.initState();
     screenScrollController = _scrollController;
+    _subLoadedAppConfig = eventBus.on<EventLoadedAppConfig>().listen((event) {
+      if (!mounted) return;
+      final appModel = Provider.of<AppModel>(context, listen: false);
+      final categoryModel = Provider.of<CategoryModel>(context, listen: false);
+      categoryModel.resortCategories(
+        appModel.categories,
+        categoryLayout: appModel.categoryLayout,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _subLoadedAppConfig?.cancel();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,6 +79,24 @@ class CategoriesScreenState extends State<CategoriesScreen>
     super.build(context);
 
     final appModel = Provider.of<AppModel>(context);
+    final categories = context.watch<CategoryModel>();
+    if (categories.loadError != null) {
+      return renderScaffold(
+          routeName: RouteList.category,
+          child: CatalogLoadError(
+              loading: categories.isLoading,
+              onRetry: () async {
+                if (!categories.isLoading) {
+                  await categories.refresh(autoGetData: false);
+                  await categories.getCategories(
+                    lang: appModel.langCode,
+                    sortingList: appModel.categories,
+                    categoryLayout: appModel.categoryLayout,
+                    remapCategories: appModel.remapCategories,
+                  );
+                }
+              }));
+    }
     final categoryLayout = appModel.categoryLayout;
     return renderScaffold(
       routeName: RouteList.category,
@@ -146,7 +185,7 @@ class HeaderCategory extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Icon(
-                  Icons.arrow_back_ios,
+                  Tools.getBackIcon(context),
                   color:
                       Theme.of(context).colorScheme.secondary.withOpacity(0.6),
                 ),

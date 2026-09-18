@@ -1,0 +1,237 @@
+{
+    "HorizonLayout": [
+        {
+            "layout": "logo",
+            "showMenu": true,
+            "showSearch": true,
+            "showLogo": true,
+            "enableBackground": true
+        },
+        {
+            "layout": "bannerImage",
+            "isSlider": true,
+            "design": "swiper",
+            "height": 0.26,
+            "viewportFraction": 0.65,
+            "padding": 10,
+            "autoPlay": true,
+            "intervalTime": 3,
+            "radius": 25,
+            "items": [
+                {
+                    "category": 124,
+                    "image": "assets/images/gold-bars.png"
+                },
+                {
+                    "category": 127,
+                    "image": "assets/images/gold-bars-with-name.png"
+                },
+                {
+                    "category": 130,
+                    "image": "assets/images/gold-pounds.png"
+                },
+                {
+                    "category": 453,
+                    "image": "assets/images/jewelry.png"
+                },
+                {
+                    "category": 125,
+                    "image": "assets/images/gold-bars-with-name.png"
+                },
+                {
+                    "category": 430,
+                    "image": "assets/images/silver-bars.png"
+                },
+                {
+                    "category": 438,
+                    "image": "assets/images/bracelets.png"
+                }
+            ],
+            "marginBottom": 25,
+            "marginTop": 5
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "Gold Bars",
+            "category": "124",
+            "rows": 1,
+            "productListItemHeight": 350.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "cardDesign": "card",
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "hMargin": 10.0,
+            "vMargin": 15.0,
+            "hPadding": 10.0,
+            "vPadding": 0.0,
+            "enableAutoSliding": true,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "Gold Pounds",
+            "category": "130",
+            "rows": 1,
+            "productListItemHeight": 350.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "cardDesign": "card",
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "hMargin": 10.0,
+            "vMargin": 15.0,
+            "hPadding": 10.0,
+            "vPadding": 0.0,
+            "enableAutoSliding": true,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "Silver Bars",
+            "category": "430",
+            "rows": 1,
+            "productListItemHeight": 350.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "cardDesign": "card",
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "hMargin": 10.0,
+            "vMargin": 15.0,
+            "hPadding": 10.0,
+            "vPadding": 0.0,
+            "enableAutoSliding": true,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "Bracelets",
+            "category": "438",
+            "rows": 1,
+            "productListItemHeight": 350.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "cardDesign": "card",
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "hMargin": 10.0,
+            "vMargin": 0.0,
+            "hPadding": 10.0,
+            "vPadding": 0.0,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        },
+        {
+            "layout": "oneAndHalfColumn",
+            "name": "Jewelry Sets",
+            "category": "453",
+            "rows": 1,
+            "productListItemHeight": 350.0,
+            "imageWidth": 260.0,
+            "height": 0.45,
+            "limit": 12,
+            "showCartButton": true,
+            "cardDesign": "card",
+            "titleLine": 1,
+            "cardDesign": "card",
+            "borderColor": "#B18729",
+            "borderWidth": 1.0,
+            "priceColor": "#B18729",
+            "borderRadius": 15.0,
+            "hMargin": 10.0,
+            "vMargin": 0.0,
+            "hPadding": 10.0,
+            "vPadding": 0.0,
+            "boxShadow": {
+                "blurRadius": 10.0,
+                "colorOpacity": 0.1,
+                "x": 0.0,
+                "y": 4.0
+            }
+        }
+    ],
+    "Setting": {
+        "MainColor": "#B18729",
+        "FontFamily": "Tajawal",
+        "FontHeader": "Tajawal",
+        "ProductListLayout": "list",
+        "StickyHeader": false,
+        "ShowChat": false,
+        "useMaterial3": false
+
+
+    },
+    "TabBar": [
+        {
+            "layout": "home",
+            "icon": "assets/icons/tabs/icon-home.png"
+        },
+
+        {
+            "layout": "category",
+            "categoryLayout": "card",
+            "icon": "assets/icons/tabs/icon-category.png"
+        },
+        {
+            "layout": "cart",
+            "icon": "assets/icons/tabs/icon-cart2.png"
+        },
+        {
+            "layout": "profile",
+            "icon": "assets/icons/tabs/icon-user.png",
+            "showChat": true,
+            "showBackground": true,
+            "styleItem": "listTile",
+            "settingStyle": "normal"
+        }
+    ],
+    "searchSuggestion": [
+
+    ],
+    "PrivacyPoliciesPageUrlOrId": "https://kanzalsahra.com/privacy-policy/"
+
+}

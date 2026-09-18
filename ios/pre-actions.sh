@@ -1,37 +1,14 @@
-# This file is for easier editing.
-# All updates to this file should be update to
-# the script in Runner.xcworkspace > Edit Runner scheme > Build > Pre-actions.
-
-# Enable this below line for debugging.
-#exec > ${PROJECT_DIR}/prebuild.log 2>&1
-
-echo "Copying configs/GoogleService-Info.plist to ios/GoogleService-Info.plist..."
-/bin/cp -Rf ${PROJECT_DIR}/../configs/GoogleService-Info.plist ${PROJECT_DIR}/GoogleService-Info.plist
-
-echo "Copying configs/customized to project..."
-/bin/cp -Rf ${PROJECT_DIR}/../configs/customized/ ${PROJECT_DIR}/../
-
-if [ -e ${PROJECT_DIR}/../configs/env.properties ] && [ -e ${PROJECT_DIR}/../configs/env.props ]
-then
-    echo "================================================================="
-    echo "Warning: env.properties is deprecated, please rename to env.props"
-    echo "================================================================="
+#!/bin/sh
+set -eu
+: "${PROJECT_DIR:?Xcode PROJECT_DIR is required}"
+config_file="$PROJECT_DIR/../configs/GoogleService-Info.plist"
+test -f "$config_file" || { echo 'Missing Firebase iOS configuration.' >&2; exit 1; }
+test -f "$PROJECT_DIR/../configs/env.props" || { echo 'Missing env.props.' >&2; exit 1; }
+/usr/bin/plutil -lint "$config_file" >/dev/null
+if ! /usr/bin/cmp -s "$config_file" "$PROJECT_DIR/GoogleService-Info.plist"; then
+    /bin/cp "$config_file" "$PROJECT_DIR/GoogleService-Info.plist"
 fi
-
-if [ -e ${PROJECT_DIR}/../configs/env.properties ] &&! [ -e ${PROJECT_DIR}/../configs/env.props ]
-then
-    echo "================================================================="
-    echo "⚠️  Warning: env.properties is deprecated and should not be used"
-    echo "🪄️  env.properties has been renamed to env.props automatically"
-    echo "================================================================="
-    /bin/mv -f ${PROJECT_DIR}/../configs/env.properties ${PROJECT_DIR}/../configs/env.props
-fi
-
-if [ -e ${PROJECT_DIR}/../configs/env.props ]
-then
-    echo "Loading configs from configs/env.props..."
-    echo "#include? \"${PROJECT_DIR}/../configs/env.props\"" > ${PROJECT_DIR}/Config.xcconfig
-else
-    echo "Loading configs from configs/env.properties..."
-    echo "#include? \"${PROJECT_DIR}/../configs/env.properties\"" > ${PROJECT_DIR}/Config.xcconfig
+# Config.xcconfig uses a committed relative include. Never overwrite reviewed code.
+if [ -d "$PROJECT_DIR/../configs/customized/assets" ]; then
+    /bin/cp -R "$PROJECT_DIR/../configs/customized/assets/." "$PROJECT_DIR/../assets/"
 fi

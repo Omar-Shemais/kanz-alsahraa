@@ -1,0 +1,48 @@
+# Optional YAML example only. The application uses Codemagic Workflow Editor.
+# First Shorebird build validates locally in CI: no release/patch/store uploads.
+# Initialize shorebird.yaml locally and configure the secret groups before running.
+workflows:
+  kanz-ios-shorebird-validation:
+    name: Kanz iOS Shorebird - dry run
+    instance_type: mac_mini_m2
+    max_build_duration: 120
+    environment:
+      flutter: 3.38.4
+      xcode: latest
+      cocoapods: default
+      groups:
+        - shorebird
+        - kanz_release
+      vars:
+        KANZ_FLUTTER_VERSION: 3.38.4
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.khtwah.kanzalsahra
+    scripts:
+      - name: Install Shorebird from the official source
+        script: |
+          set -eu
+          curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
+          printf '\nPATH=%s/.shorebird/bin:%s\n' "$HOME" "$PATH" >> "$CM_ENV"
+      - name: Check dependencies, source and Shorebird initialization
+        script: |
+          set -eu
+          /bin/sh tools/ios_prebuild.sh
+          dart run tools/shorebird_config_guard.dart
+      - name: Install CocoaPods dependencies
+        script: |
+          set -eu
+          cd ios
+          pod install
+      - name: Apply existing App Store profiles without changing the build number
+        script: |
+          set -eu
+          xcode-project use-profiles --custom-export-options='{"manageAppVersionAndBuildNumber":false}'
+      - name: Build Shorebird iOS without registering or publishing
+        script: /bin/sh tools/shorebird_ios_dry_run.sh
+      - name: Verify signed archive
+        script: /bin/sh tools/ios_archive_verify.sh
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/ios/archive/*.xcarchive
+      - build/ios/archive/*.xcarchive/dSYMs/*.dSYM

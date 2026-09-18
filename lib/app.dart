@@ -17,6 +17,7 @@ import 'common/constants.dart';
 import 'common/events.dart';
 import 'common/theme/index.dart';
 import 'common/tools.dart';
+import 'common/tools/flash.dart';
 import 'generated/l10n.dart';
 import 'generated/languages/index.dart';
 import 'generated/overrides/app_localizations.dart';
@@ -33,6 +34,7 @@ import 'screens/categories/layouts/fancy_scroll.dart';
 import 'screens/categories/layouts/multi_level.dart';
 import 'screens/index.dart' show ListBlogModel;
 import 'services/index.dart';
+import 'widgets/common/app_update_gate.dart';
 import 'widgets/overlay/custom_overlay_state.dart';
 import 'widgets/web_layout/appbar_web_control_delegate.dart';
 
@@ -198,19 +200,8 @@ class AppState extends State<App>
   }
 
   void updateDeviceToken(User? user) {
-    if (GmsCheck().isGmsAvailable) {
-      /// only update for login users
-      if (user!.username != null) {
-        Services().firebase.getMessagingToken().then((token) {
-          try {
-            printLog('[🔽 updateDeviceToken] user cookie ${user.cookie}');
-            Services().api.updateUserInfo({'deviceToken': token}, user.cookie);
-          } catch (err, trace) {
-            printError(err, trace);
-          }
-        });
-      }
-    }
+    // UserModel performs the authenticated registration once. Avoid a second
+    // network call and never place cookies or device tokens in application logs.
     final notificationService = injector<NotificationService>();
     notificationService.setExternalId(user?.id);
   }
@@ -246,7 +237,9 @@ class AppState extends State<App>
   }
 
   void initAds() async {
-    await AppTracking.requestAuthorization();
+    if (isIos) {
+      await AppTracking.requestAuthorization();
+    }
 
     Services().advertisement.initAdvertise(_app!.advertisement);
   }
@@ -271,6 +264,7 @@ class AppState extends State<App>
 
     /// clear cache products  to show correct product price for wholesale
     _product.setProductsList([]);
+    unawaited(Services().firebase.syncPublicNotificationDevice(user: null));
     _user.logout();
     if (isRequiredLogin || Services().widget.isRequiredLogin) {
       NavigateTools.navigateToLogin(
@@ -352,6 +346,19 @@ class AppState extends State<App>
   void onMessage(FStoreNotificationItem notification) {
     printLog(notification.toJson());
     _notificationModel.saveMessage(notification);
+    if (notification.title.isNotEmpty || notification.body.isNotEmpty) {
+      final context = App.fluxStoreNavigatorKey.currentContext;
+      if (context != null && context.mounted) {
+        FlashHelper.message(
+          context,
+          title: notification.title.isNotEmpty ? notification.title : null,
+          message: notification.body,
+          onTap: () async {
+            onMessageOpenedApp(notification);
+          },
+        );
+      }
+    }
   }
 
   @override
@@ -508,7 +515,11 @@ class AppState extends State<App>
                       child: Material(
                         child: Column(
                           children: [
-                            Expanded(child: widget!),
+                            Expanded(
+                                child: AppUpdateGate(
+                              config: appConfig?.jsonData,
+                              child: widget!,
+                            )),
                             if (!ServerConfig().isBuilder)
                               Services().advertisement.getAdWidget(),
                           ],

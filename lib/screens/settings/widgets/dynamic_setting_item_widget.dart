@@ -6,6 +6,7 @@ import '../../../common/config.dart';
 import '../../../common/config/configuration_utils.dart';
 import '../../../common/constants.dart';
 import '../../../common/extensions/translate_ext.dart';
+import '../../../common/tools.dart';
 import '../../../common/tools/biometrics_tools.dart';
 import '../../../generated/l10n.dart';
 import '../../../models/index.dart';
@@ -13,6 +14,7 @@ import '../../../routes/flux_navigate.dart';
 import '../../../services/outside/index.dart';
 import '../../../services/service_config.dart';
 import '../../../widgets/general/index.dart';
+import '../../order_history/views/guest_order_lookup_screen.dart';
 import '../../users/user_point_screen.dart';
 import '../layouts/mixins/setting_action_mixin.dart';
 import '../rate_myapp_mixin.dart';
@@ -194,40 +196,7 @@ class _DynamicSettingItemWidgetState extends State<DynamicSettingItemWidget>
         }
       case 'language':
         {
-          return Selector<AppModel, String?>(
-            selector: (context, model) => model.langCode,
-            builder: (context, langCode, _) {
-              final languages = getLanguages();
-              return SettingItemWidget(
-                cardStyle: _cardStyle,
-                icon: CupertinoIcons.globe,
-                title: S.of(context).language,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      languages.firstWhere(
-                        (element) => langCode == element['code'],
-                        orElse: () => {'text': ''},
-                      )['text'],
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
-                    const SizedBox(width: 16.0),
-                    const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 18,
-                      color: kGrey600,
-                    )
-                  ],
-                ),
-                onTap: () {
-                  Navigator.of(context).pushNamed(RouteList.language);
-                },
-              );
-            },
-          );
+          return const SizedBox();
         }
       case 'currencies':
         {
@@ -291,10 +260,19 @@ class _DynamicSettingItemWidgetState extends State<DynamicSettingItemWidget>
         }
       case 'order':
         {
-          if (widget.user == null ||
-              (ServerConfig().isListingType &&
-                  (ServerConfig().multiVendorType?.isEmpty ?? true))) {
+          if (ServerConfig().isListingType &&
+              (ServerConfig().multiVendorType?.isEmpty ?? true)) {
             return const SizedBox();
+          }
+          if (widget.user == null) {
+            icon = CupertinoIcons.search;
+            title = Tools.isRTL(context) ? 'استعلام عن طلب' : 'Track Order';
+            onTap = () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GuestOrderLookupScreen(),
+                  ),
+                );
+            break;
           }
           icon = CupertinoIcons.time;
           title = S.of(context).orderHistory;

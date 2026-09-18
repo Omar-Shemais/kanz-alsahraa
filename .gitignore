@@ -35,6 +35,8 @@ out/
 **/android/local.properties
 **/android/key.properties
 **/android/app/*.jks
+**/configs/*.jks
+**/*.jsk
 **/android/app/*.keystore
 **/android/app/*.gpg
 **/android/app/google-services.json

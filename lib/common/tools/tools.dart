@@ -248,6 +248,15 @@ class Tools {
         LocalWidgetsLocalizations.isRtlLanguage(languageCode);
   }
 
+  static IconData getBackIcon(BuildContext context) {
+    // Material icons already mirror using Directionality; do not flip twice.
+    return Icons.arrow_back_ios;
+  }
+
+  static IconData getForwardIcon(BuildContext context) {
+    return Icons.arrow_forward_ios;
+  }
+
   static String? convertDateTime(DateTime date) {
     return DateFormat.yMd().add_jm().format(date);
   }

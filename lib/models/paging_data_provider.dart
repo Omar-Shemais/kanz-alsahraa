@@ -37,6 +37,7 @@ abstract class PagingDataProvider<T> extends PagingDataBase<T> {
 
   bool _isLoading = false;
   bool _isDisposed = false;
+  String? loadError;
 
   @override
   Future<void> getData() async {
@@ -52,6 +53,7 @@ abstract class PagingDataProvider<T> extends PagingDataBase<T> {
         return;
       }
       _isLoading = true;
+      loadError = null;
       _updateState();
 
       final apiData = await _dataRepo.getData();
@@ -62,6 +64,8 @@ abstract class PagingDataProvider<T> extends PagingDataBase<T> {
       _updateState();
     } catch (e) {
       _isLoading = false;
+      loadError = 'Unable to load store data';
+      _updateState();
     }
   }
 
@@ -69,6 +73,7 @@ abstract class PagingDataProvider<T> extends PagingDataBase<T> {
   Future<void> refresh({bool autoGetData = true}) async {
     _dataRepo.refresh();
     _data = null;
+    loadError = null;
     _updateState();
     await _dataRepo.cancelCompleter();
     if (autoGetData) {

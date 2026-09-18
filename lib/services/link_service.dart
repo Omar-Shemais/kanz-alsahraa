@@ -6,6 +6,7 @@ import '../models/entities/index.dart';
 import '../routes/flux_navigate.dart';
 import '../screens/index.dart';
 import 'base_services.dart';
+import 'notification_destination.dart';
 import 'service_config.dart';
 import 'services.dart';
 
@@ -47,7 +48,33 @@ class LinkService {
   }
 
   Future<void> handleDynamicLink(Uri uri) async {
-    final context = App.fluxStoreNavigatorKey.currentContext!;
+    if (uri.path == '/app-notification') {
+      if (uri.scheme != 'https' ||
+          uri.host != 'kanzalsahra.com' ||
+          uri.userInfo.isNotEmpty) {
+        return;
+      }
+      final destination = notificationDestination(uri.queryParameters);
+      if (destination == null) return;
+      // A cold-start notification may arrive before the Navigator exists.
+      for (var attempt = 0; attempt < 30; attempt++) {
+        final context = App.fluxStoreNavigatorKey.currentContext;
+        if (context != null && context.mounted) {
+          await NavigateTools.onTapNavigateOptions(
+              config: destination, context: context);
+          return;
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
+      return;
+    }
+    for (var attempt = 0;
+        App.fluxStoreNavigatorKey.currentContext == null && attempt < 100;
+        attempt++) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+    final context = App.fluxStoreNavigatorKey.currentContext;
+    if (context == null || !context.mounted) return;
     LoadingHelper.show();
     Future.delayed(const Duration(milliseconds: 1000), () {
       LoadingHelper.hide();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../generated/l10n.dart';
 import '../../models/app_model.dart';
 import '../../modules/dynamic_layout/helper/helper.dart';

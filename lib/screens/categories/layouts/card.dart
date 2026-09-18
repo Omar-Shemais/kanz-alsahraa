@@ -171,7 +171,7 @@ class _StateCardCategories extends BaseScreen<CardCategories> {
 
         var categories = provider.rootCategories ?? <Category>[];
         if (categories.isEmpty) {
-          categories = provider.categories!;
+          categories = provider.categories ?? <Category>[];
         }
 
         if (categories.isEmpty) {

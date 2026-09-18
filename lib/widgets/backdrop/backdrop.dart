@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/config.dart';
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../modules/dynamic_layout/helper/helper.dart';
 import '../../services/service_config.dart';
 import 'backdrop_constants.dart';
@@ -373,7 +374,7 @@ class _BackdropState extends State<Backdrop>
               ),
               leading: IconButton(
                 icon: Icon(
-                  Icons.arrow_back_ios,
+                  Tools.getBackIcon(context),
                   size: 20,
                   color: labelColor,
                 ),

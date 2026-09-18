@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../generated/l10n.dart';
 import '../../common/tools.dart';
-import '../../models/index.dart' show CartModel, Product;
+import '../../models/index.dart' show Product;
 import '../../modules/dynamic_layout/config/product_config.dart';
 import '../../modules/dynamic_layout/helper/helper.dart';
 import '../../services/outside/index.dart';
@@ -12,19 +10,16 @@ import 'action_button_mixin.dart';
 import 'index.dart'
     show
         CartButton,
-        CartIcon,
         CartQuantity,
         HeartButton,
         ProductImage,
         ProductOnSale,
         ProductPricing,
-        ProductRating,
         ProductTitle,
         SaleProgressBar,
         StockStatus,
         StoreName;
 import 'widgets/availability_badge.dart';
-import 'widgets/cart_button_with_quantity.dart';
 
 class ProductCard extends StatefulWidget {
   final Product item;
@@ -152,7 +147,8 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
       onTap: () =>
           onTapProduct(context, product: widget.item, config: widget.config),
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
+      child: RepaintBoundary(
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         constraints: BoxConstraints(maxWidth: widget.maxWidth ?? width),
         width: widget.width!,
@@ -185,80 +181,83 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
                   color: Theme.of(context).cardColor,
                   borderRadius:
                       BorderRadius.circular(widget.config.borderRadius ?? 3),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Color(0x1A000000),
                       blurRadius: 6.0,
-                      offset: const Offset(0, 2),
+                      offset: Offset(0, 2),
                     ),
                   ],
                 ),
                 child: ClipRRect(
                   borderRadius:
                       BorderRadius.circular(widget.config.borderRadius ?? 3),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Stack(
-                        children: [
-                          Builder(
-                            builder: (context) {
-                              var ratio = widget.config.imageRatio ?? 1.2;
-                              // Match the 1-column logic for dynamically assigned large widths
-                              if ((widget.maxWidth ?? width) > 300 &&
-                                  widget.config.layout != 'pinterest') {
-                                ratio = widget.config.imageRatio ?? 0.8;
-                              }
-                              // Cap ratio for slider layouts to prevent excessive vertical height
-                              if (widget.config.layout == 'oneAndHalfColumn' ||
-                                  widget.config.layout == 'recent_view' ||
-                                  widget.config.layout == 'saleOff') {
-                                ratio = 0.8;
-                              }
-                              var imageHeight = width * ratio;
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Stack(
+                          children: [
+                            Builder(
+                              builder: (context) {
+                                var ratio = widget.config.imageRatio;
+                                // Match the 1-column logic for dynamically assigned large widths
+                                if ((widget.maxWidth ?? width) > 300 &&
+                                    widget.config.layout != 'pinterest') {
+                                  ratio = widget.config.imageRatio;
+                                }
+                                // Cap ratio for slider layouts to prevent excessive vertical height
+                                if (widget.config.layout == 'oneAndHalfColumn' ||
+                                    widget.config.layout == 'recent_view' ||
+                                    widget.config.layout == 'saleOff') {
+                                  ratio = 0.55;
+                                }
+                                var imageHeight = width * ratio;
 
-                              if (widget.config.layout == 'pinterest') {
-                                imageHeight = 200.0;
-                              }
+                                if (widget.config.layout == 'pinterest') {
+                                  imageHeight = 200.0;
+                                }
 
-                              return ConstrainedBox(
-                                constraints:
-                                    BoxConstraints(maxHeight: imageHeight),
-                                child: SizedBox(
-                                  height: imageHeight,
-                                  width: double.infinity,
-                                  child: ProductImage(
-                                    width: width,
-                                    product: widget.item,
-                                    fit: BoxFit.cover,
-                                    config: widget.config,
-                                    ratioProductImage: widget.config.imageRatio,
-                                    offset: widget.offset,
-                                    onTapProduct: () => onTapProduct(context,
-                                        product: widget.item,
-                                        config: widget.config),
+                                return ConstrainedBox(
+                                  constraints:
+                                      BoxConstraints(maxHeight: imageHeight),
+                                  child: SizedBox(
+                                    height: imageHeight,
+                                    width: double.infinity,
+                                    child: ProductImage(
+                                      width: width,
+                                      product: widget.item,
+                                      fit: BoxFit.cover,
+                                      config: widget.config,
+                                      ratioProductImage: ratio,
+                                      offset: widget.offset,
+                                      onTapProduct: () => onTapProduct(context,
+                                          product: widget.item,
+                                          config: widget.config),
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: AvailabilityBadge(product: widget.item),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: (widget.config.hPadding ?? 10.0) + 4.0,
-                          vertical: widget.config.vPadding,
+                                );
+                              },
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: AvailabilityBadge(product: widget.item),
+                            ),
+                          ],
                         ),
-                        child: Center(child: productInfo),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: widget.config.hPadding + 4.0,
+                            vertical: widget.config.vPadding,
+                          ),
+                          child: Center(child: productInfo),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -292,6 +291,7 @@ class _ProductCardState extends State<ProductCard> with ActionButtonMixin {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

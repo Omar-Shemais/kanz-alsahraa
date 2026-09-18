@@ -1,32 +1,13 @@
 {
   "project_info": {
-    "project_number": "262931417800",
-    "project_id": "kanzalsahra-7e458",
-    "storage_bucket": "kanzalsahra-7e458.appspot.com"
+    "project_number": "132198990660",
+    "project_id": "kanz-alsahra",
+    "storage_bucket": "kanz-alsahra.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:262931417800:android:8fd8d103ca7c619b41f3fd",
-        "android_client_info": {
-          "package_name": "com.kanzalsahra.store"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyC2zmtmvE0MaHArLPfbeDP6vIL2viDGbhQ"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:262931417800:android:d3e7df6310853cf941f3fd",
+        "mobilesdk_app_id": "1:132198990660:android:d316777923e145d4668d11",
         "android_client_info": {
           "package_name": "com.khtwah.kanzalsahra"
         }
@@ -34,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC2zmtmvE0MaHArLPfbeDP6vIL2viDGbhQ"
+          "current_key": "AIzaSyAwwm5iNvqbU6fYFQv-bJpG9gsAhYZFatM"
         }
       ],
       "services": {

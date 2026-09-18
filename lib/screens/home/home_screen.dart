@@ -88,6 +88,10 @@ class _HomeScreenState extends BaseScreen<HomeScreen> {
                 configs: appConfig.jsonData,
                 key: Key('$langCode$countryCode'),
                 scrollController: widget.scrollController,
+                // The old pull-to-refresh rebuilt the complete remote layout,
+                // reset the scroll position and made product taps unreliable.
+                // Remote configuration is refreshed safely on app launch.
+                enableRefresh: false,
               ),
               SmartEngagementBanner(
                 context: App.fluxStoreNavigatorKey.currentContext!,

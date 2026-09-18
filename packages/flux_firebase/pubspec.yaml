@@ -19,7 +19,6 @@ dependencies:
   firebase_analytics: any
   firebase_auth: any
   firebase_remote_config: any
-  firebase_dynamic_links: any
   cloud_firestore: any
   firebase_remote_config_web: any
 
@@ -44,5 +43,4 @@ dependency_overrides:
   vector_math: 2.2.0
   path: 1.9.1
   timeago: 3.7.0
-
 

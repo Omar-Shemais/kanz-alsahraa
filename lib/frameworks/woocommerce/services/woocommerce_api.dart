@@ -1,17 +1,17 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
-import 'dart:io' show HttpClient, HttpHeaders, X509Certificate;
+import 'dart:io' show HttpHeaders;
 import 'dart:math';
 
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:http/http.dart' as http;
-import 'package:http/io_client.dart';
 
 import '../../../common/config.dart';
 import '../../../common/constants.dart';
 import '../../../common/extensions/uri_ext.dart';
 import '../../../services/https.dart';
+import '../../../services/secure_http_client.dart';
 import 'branch_ext.dart';
 
 class QueryString {
@@ -147,7 +147,7 @@ class WooCommerceAPI {
   }
 
   Future<http.StreamedResponse> getStream(String endPoint) async {
-    var client = http.Client();
+    var client = SecureHttpClient();
     var request = http.Request('GET', Uri.parse(url!).addProxy());
     return client.send(request);
   }
@@ -170,7 +170,7 @@ class WooCommerceAPI {
       // }
       return json.decode(response.body);
     } catch (e) {
-      printError(e);
+      rethrow;
     }
   }
 
@@ -178,47 +178,35 @@ class WooCommerceAPI {
       {int version = 2}) async {
     final url = _getOAuthURL('POST', endPoint, version)!;
 
-    printLog(
-        '[wocommerce_api][${DateTime.now().toString().split(' ').last}] postAsync START [endPoint:$endPoint] url:$url');
-
-    var client;
-    if (debugNetworkProxy) {
-      var proxy = isAndroid ? '192.168.1.10:8888' : 'localhost:9090';
-      var httpClient = HttpClient();
-      httpClient.findProxy = (uri) => 'PROXY $proxy;';
-      httpClient.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => isAndroid;
-      client = IOClient(httpClient);
-    } else {
-      client = http.Client();
-    }
+    final client = SecureHttpClient();
 
     var request = http.Request('POST', url.addProxy());
     request.headers[HttpHeaders.contentTypeHeader] =
         'application/json; charset=utf-8';
     request.headers[HttpHeaders.cacheControlHeader] = 'no-cache';
     request.body = json.encode(data);
-    var response =
-        await client.send(request).then((res) => res.stream.bytesToString());
-    var dataResponse = await json.decode(response);
-
-    printLog(
-        '[wocommerce_api][${DateTime.now().toString().split(' ').last}] postAsync END [endPoint:$endPoint]');
-    return dataResponse;
+    try {
+      final response = await client.send(request);
+      return json.decode(await response.stream.bytesToString());
+    } finally {
+      client.close();
+    }
   }
 
   Future<dynamic> putAsync(String endPoint, Map data, {int version = 3}) async {
     var url = _getOAuthURL('PUT', endPoint, version)!;
 
-    var client = http.Client();
+    var client = SecureHttpClient();
     var request = http.Request('PUT', url.addProxy());
     request.headers[HttpHeaders.contentTypeHeader] =
         'application/json; charset=utf-8';
     request.headers[HttpHeaders.cacheControlHeader] = 'no-cache';
     request.body = json.encode(data);
-    var response =
-        await client.send(request).then((res) => res.stream.bytesToString());
-    var dataResponse = await json.decode(response);
-    return dataResponse;
+    try {
+      final response = await client.send(request);
+      return json.decode(await response.stream.bytesToString());
+    } finally {
+      client.close();
+    }
   }
 }

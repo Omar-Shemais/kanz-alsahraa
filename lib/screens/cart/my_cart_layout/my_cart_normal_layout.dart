@@ -250,6 +250,39 @@ class _MyCartNormalLayoutState extends State<MyCartNormalLayout>
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
+                                    if (totalCartQuantity > 0 &&
+                                        cartModel.hasBullionOrRestrictedItems)
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 16.0, vertical: 8.0),
+                                        padding: const EdgeInsets.all(12.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.shade50,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                              color: Colors.amber.shade400),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.info_outline,
+                                                color: Colors.amber.shade900),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(
+                                                Tools.isRTL(context)
+                                                    ? 'تحتوي السلة على سبائك ذهبية، وتقتصر طريقة الدفع المعتمدة لها على التحويل البنكي المباشر فقط.'
+                                                    : 'Your cart contains gold bullion items, which require direct bank transfer payment.',
+                                                style: TextStyle(
+                                                  color: Colors.amber.shade900,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     const SizedBox(height: 16.0),
                                     if (totalCartQuantity > 0)
                                       Column(

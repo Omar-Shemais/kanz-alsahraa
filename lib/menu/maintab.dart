@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_lazy_indexed_stack/flutter_lazy_indexed_stack.dart';
 import 'package:inspireui/inspireui.dart';
@@ -71,6 +72,7 @@ class MainTabsState extends CustomOverlayState<MainTabs>
   var isInitialized = false;
 
   final List<Widget> _tabView = [];
+  List<String> _currentTabRoutes = [];
   Map saveIndexTab = {};
   Map<String, String?> childTabName = {};
   int currentTabIndex = 0;
@@ -143,7 +145,7 @@ class MainTabsState extends CustomOverlayState<MainTabs>
     // App rating
     showRatingOnOpen();
 
-    if (!kIsWeb && Services().firebase.isEnabled) {
+    if (!kIsWeb && dynamicLinkConfig.enable) {
       Future.delayed(Duration.zero, () {
         if (mounted) {
           Services().dynamicLinkService.initialize();
@@ -175,11 +177,8 @@ class MainTabsState extends CustomOverlayState<MainTabs>
     });
 
     // Attempt to apply new config after refresh or change language
-    _subLoadedAppConfig =
-        eventBus.on<EventLoadedAppConfig>().listen((event) async {
-      try {
-        await Provider.of<AppModel>(context, listen: false).applyAppCaching();
-      } catch (_) {}
+    _subLoadedAppConfig = eventBus.on<EventLoadedAppConfig>().listen((event) {
+      if (!mounted) return;
       _initTabData(context);
     });
   }
@@ -462,13 +461,24 @@ extension TabBarMenuExtention on MainTabsState {
   /// 🚀 init the tabView data and tabController
   void _initTabData(context) async {
     var appModel = Provider.of<AppModel>(context, listen: false);
-
-    /// Fix the empty loading appConfig on Web
-    // if (appModel.appConfig == null && kIsWeb) {
-    //   await appModel.loadAppConfig();
-    // }
+    if (appModel.appConfig == null) return;
 
     var tabData = appModel.appConfig!.tabBar;
+    final newLayouts = tabData.map((e) => e.layout).toList();
+
+    // If tabs haven't changed, do NOT re-create navigators, tabView, or tabController!
+    // Recreating them resets the scroll position to 0, breaks clicks, and causes scroll jumping.
+    if (isInitialized &&
+        _tabView.isNotEmpty &&
+        listEquals(_currentTabRoutes, newLayouts)) {
+      if (mounted) {
+        // ignore: invalid_use_of_protected_member
+        setState(() {});
+      }
+      return;
+    }
+    _currentTabRoutes = List.from(newLayouts);
+
     var enableOnTop =
         appModel.appConfig?.settings.tabBarConfig.enableOnTop ?? false;
 
@@ -480,15 +490,15 @@ extension TabBarMenuExtention on MainTabsState {
     for (var i = 0; i < tabData.length; i++) {
       var dataOfTab = tabData[i];
       final initialRoute = dataOfTab.layout;
-      navigators[i] = GlobalKey<NavigatorState>();
-      listPrimaryScrollController[i] = null;
+      navigators.putIfAbsent(i, () => GlobalKey<NavigatorState>());
+      listPrimaryScrollController.putIfAbsent(i, () => null);
 
       if (dataOfTab.isFullscreen == false) {
         saveIndexTab[dataOfTab.layout] = i;
       }
 
       if (kTabSupportScrollToTop.contains(initialRoute)) {
-        listPrimaryScrollController[i] = ScrollController();
+        listPrimaryScrollController[i] ??= ScrollController();
 
         dataOfTab = dataOfTab.copyWith(
             scrollController: listPrimaryScrollController[i]);
@@ -540,6 +550,11 @@ extension TabBarMenuExtention on MainTabsState {
     if (tabView.isNotEmpty) {
       _tabView.clear();
       _tabView.addAll(tabView);
+    }
+
+    if (isInitialized) {
+      tabController.removeListener(_tabListener);
+      tabController.dispose();
     }
 
     // ignore: invalid_use_of_protected_member

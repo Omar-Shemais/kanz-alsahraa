@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@page {
+  size: A4;
+  margin: 20mm;
+  @bottom-center {
+    content: 'صفحة ' counter(page);
+    font-family: sans-serif;
+  }
+}
+body { font-family: sans-serif; }
+.break { page-break-after: always; }
+</style>
+</head>
+<body>
+  <h1>الصفحة الأولى</h1>
+  <div class='break'></div>
+  <h1>الصفحة الثانية</h1>
+</body>
+</html>

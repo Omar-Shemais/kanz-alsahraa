@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 // ignore: depend_on_referenced_packages
@@ -20,43 +19,30 @@ import '../../common/constants.dart';
 import '../../common/tools.dart' hide ImagePicker;
 import '../../generated/l10n.dart';
 import '../../screens/common/app_bar_mixin.dart';
+import '../../services/native_browser_session.dart';
+import '../../services/web_navigation_policy.dart';
 import '../html/index.dart';
 import 'webview_inapp.dart';
 
 mixin WebviewMixin {
   /// Return true when overridden and the navigation in webview should stop.
   Future<bool> overrideWebNavigation(String url) async {
-    /// open the normal web link
-    var isHttp = 'http';
-    if (url.startsWith(isHttp)) {
-      return false;
+    final action = webUrlAction(url);
+    if (action == WebUrlAction.embed) return false;
+    if (action == WebUrlAction.external) {
+      try {
+        await Tools.launchURL(url,
+            mode: LaunchMode.externalNonBrowserApplication);
+      } catch (_) {
+        // A missing external app must not turn into embedded navigation.
+      }
     }
-
-    if (url.startsWith('intent://') && url.contains('scheme=')) {
-      final intentInfo = url.substring(url.indexOf('scheme='));
-      final scheme = intentInfo.substring(
-          intentInfo.indexOf('scheme=') + 7, intentInfo.indexOf(';'));
-      final newUrl = url.replaceFirst('intent://', '$scheme://');
-      await Tools.launchURL(
-        newUrl,
-        mode: LaunchMode.externalNonBrowserApplication,
-      );
-      return true;
-    }
-
-    /// open external app link
-    await Tools.launchURL(
-      url,
-      mode: LaunchMode.externalNonBrowserApplication,
-    );
-
     return true;
   }
 
   Future<NavigationDecision> getNavigationDelegate(
       NavigationRequest request) async {
     final url = request.url;
-    printLog('[WebView] getNavigationDelegate: $url');
     final overridden = await overrideWebNavigation(url);
 
     if (overridden) {
@@ -129,6 +115,43 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
   }
 
   late final WebViewController _controller;
+  bool _sessionError = false;
+  final _sessionGeneration = browserSession.generation;
+
+  Future<void> _clearSession() async {
+    if (mounted && _sessionGeneration != browserSession.generation) {
+      setState(() => _sessionError = true);
+    }
+    await _controller.runJavaScript(
+        'try { localStorage.clear(); sessionStorage.clear(); } catch (_) {}');
+    await _controller.clearLocalStorage();
+    await _controller.clearCache();
+    await _controller.loadRequest(Uri.parse('about:blank'));
+    if (mounted && _sessionGeneration != browserSession.generation) {
+      setState(() => _sessionError = true);
+    }
+  }
+
+  Future<void> _openSession() async {
+    try {
+      if (webUrlAction(url) != WebUrlAction.embed || url == 'about:blank') {
+        throw StateError('Unsafe initial web URL');
+      }
+      await browserSession.ensureReady();
+      if (!mounted) return;
+      if (_sessionGeneration != browserSession.generation) {
+        throw StateError('Account session changed');
+      }
+      await browserSession.open(
+          _sessionGeneration,
+          () => _controller.loadRequest(Uri.parse(url),
+              headers: widget.headers ?? {}));
+      if (mounted) setState(() => _sessionError = false);
+    } catch (_) {
+      if (mounted) setState(() => _sessionError = true);
+    }
+  }
+
   late final PlatformWebViewControllerCreationParams params;
 
   final Set<foundation.Factory<OneSequenceGestureRecognizer>>
@@ -137,15 +160,19 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
   };
 
   void onFinishLoading() {
+    if (!mounted || _sessionGeneration != browserSession.generation) return;
     setState(() {
       selectedIndex = 0;
     });
-    _controller.runJavaScript(widget.script.isEmptyOrNull
-        ? kAdvanceConfig.webViewScript
-        : widget.script);
+    _controller.runJavaScript(originBoundWebScript(
+        widget.script.isEmptyOrNull
+            ? kAdvanceConfig.webViewScript
+            : widget.script,
+        url));
   }
 
   void onTapBackButton(BuildContext buildContext) async {
+    if (_sessionGeneration != browserSession.generation) return;
     var value = await _controller.canGoBack();
     if (value) {
       await _controller.goBack();
@@ -159,6 +186,7 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
   }
 
   void onTapForwardButton(BuildContext buildContext) async {
+    if (_sessionGeneration != browserSession.generation) return;
     if (await _controller.canGoForward()) {
       await _controller.goForward();
     } else {
@@ -178,21 +206,10 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
           _controller.platform as AndroidWebViewController;
       await androidController.setGeolocationPermissionsPromptCallbacks(
         onShowPrompt: (request) async {
-          final status = await Permission.locationWhenInUse.request();
-
-          if (status.isDenied) {
-            // For the first time if user have never asked for permission yet,
-            // this status will return [PermissionStatus.denied].
-            await Permission.location.request();
-          } else if (status.isPermanentlyDenied) {
-            // For the next time if user already denied permission, they
-            // must go to app settings to allow permission manually again.
-            await openAppSettings();
-          }
-
-          return GeolocationPermissionsResponse(
-            allow: status.isGranted,
-            retain: true,
+          // Store and payment pages do not require device geolocation.
+          return const GeolocationPermissionsResponse(
+            allow: false,
+            retain: false,
           );
         },
       );
@@ -322,15 +339,25 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
             }
           },
           onPageStarted: (String url) {},
-          onPageFinished: (String url) => widget.onPageFinished?.call(url),
+          onPageFinished: (String url) {
+            if (url != 'about:blank' &&
+                _sessionGeneration == browserSession.generation) {
+              widget.onPageFinished?.call(url);
+            }
+          },
           onWebResourceError: (WebResourceError error) {},
-          // onNavigationRequest: (NavigationRequest request) {},
+          onNavigationRequest: (request) async =>
+              _sessionGeneration == browserSession.generation ||
+                      request.url == 'about:blank'
+                  ? await getNavigationDelegate(request)
+                  : NavigationDecision.prevent,
         ),
-      )
-      ..loadRequest(
-        Uri.parse(url.toString()),
-        headers: widget.headers ?? {},
       );
+
+    if (kIsWeb || !kAdvanceConfig.inAppWebView) {
+      browserSession.register(_clearSession);
+      _openSession();
+    }
 
     // if (controller.platform is AndroidWebViewController) {
     //   AndroidWebViewController.enableDebugging(true);
@@ -347,12 +374,7 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
 
   @override
   void dispose() {
-    if (kAdvanceConfig.alwaysClearWebViewCache) {
-      _controller.clearCache();
-    }
-    if (kAdvanceConfig.alwaysClearWebViewCookie) {
-      WebViewCookieManager().clearCookies();
-    }
+    browserSession.unregister(_clearSession);
     super.dispose();
   }
 
@@ -390,7 +412,7 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
                         children: [
                           if (widget.enableBackward)
                             IconButton(
-                              icon: const Icon(Icons.arrow_back_ios, size: 20),
+                              icon: Icon(Tools.getBackIcon(context), size: 20),
                               onPressed: () {
                                 if (Navigator.canPop(context)) {
                                   Navigator.of(context).pop();
@@ -401,7 +423,7 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
                             IconButton(
                               onPressed: () {},
                               icon:
-                                  const Icon(Icons.arrow_forward_ios, size: 20),
+                                  Icon(Tools.getForwardIcon(context), size: 20),
                             ),
                         ],
                       );
@@ -487,7 +509,7 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
                 ),
               ),
       child: IndexedStack(
-        index: selectedIndex,
+        index: _sessionError ? 2 : selectedIndex,
         children: [
           Builder(builder: (BuildContext context) {
             return WebViewWidget(controller: _controller);
@@ -498,6 +520,12 @@ class _WebViewState extends State<WebView> with WebviewMixin, AppBarMixin {
             )
           else
             const SizedBox(),
+          Center(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('تعذر فتح الصفحة بأمان. أغلقها وافتحها مجددًا.'),
+            TextButton(
+                onPressed: _openSession, child: const Text('إعادة المحاولة')),
+          ])),
         ],
       ),
     );

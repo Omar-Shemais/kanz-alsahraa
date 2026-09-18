@@ -2,6 +2,7 @@ import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/constants.dart';
+import '../../common/tools.dart';
 import '../../generated/l10n.dart';
 import '../../models/index.dart' show Blog;
 import '../../services/index.dart';
@@ -69,7 +70,7 @@ class _PostScreenState extends State<PostScreen> with AppBarMixin {
                 child: GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Icon(
-                    Icons.arrow_back_ios,
+                    Tools.getBackIcon(context),
                     color: Theme.of(context).colorScheme.secondary,
                   ),
                 ),
