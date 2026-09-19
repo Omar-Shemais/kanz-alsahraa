@@ -6,7 +6,7 @@ test -f pubspec.yaml || { echo 'Run from the Flutter project root.' >&2; exit 1;
 : "${KANZ_WOO_CONSUMER_SECRET:?Add the encrypted Woo secret in Codemagic}"
 : "${KANZ_BUILD_NUMBER:?Set a build number greater than the latest uploaded build}"
 case "$KANZ_BUILD_NUMBER" in ''|*[!0-9]*) echo 'Build number must be an integer.' >&2; exit 1;; esac
-test "$KANZ_BUILD_NUMBER" -gt 22 || { echo 'Build number must exceed repository build 22 and the latest uploaded build.' >&2; exit 1; }
+test "$KANZ_BUILD_NUMBER" -gt 23 || { echo 'Build number must exceed uploaded build 23.' >&2; exit 1; }
 flutter pub get
 dart run tools/prepare_build_dependencies.dart
 dart run tools/shorebird_config_guard.dart

@@ -39,7 +39,9 @@ void main() {
     for (final key in [
       'NSCameraUsageDescription',
       'NSPhotoLibraryUsageDescription',
-      'NSFaceIDUsageDescription'
+      'NSFaceIDUsageDescription',
+      'NSMicrophoneUsageDescription',
+      'NSSpeechRecognitionUsageDescription',
     ]) {
       expect(info[key]!.innerText, isNotEmpty);
     }
