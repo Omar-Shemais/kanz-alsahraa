@@ -20,10 +20,10 @@ import '../models/index.dart'
         User,
         UserModel;
 import '../models/search_web_model.dart';
+import '../modules/digits_mobile_login/views/digits_mobile_login_screen.dart';
 import '../modules/dynamic_layout/geo_search/geo_search_screen.dart';
 import '../modules/dynamic_layout/helper/helper.dart';
 import '../modules/dynamic_layout/index.dart';
-import '../modules/digits_mobile_login/views/digits_mobile_login_screen.dart';
 import '../modules/product_reviews/models/product_reviews_model.dart';
 import '../modules/product_reviews/product_review_screen.dart';
 import '../modules/sms_login/sms_login.dart';
