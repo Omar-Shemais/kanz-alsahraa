@@ -1,14 +1,16 @@
 <?php
 /**
- * Kanz App Control — standalone PHP snippet, version 0.2.0.
+ * Kanz App Control — standalone PHP snippet, version 0.3.0.
  * In Code Snippets paste WITHOUT this opening <?php line.
  * Run everywhere: both admin-post handlers and the public config REST route
  * are required. Do not activate together with the equivalent Kanz plugin.
+ * Function names are versioned so Code Snippets can safely validate this
+ * replacement while an older revision is still active in the same request.
  * Firebase credentials are NOT embedded here. Deployment is not verified.
  */
 if (!defined('ABSPATH')) { return; }
-if (!function_exists('kanz_config_validate')) {
-function kanz_snippet_admin_js() {
+if (!function_exists('kanz_v3_config_validate')) {
+function kanz_v3_snippet_admin_js() {
     return <<<'KANZ_CONTROL_EDITOR_JS'
 (() => {
   const start = () => {
@@ -575,7 +577,7 @@ function kanz_snippet_admin_js() {
 })();
 KANZ_CONTROL_EDITOR_JS;
 }
-function kanz_destination_data($type, $value = '') {
+function kanz_v3_destination_data($type, $value = '') {
     if ($type === 'none') { return array(); }
     if (in_array($type, array('category', 'product'), true) && is_string($value) && preg_match('/^[1-9][0-9]{0,9}$/', $value)) {
         return array('kanz_target' => $type, 'kanz_id' => $value);
@@ -590,7 +592,7 @@ function kanz_destination_data($type, $value = '') {
     return new WP_Error('invalid_destination', 'اختر وجهة صحيحة ورقم منتج أو تصنيف صالح، أو رابط HTTPS دون بيانات دخول.');
 }
 
-function kanz_destination_options($kind) {
+function kanz_v3_destination_options($kind) {
     if ($kind === 'category') {
         if (!taxonomy_exists('product_cat')) { return array(); }
         $terms = get_terms(array('taxonomy' => 'product_cat', 'hide_empty' => false));
@@ -607,7 +609,7 @@ function kanz_destination_options($kind) {
     return array_map(function ($post) { return array('id' => (string) $post->ID, 'name' => $post->post_title); }, $posts);
 }
 
-function kanz_notification_payload($title, $body, $destination = array()) {
+function kanz_v3_notification_payload($title, $body, $destination = array()) {
     if (!is_string($title) || !is_string($body) || trim($title) === '' || trim($body) === '' ||
         strlen($title) > 240 || strlen($body) > 2400 || strip_tags($title) !== $title || strip_tags($body) !== $body) {
         return new WP_Error('invalid_message', 'أدخل عنواناً ونصاً قصيرين دون HTML.');
@@ -616,14 +618,14 @@ function kanz_notification_payload($title, $body, $destination = array()) {
     $payload = array('message' => array('topic' => 'all-notifications',
         'notification' => array('title' => trim($title), 'body' => trim($body))));
     if ($destination) {
-        $checked = kanz_destination_data(isset($destination['kanz_target']) ? $destination['kanz_target'] : '', isset($destination['kanz_id']) ? $destination['kanz_id'] : (isset($destination['kanz_url']) ? $destination['kanz_url'] : ''));
+        $checked = kanz_v3_destination_data(isset($destination['kanz_target']) ? $destination['kanz_target'] : '', isset($destination['kanz_id']) ? $destination['kanz_id'] : (isset($destination['kanz_url']) ? $destination['kanz_url'] : ''));
         if (is_wp_error($checked)) { return $checked; }
         $payload['message']['data'] = $checked;
     }
     return $payload;
 }
 
-function kanz_notification_credentials() {
+function kanz_v3_notification_credentials() {
     if (!function_exists('openssl_sign')) {
         return new WP_Error('not_configured', 'الإشعارات غير مربوطة بخدمة Firebase على الخادم.');
     }
@@ -640,7 +642,7 @@ function kanz_notification_credentials() {
     if (!$account) {
         $stored = get_option('kanz_fcm_service_account_encrypted', '');
         if (is_string($stored) && trim($stored) !== '') {
-            $decoded = kanz_fcm_unseal($stored);
+            $decoded = kanz_v3_fcm_unseal($stored);
             if (!is_wp_error($decoded)) { $account = json_decode($decoded, true); }
         }
     }
@@ -657,7 +659,7 @@ function kanz_notification_credentials() {
     return $account;
 }
 
-function kanz_fcm_seal($raw) {
+function kanz_v3_fcm_seal($raw) {
     if (!function_exists('openssl_encrypt') || !function_exists('wp_salt')) { return new WP_Error('crypto_missing', 'التشفير غير متاح؛ لم يُحفظ المفتاح.'); }
     $iv = random_bytes(12); $tag = '';
     $key = hash('sha256', wp_salt('auth') . wp_salt('secure_auth'), true);
@@ -666,7 +668,7 @@ function kanz_fcm_seal($raw) {
     return base64_encode($iv . $tag . $cipher);
 }
 
-function kanz_fcm_unseal($stored) {
+function kanz_v3_fcm_unseal($stored) {
     if (!function_exists('openssl_decrypt') || !function_exists('wp_salt')) { return new WP_Error('crypto_missing', 'التشفير غير متاح.'); }
     $bytes = base64_decode($stored, true);
     if ($bytes === false || strlen($bytes) < 29) { return new WP_Error('crypto_invalid', 'المفتاح المخزن غير صالح.'); }
@@ -675,7 +677,7 @@ function kanz_fcm_unseal($stored) {
     return $raw === false ? new WP_Error('crypto_invalid', 'تعذر فك المفتاح؛ أعد إعداده بعد تغيير مفاتيح أمان WordPress.') : $raw;
 }
 
-function kanz_notification_audience($payload, $audience, $user_id = '') {
+function kanz_v3_notification_audience($payload, $audience, $user_id = '') {
     if ($audience === 'broadcast') { return $payload; }
     if ($audience !== 'test_user' || !is_string($user_id) || !preg_match('/^[1-9][0-9]{0,9}$/', $user_id) || !get_userdata((int) $user_id)) {
         return new WP_Error('invalid_test_user', 'حدد رقم حساب WordPress موجود للاختبار.');
@@ -689,8 +691,8 @@ function kanz_notification_audience($payload, $audience, $user_id = '') {
     return $payload;
 }
 
-function kanz_notification_send($payload) {
-    $account = kanz_notification_credentials();
+function kanz_v3_notification_send($payload) {
+    $account = kanz_v3_notification_credentials();
     if (is_wp_error($account)) { return $account; }
     $encode = function ($value) { return rtrim(strtr(base64_encode($value), '+/', '-_'), '='); };
     $now = time();
@@ -735,15 +737,15 @@ add_action('admin_post_kanz_send_notification', function () {
     $type = isset($_POST['destination_type']) ? wp_unslash($_POST['destination_type']) : 'none';
     $field = $type === 'category' ? 'destination_category' : ($type === 'product' ? 'destination_product' : 'destination_url');
     $value = isset($_POST[$field]) ? wp_unslash($_POST[$field]) : '';
-    $destination = kanz_destination_data($type, $value);
+    $destination = kanz_v3_destination_data($type, $value);
     if (is_wp_error($destination)) { wp_die(esc_html($destination->get_error_message())); }
-    $payload = kanz_notification_payload($title, $body, $destination);
+    $payload = kanz_v3_notification_payload($title, $body, $destination);
     if (is_wp_error($payload)) { wp_die(esc_html($payload->get_error_message())); }
     $audience = isset($_POST['notification_audience']) ? wp_unslash($_POST['notification_audience']) : 'test_user';
     $test_user = isset($_POST['notification_test_user']) ? wp_unslash($_POST['notification_test_user']) : '';
-    $payload = kanz_notification_audience($payload, $audience, $test_user);
+    $payload = kanz_v3_notification_audience($payload, $audience, $test_user);
     if (is_wp_error($payload)) { wp_die(esc_html($payload->get_error_message())); }
-    $credentials = kanz_notification_credentials();
+    $credentials = kanz_v3_notification_credentials();
     if (is_wp_error($credentials)) { wp_die(esc_html($credentials->get_error_message())); }
     $request_id = isset($_POST['request_id']) ? wp_unslash($_POST['request_id']) : '';
     if (!is_string($request_id) || !preg_match('/^[a-f0-9-]{36}$/i', $request_id)) { wp_die('معرف الإرسال غير صالح.'); }
@@ -761,7 +763,7 @@ add_action('admin_post_kanz_send_notification', function () {
     if (!update_option('kanz_notification_history', $history, false)) {
         delete_option('kanz_notification_lock'); wp_die('تعذر تسجيل الإرسال. لم تُرسل الرسالة.');
     }
-    $result = kanz_notification_send($payload);
+    $result = kanz_v3_notification_send($payload);
     $history[0]['status'] = is_wp_error($result) ? $result->get_error_code() : 'accepted';
     update_option('kanz_notification_history', $history, false);
     delete_option('kanz_notification_lock');
@@ -790,7 +792,7 @@ add_action('admin_post_kanz_save_fcm_key', function () {
         wp_die('محتوى JSON غير صالح؛ تأكد من نسخ ملف مفتاح الخدمة الخاص بمشروع Firebase كاملاً.');
     }
     if ($data['project_id'] !== 'kanz-alsahra' || !openssl_pkey_get_private($data['private_key'])) { wp_die('المشروع أو المفتاح الخاص غير صحيح؛ لم يُحفظ المفتاح.'); }
-    $sealed = kanz_fcm_seal(wp_json_encode($data));
+    $sealed = kanz_v3_fcm_seal(wp_json_encode($data));
     if (is_wp_error($sealed)) { wp_die(esc_html($sealed->get_error_message())); }
     if (!update_option('kanz_fcm_service_account_encrypted', $sealed, false)) { wp_die('تعذر حفظ المفتاح المشفر.'); }
     delete_option('kanz_fcm_service_account');
@@ -798,8 +800,8 @@ add_action('admin_post_kanz_save_fcm_key', function () {
     exit;
 });
 
-function kanz_notification_page_section() {
-    $credentials = kanz_notification_credentials();
+function kanz_v3_notification_page_section() {
+    $credentials = kanz_v3_notification_credentials();
     $ready = !is_wp_error($credentials);
     ?>
     <h2>إشعارات عامة</h2>
@@ -846,14 +848,14 @@ function kanz_notification_page_section() {
       <p id="kanz-notif-row-category" style="display:none"><label>التصنيف
         <input type="search" placeholder="🔍 تصفية التصنيفات بالاسم..." oninput="kanzFilterSelect(this, 'kanz-notif-select-category')" style="display:block;margin:4px 0;width:100%;max-width:320px;padding:4px 8px;border:1px solid #ccc;border-radius:4px">
         <select name="destination_category" id="kanz-notif-select-category"><option value="">اختر التصنيف</option>
-        <?php foreach (kanz_destination_options('category') as $option) {
+        <?php foreach (kanz_v3_destination_options('category') as $option) {
           $prefix = empty($option['parent']) ? '🟢 ' : '↳ ';
         ?><option value="<?php echo esc_attr($option['id']); ?>"><?php echo esc_html($prefix . $option['name'] . ' — #' . $option['id']); ?></option><?php } ?>
         </select></label></p>
       <p id="kanz-notif-row-product" style="display:none"><label>المنتج
         <input type="search" placeholder="🔍 تصفية المنتجات بالاسم..." oninput="kanzFilterSelect(this, 'kanz-notif-select-product')" style="display:block;margin:4px 0;width:100%;max-width:320px;padding:4px 8px;border:1px solid #ccc;border-radius:4px">
         <select name="destination_product" id="kanz-notif-select-product"><option value="">اختر المنتج</option>
-        <?php foreach (kanz_destination_options('product') as $option) { ?><option value="<?php echo esc_attr($option['id']); ?>"><?php echo esc_html($option['name'] . ' — #' . $option['id']); ?></option><?php } ?>
+        <?php foreach (kanz_v3_destination_options('product') as $option) { ?><option value="<?php echo esc_attr($option['id']); ?>"><?php echo esc_html($option['name'] . ' — #' . $option['id']); ?></option><?php } ?>
         </select></label></p>
       <p id="kanz-notif-row-url" style="display:none"><label>رابط خارجي <input name="destination_url" type="url" maxlength="2048" placeholder="https://..." style="width:100%;max-width:400px"></label></p>
       <script>
@@ -895,7 +897,7 @@ function kanz_notification_page_section() {
     <?php } ?>
     <?php
 }
-function kanz_config_validate($data) {
+function kanz_v3_config_validate($data) {
     if (!is_array($data) || !isset($data['Setting'], $data['TabBar'], $data['HorizonLayout']) ||
         !is_array($data['Setting']) || !is_array($data['TabBar']) || !$data['TabBar'] ||
         !is_array($data['HorizonLayout'])) {
@@ -948,7 +950,7 @@ function kanz_config_validate($data) {
 }
 
 add_action('admin_menu', function () {
-    add_menu_page('إدارة تطبيق كنز', 'تطبيق كنز', 'manage_options', 'kanz-app-control', 'kanz_config_page', 'dashicons-smartphone');
+    add_menu_page('إدارة تطبيق كنز', 'تطبيق كنز', 'manage_options', 'kanz-app-control', 'kanz_v3_config_page', 'dashicons-smartphone');
 });
 
 add_action('admin_enqueue_scripts', function ($hook) {
@@ -969,11 +971,11 @@ add_action('admin_enqueue_scripts', function ($hook) {
             }
         }
     }
-    wp_localize_script('jquery-core', 'kanzAdmin', array('categories' => $categories, 'products' => kanz_destination_options('product')));
-    wp_add_inline_script('jquery-core', kanz_snippet_admin_js(), 'after');
+    wp_localize_script('jquery-core', 'kanzAdmin', array('categories' => $categories, 'products' => kanz_v3_destination_options('product')));
+    wp_add_inline_script('jquery-core', kanz_v3_snippet_admin_js(), 'after');
 });
 
-function kanz_mstore_path() {
+function kanz_v3_mstore_path() {
     $uploads = wp_upload_dir();
     if (!empty($uploads['error'])) { return new WP_Error('upload_path', 'تعذر تحديد مجلد رفع MStore.'); }
     $root = realpath($uploads['basedir']);
@@ -985,18 +987,18 @@ function kanz_mstore_path() {
     return $path;
 }
 
-function kanz_mstore_record() {
-    $path = kanz_mstore_path();
+function kanz_v3_mstore_record() {
+    $path = kanz_v3_mstore_path();
     if (is_wp_error($path)) { return $path; }
     if (!is_readable($path) || filesize($path) > 1048576) { return new WP_Error('mstore_read', 'ملف MStore غير قابل للقراءة أو كبير جداً.'); }
     $raw = file_get_contents($path);
     $data = json_decode($raw, true, 64); $object = json_decode($raw, false, 64);
-    if (!is_object($object) || kanz_config_validate($data) !== true) { return new WP_Error('mstore_invalid', 'ملف MStore الحالي غير صالح؛ لم يتم استبداله.'); }
+    if (!is_object($object) || kanz_v3_config_validate($data) !== true) { return new WP_Error('mstore_invalid', 'ملف MStore الحالي غير صالح؛ لم يتم استبداله.'); }
     return array('revision' => hash('sha256', $raw), 'saved_at' => gmdate('c', filemtime($path)), 'config' => $object);
 }
 
-function kanz_mstore_publish($object, $expected_revision) {
-    $path = kanz_mstore_path();
+function kanz_v3_mstore_publish($object, $expected_revision) {
+    $path = kanz_v3_mstore_path();
     if (is_wp_error($path)) { return $path; }
     if (!is_writable($path) || !is_writable(dirname($path))) { return new WP_Error('mstore_readonly', 'WordPress لا يملك صلاحية كتابة ملف MStore؛ لم يتم النشر.'); }
     $json = wp_json_encode($object, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -1010,12 +1012,12 @@ function kanz_mstore_publish($object, $expected_revision) {
         if (!is_string($actual_revision) || !hash_equals($expected_revision, $actual_revision)) { return new WP_Error('mstore_conflict', 'عدل مستخدم آخر الملف؛ أعد تحميل اللوحة قبل النشر.'); }
         if (!rename($temporary, $path)) { return new WP_Error('mstore_replace', 'تعذر استبدال ملف MStore.'); }
         clearstatcache(true, $path);
-        if (function_exists('do_action')) { do_action('litespeed_purge_url', kanz_mstore_url()); }
+        if (function_exists('do_action')) { do_action('litespeed_purge_url', kanz_v3_mstore_url()); }
         return true;
     } finally { if (is_file($temporary)) { unlink($temporary); } }
 }
 
-function kanz_mstore_url() {
+function kanz_v3_mstore_url() {
     return class_exists('FlutterUtils') ? FlutterUtils::get_json_file_url('config_ar.json') : rtrim(wp_upload_dir()['baseurl'], '/') . '/flutter_config_files/config_ar.json';
 }
 
@@ -1031,7 +1033,7 @@ add_action('admin_post_kanz_save_config', function () {
         !isset($object->TabBar, $object->HorizonLayout) || !is_array($object->TabBar) || !is_array($object->HorizonLayout)) {
         wp_die('نوع حقول JSON غير صحيح. Setting يجب أن يكون كائناً والأقسام والتنقل قوائم.');
     }
-    $valid = kanz_config_validate($data);
+    $valid = kanz_v3_config_validate($data);
     if (is_wp_error($valid)) { wp_die(esc_html($valid->get_error_message())); }
     foreach (array('android', 'ios') as $platform) {
         if (!empty($data['KanzControl']['updates'][$platform]['enabled']) && empty($_POST['confirm_updates'])) {
@@ -1044,7 +1046,7 @@ add_action('admin_post_kanz_save_config', function () {
         wp_die('هناك عملية نشر أخرى. انتظر ثم أعد المحاولة؛ إذا استمر التنبيه اطلب مراجعة قفل النشر من المسؤول.');
     }
     // Optimistic locking prevents silently overwriting another administrator.
-    $current = kanz_mstore_record();
+    $current = kanz_v3_mstore_record();
     if (is_wp_error($current)) { delete_option('kanz_app_config_publish_lock'); wp_die(esc_html($current->get_error_message())); }
     $revision = isset($current['revision']) ? $current['revision'] : '';
     if (!isset($_POST['base_revision']) || !hash_equals((string) $revision, (string) wp_unslash($_POST['base_revision']))) {
@@ -1061,7 +1063,7 @@ add_action('admin_post_kanz_save_config', function () {
         delete_option('kanz_app_config_publish_lock');
         wp_die('تعذر حفظ النسخة السابقة. لم يتم النشر.');
     }
-    $saved = kanz_mstore_publish($object, (string) $revision);
+    $saved = kanz_v3_mstore_publish($object, (string) $revision);
     if (!is_wp_error($saved)) { update_option('kanz_app_config_record', $record, false); }
     delete_option('kanz_app_config_publish_lock');
     if (is_wp_error($saved)) { wp_die(esc_html($saved->get_error_message())); }
@@ -1073,7 +1075,7 @@ add_action('rest_api_init', function () {
     register_rest_route('kanz/v1', '/config/(?P<locale>[a-zA-Z_-]+)', array(
         'methods' => 'GET', 'permission_callback' => '__return_true',
         'callback' => function () {
-            $record = kanz_mstore_record();
+            $record = kanz_v3_mstore_record();
             if (is_wp_error($record)) { return new WP_Error('mstore_unavailable', 'Configuration is unavailable.', array('status' => 503)); }
             if (empty($record['config'])) { return new WP_Error('not_published', 'Configuration is not published.', array('status' => 404)); }
             // Never expose administrator identity, history or notification secrets.
@@ -1084,9 +1086,9 @@ add_action('rest_api_init', function () {
     ));
 });
 
-function kanz_config_page() {
+function kanz_v3_config_page() {
     if (!current_user_can('manage_options')) { return; }
-    $record = kanz_mstore_record();
+    $record = kanz_v3_mstore_record();
     if (is_wp_error($record)) { echo '<div class="notice notice-error"><p>' . esc_html($record->get_error_message()) . '</p></div>'; return; }
     $json = empty($record['config']) ? '' : wp_json_encode($record['config'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     ?>
@@ -1094,7 +1096,7 @@ function kanz_config_page() {
       <h1>إدارة تطبيق كنز الصحراء</h1>
       <?php if (isset($_GET['saved'])) { ?><div class="notice notice-success"><p>تم حفظ النسخة المنشورة.</p></div><?php } ?>
       <p>تقرأ اللوحة config_ar.json من MStore تلقائياً عند فتحها. زر النشر يستبدل الملف نفسه بعد حفظ نسخة سابقة. الاستيراد اليدوي اختياري للمسودة فقط.</p>
-      <p>رابط إعدادات MStore: <code dir="ltr"><?php echo esc_html(kanz_mstore_url()); ?></code></p>
+      <p>رابط إعدادات MStore: <code dir="ltr"><?php echo esc_html(kanz_v3_mstore_url()); ?></code></p>
       <p><strong>لا تعدل ملف MStore من واجهتين في الوقت نفسه. قد تحتاج التطبيقات إعادة فتح لجلب الإعدادات، والوظائف الجديدة تحتاج تحديث التطبيق. لا توجد حاجة لتغيير مصدر التطبيق إذا كان يقرأ هذا الرابط.</strong></p>
       <input id="kanz-import" type="file" accept=".json,application/json">
       <p id="kanz-error" role="alert" style="color:#b32d2e"></p>
@@ -1133,7 +1135,7 @@ function kanz_config_page() {
       <?php foreach (get_option('kanz_app_config_history', array()) as $past) { ?>
         <details><summary><?php echo esc_html($past['saved_at']); ?></summary><textarea readonly dir="ltr" style="width:100%;height:150px"><?php echo esc_textarea(wp_json_encode($past['config'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></textarea></details>
       <?php } ?>
-      <?php kanz_notification_page_section(); ?>
+      <?php kanz_v3_notification_page_section(); ?>
     </div>
     <?php
 }
