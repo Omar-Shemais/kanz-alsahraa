@@ -32,6 +32,13 @@ vm.runInNewContext(editorScript, {
 const read = () => JSON.parse(elements['kanz-json'].value);
 assert.equal(elements['kanz-sections'].children.length, 11);
 const descendants = (element) => [element, ...element.children.flatMap((child) => typeof child === 'object' ? descendants(child) : [])];
+const firstBannerCard = elements['kanz-sections'].children[1];
+const insertBefore = descendants(firstBannerCard).find((item) => item.tag === 'button' && item.textContent === 'إضافة قسم منتجات قبله');
+assert.ok(insertBefore);
+insertBefore.click();
+assert.equal(read().HorizonLayout[1].layout, 'oneAndHalfColumn');
+assert.equal(read().HorizonLayout[2].items[0].image, 'https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-700x263.png');
+assert.equal(elements['kanz-sections'].children.length, 12);
 const orderInput = descendants(elements['kanz-category-order']).find((item) => item.tag === 'input' && item.type === 'number');
 assert.ok(orderInput);
 assert.equal(orderInput.step, '1');
@@ -43,10 +50,10 @@ const modified = read(); modified.Setting.MainColor = '#abcdef';
 elements['kanz-json'].value = JSON.stringify(modified);
 elements['kanz-json'].listeners.input();
 elements['kanz-add-banner'].click();
-assert.equal(read().HorizonLayout.length, 11); // dirty text is not overwritten
+assert.equal(read().HorizonLayout.length, 12); // dirty text is not overwritten
 assert.ok(elements['kanz-error'].textContent);
 elements['kanz-apply'].click(); elements['kanz-add-banner'].click();
-assert.equal(read().HorizonLayout.length, 12);
+assert.equal(read().HorizonLayout.length, 13);
 assert.equal(read().Setting.MainColor, '#abcdef');
 const custom = read(); custom.CustomField = { text: 'preserved value' };
 elements['kanz-json'].value = JSON.stringify(custom); elements['kanz-apply'].click();

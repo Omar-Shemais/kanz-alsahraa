@@ -91,6 +91,16 @@ function kanz_snippet_admin_js() {
     populate('');
     wrapper.append(filterInput, select); parent.append(wrapper);
   }
+  function newProductSection() {
+    return {
+      layout: 'oneAndHalfColumn',
+      name: 'قسم منتجات جديد',
+      category: '',
+      limit: 12,
+      rows: 1,
+      enableBackground: true,
+    };
+  }
   function render() {
     container.replaceChildren();
     if (!config) return;
@@ -103,6 +113,7 @@ function kanz_snippet_admin_js() {
       const title = document.createElement('h3'); title.textContent = `${index + 1}. ${section.name || section.layout}`; card.append(title);
       button('↑', () => change(() => { if (index > 0) [config.HorizonLayout[index - 1], config.HorizonLayout[index]] = [section, config.HorizonLayout[index - 1]]; }), card);
       button('↓', () => change(() => { if (index + 1 < config.HorizonLayout.length) [config.HorizonLayout[index + 1], config.HorizonLayout[index]] = [section, config.HorizonLayout[index + 1]]; }), card);
+      button('إضافة قسم منتجات قبله', () => change(() => config.HorizonLayout.splice(index, 0, newProductSection())), card);
       button('حذف القسم', () => { if (window.confirm('حذف القسم من المسودة؟')) change(() => config.HorizonLayout.splice(index, 1)); }, card);
       field('الاسم', section.name, (value) => { section.name = value; }, card);
       if (!['logo', 'bannerImage', 'luxurySaleBanner'].includes(section.layout)) {
@@ -521,7 +532,7 @@ function kanz_snippet_admin_js() {
     } catch (_) { message('تعذر قراءة ملف إعدادات صالح.'); }
   });
   document.getElementById('kanz-add-banner').addEventListener('click', () => change(() => config.HorizonLayout.push({ layout: 'bannerImage', design: 'static', items: [] })));
-  document.getElementById('kanz-add-category').addEventListener('click', () => change(() => config.HorizonLayout.push({ layout: 'oneAndHalfColumn', name: 'قسم جديد', category: '', limit: 12, rows: 1 })));
+  document.getElementById('kanz-add-category').addEventListener('click', () => change(() => config.HorizonLayout.push(newProductSection())));
   document.getElementById('kanz-form').addEventListener('submit', (event) => {
     try {
       const publishing = validate(JSON.parse(json.value));
