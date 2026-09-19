@@ -68,6 +68,13 @@ void main() {
     expect(podfile, contains("['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'"));
     expect(File('ios/Config.xcconfig').readAsStringSync().trim(),
         '#include "../configs/env.props"');
+    final sharedEnvironment = File('configs/env.props').readAsLinesSync();
+    expect(
+      sharedEnvironment.where((line) => line.trimLeft().startsWith('#')),
+      isEmpty,
+      reason:
+          'env.props is parsed by Xcode as an xcconfig; # comments become invalid preprocessor directives.',
+    );
     expect(File('ios/Flutter/Release.xcconfig').readAsStringSync(),
         isNot(contains('profile.xcconfig')));
     final scheme = XmlDocument.parse(
