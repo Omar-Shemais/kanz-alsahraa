@@ -109,7 +109,11 @@ class ImageResize extends StatelessWidget {
       fit: fit,
       cache: true,
       timeRetry: const Duration(milliseconds: 500),
-      clearMemoryCacheWhenDispose: true,
+      // Home slivers are disposed when they move far outside the viewport.
+      // Retaining the decoded entry prevents the same product image from
+      // flashing its placeholder and decoding again when the user scrolls up.
+      clearMemoryCacheWhenDispose: false,
+      gaplessPlayback: true,
       cacheWidth: kIsWeb ? null : cacheWidth,
       enableLoadState: false,
       alignment: alignmentImage ??

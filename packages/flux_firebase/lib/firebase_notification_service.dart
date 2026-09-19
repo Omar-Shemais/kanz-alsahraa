@@ -14,16 +14,34 @@ class FirebaseNotificationService extends NotificationService {
 
   StreamSubscription? _notificationSubscription;
   StreamSubscription<String>? _tokenRefreshSubscription;
+  bool _notificationsEnabled = true;
 
-  // @override
-  // Future<bool> requestPermission() async {
-  //   try {
-  //     final result = await _instance.requestPermission();
-  //     return result.alert == AppleNotificationSetting.enabled;
-  //   } catch (_) {
-  //     return false;
-  //   }
-  // }
+  bool _isAuthorized(NotificationSettings settings) =>
+      settings.authorizationStatus == AuthorizationStatus.authorized ||
+      settings.authorizationStatus == AuthorizationStatus.provisional;
+
+  @override
+  Future<bool> requestPermission() async {
+    try {
+      final settings = await _instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      return _isAuthorized(settings);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> isGranted() async {
+    try {
+      return _isAuthorized(await _instance.getNotificationSettings());
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Future<void> init({
@@ -95,6 +113,9 @@ class FirebaseNotificationService extends NotificationService {
         }
       },
     );
+    if (!_notificationsEnabled) {
+      _notificationSubscription?.pause();
+    }
 
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       // printLog('Notification OpenedApp triggered');
@@ -129,8 +150,9 @@ class FirebaseNotificationService extends NotificationService {
       final token =
           await _instance.getToken().timeout(const Duration(seconds: 8));
       if (token == null || token.isEmpty) return;
-      await _instance
-          .subscribeToTopic(_topicAll)
+      await (_notificationsEnabled
+              ? _instance.subscribeToTopic(_topicAll)
+              : _instance.unsubscribeFromTopic(_topicAll))
           .timeout(const Duration(seconds: 8));
       printLog('[FirebaseCloudMessaging] registration ready');
     } catch (_) {
@@ -141,7 +163,8 @@ class FirebaseNotificationService extends NotificationService {
 
   @override
   void disableNotification() {
-    _instance.unsubscribeFromTopic(_topicAll);
+    _notificationsEnabled = false;
+    unawaited(_updateTopicSubscription());
     _instance.setForegroundNotificationPresentationOptions(
       alert: false, // Required to display a heads up notification
       badge: false,
@@ -154,7 +177,8 @@ class FirebaseNotificationService extends NotificationService {
 
   @override
   void enableNotification() {
-    _instance.subscribeToTopic(_topicAll);
+    _notificationsEnabled = true;
+    unawaited(_updateTopicSubscription());
     _instance.setForegroundNotificationPresentationOptions(
       alert: true, // Required to display a heads up notification
       badge: true,
@@ -162,6 +186,18 @@ class FirebaseNotificationService extends NotificationService {
     );
     if (_notificationSubscription != null) {
       _notificationSubscription!.resume();
+    }
+  }
+
+  Future<void> _updateTopicSubscription() async {
+    try {
+      if (_notificationsEnabled) {
+        await _instance.subscribeToTopic(_topicAll);
+      } else {
+        await _instance.unsubscribeFromTopic(_topicAll);
+      }
+    } catch (_) {
+      printLog('[FirebaseCloudMessaging] topic preference unavailable');
     }
   }
 

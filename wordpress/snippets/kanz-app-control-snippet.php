@@ -100,6 +100,18 @@ function kanz_v3_snippet_admin_js() {
       category: '',
       limit: 12,
       rows: 1,
+      productListItemHeight: 420,
+      imageWidth: 260,
+      imageRatio: 0.55,
+      showCartButton: true,
+      cardDesign: 'card',
+      titleLine: 1,
+      borderColor: '#B18729',
+      borderWidth: 1,
+      priceColor: '#B18729',
+      borderRadius: 15,
+      isSnapping: true,
+      enableAutoSliding: false,
       enableBackground: true,
     };
   }

@@ -355,9 +355,15 @@ class ProductConfig {
     enableParallax = json['parallax'] ?? false;
     parallaxImageRatio = Helper.formatDouble(json['parallaxImageRatio']) ?? 1.2;
     hideEmptyProductLayout = json['hideEmptyProductLayout'] ?? false;
+    // Product sections created by the WordPress editor used to omit their
+    // height and silently inherit the 125px list-tile default. That crops the
+    // normal card into a short image strip. Keep old remote configs safe while
+    // the editor starts publishing the explicit card dimensions.
     productListItemHeight =
         Helper.formatDouble(json['productListItemHeight']) ??
-            env.productListItemHeight;
+            (layout == Layout.oneAndHalfColumn
+                ? 420.0
+                : env.productListItemHeight);
 
     enableAutoSliding = json['enableAutoSliding'] ?? env.enableAutoSliding;
     durationAutoSliding = Helper.formatInt(json['durationAutoSliding']) ??

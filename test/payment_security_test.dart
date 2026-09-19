@@ -46,7 +46,8 @@ void main() {
           environment['paymentConfig'] as Map<String, dynamic>;
       expect(paymentConfig['GuestCheckout'], false);
       expect(paymentConfig['EnableRefundCancel'], false);
-      expect(paymentConfig['EnableOnePageCheckout'], false);
+      expect(paymentConfig['EnableOnePageCheckout'], true);
+      expect(paymentConfig['NativeOnePageCheckout'], false);
     });
   });
 }

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fstore/common/theme/dark_theme.dart';
 import 'package:fstore/modules/dynamic_layout/config/app_setting.dart';
 import 'package:fstore/modules/dynamic_layout/config/banner_config.dart';
+import 'package:fstore/modules/dynamic_layout/config/product_config.dart';
 
 void main() {
   double contrast(Color foreground, Color background) {
@@ -81,6 +82,21 @@ void main() {
       final parsed = BannerConfig.fromJson(categoryCarousel);
       expect(parsed.viewportFraction, 0.72);
       expect(parsed.showIndicator, isTrue);
+    });
+
+    test('WordPress product sections have a safe full-card height', () {
+      final legacySection = ProductConfig.fromJson({
+        'layout': 'oneAndHalfColumn',
+        'name': 'عروض اليوم الوطني',
+        'category': '1',
+      });
+      final explicitSection = ProductConfig.fromJson({
+        'layout': 'oneAndHalfColumn',
+        'productListItemHeight': 360,
+      });
+
+      expect(legacySection.productListItemHeight, 420);
+      expect(explicitSection.productListItemHeight, 360);
     });
   });
 }

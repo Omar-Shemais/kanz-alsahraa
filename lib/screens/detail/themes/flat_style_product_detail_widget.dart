@@ -272,7 +272,19 @@ class _FlatStyleDetailProductWidgetState
                           RelatedProduct(widget.product),
                         if (kProductDetail.showRecentProduct)
                           RecentProducts(excludeProduct: widget.product),
-                        const SizedBox(height: 50),
+                        // The floating purchase panel is painted above the
+                        // scroll view. Reserve its full height so the final
+                        // description/related section can be scrolled clear of
+                        // the panel on devices with a home indicator.
+                        SizedBox(
+                          height: isVisibleBuyButton &&
+                                  enableAutoHideButtonBuy &&
+                                  stateUI.enableShoppingCart
+                              ? _kSizeBttomWidget +
+                                  MediaQuery.paddingOf(context).bottom +
+                                  24
+                              : 50,
+                        ),
                       ],
                     ),
                   ),

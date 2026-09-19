@@ -80,17 +80,18 @@ class NotificationModel extends ChangeNotifier {
     }
   }
 
-  Future<void> enableNotification() async {
+  Future<bool> enableNotification() async {
     if (!(await _service.isGranted())) {
       final granted = await _service.requestPermission();
       if (!granted) {
-        return;
+        return false;
       }
     }
     _fStoreNotification = _fStoreNotification.copyWith(enable: true);
     _service.enableNotification();
     notifyListeners();
     unawaited(_saveDataToLocal());
+    return true;
   }
 
   void disableNotification() {

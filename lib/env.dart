@@ -525,8 +525,9 @@ Map<String, dynamic> environment = {
 
     "GuestCheckout": false,
 
-    /// Enable Payment option (Disable OnePageCheckout to use stable native checkout flow)
-    "EnableOnePageCheckout": false,
+    /// Kanz payment gateways are configured on WooCommerce. Send the complete
+    /// cart/customer payload to the server and finish checkout in the webview.
+    "EnableOnePageCheckout": true,
     "NativeOnePageCheckout": false,
 
     "ShowWebviewCheckoutSuccessScreen": true,
