@@ -214,7 +214,10 @@ class LoginSMSScreenState<T extends LoginSMSScreen> extends State<T>
                   const SizedBox(height: 20),
                   OutlinedButton.icon(
                     key: const Key('loginWithEmailButton'),
-                    onPressed: () => Navigator.of(context).push(
+                    // Replace the phone entry instead of stacking email on
+                    // top of it. A successful email login can then pop once
+                    // to the protected page/profile that requested auth.
+                    onPressed: () => Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (_) => const LoginScreen(emailOnly: true),
                       ),

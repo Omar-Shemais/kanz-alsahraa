@@ -59,6 +59,7 @@ void main() {
 
     expect(phoneUi, contains("Key('loginWithEmailButton')"));
     expect(phoneUi, contains('OutlinedButton.icon'));
+    expect(phoneUi, contains('pushReplacement('));
     expect(phoneUi, contains('LoginScreen(emailOnly: true)'));
     expect(emailUi, contains('AutofillHints.username'));
     expect(emailUi, contains('AutofillHints.email'));
