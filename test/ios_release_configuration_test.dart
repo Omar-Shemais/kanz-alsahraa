@@ -26,7 +26,7 @@ void main() {
     expect(File('configs/GoogleService-Info.plist').readAsStringSync(),
         File('ios/GoogleService-Info.plist').readAsStringSync());
   });
-  test('Arabic metadata, Apple login, push and HTTPS are configured', () {
+  test('Arabic metadata, push and HTTPS are configured', () {
     final info = plist('ios/Runner/Info.plist');
     expect(info['CFBundleDevelopmentRegion']!.innerText, 'ar');
     expect(info['CFBundleLocalizations']!.childElements.map((e) => e.innerText),
@@ -43,17 +43,26 @@ void main() {
     ]) {
       expect(info[key]!.innerText, isNotEmpty);
     }
+    for (final key in [
+      'NSLocationWhenInUseUsageDescription',
+      'NSLocationAlwaysAndWhenInUseUsageDescription',
+      'NSUserTrackingUsageDescription',
+    ]) {
+      expect(info, isNot(contains(key)));
+    }
     expect(info, isNot(contains('NSMicrophoneUsageDescription')));
     expect(info, isNot(contains('NSSpeechRecognitionUsageDescription')));
     expect(
       File('pubspec.yaml').readAsStringSync(),
       isNot(contains('speech_to_text:')),
-      reason: 'Unused speech APIs trigger unnecessary iOS privacy declarations.',
+      reason:
+          'Unused speech APIs trigger unnecessary iOS privacy declarations.',
     );
+    final dependencies = File('pubspec.yaml').readAsStringSync();
+    expect(dependencies, isNot(contains('app_tracking_transparency:')));
+    expect(dependencies, isNot(contains('\n  location:')));
     expect(info['NSAppTransportSecurity']!.innerXml, isNot(contains('<true')));
     final entitlements = plist('ios/Runner/Runner.entitlements');
-    expect(entitlements['com.apple.developer.applesignin']!.innerText.trim(),
-        'Default');
     expect(entitlements['aps-environment']!.innerText, r'${iosApsEnvironment}');
     expect(entitlements['com.apple.developer.associated-domains']!.innerText,
         contains('applinks:'));
@@ -65,14 +74,14 @@ void main() {
     final targets =
         RegExp(r'IPHONEOS_DEPLOYMENT_TARGET = ([0-9.]+);').allMatches(project);
     expect(targets, isNotEmpty);
-    expect(targets.map((m) => m.group(1)).toSet(), {'14.0'});
+    expect(targets.map((m) => m.group(1)).toSet(), {'15.0'});
     expect(
         plist('ios/Flutter/AppFrameworkInfo.plist')['MinimumOSVersion']!
             .innerText,
-        '14.0');
+        '15.0');
     final podfile = File('ios/Podfile').readAsStringSync();
-    expect(podfile, contains("platform :ios, '14.0'"));
-    expect(podfile, contains("['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'"));
+    expect(podfile, contains("platform :ios, '15.0'"));
+    expect(podfile, contains("['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'"));
     expect(File('ios/Config.xcconfig').readAsStringSync().trim(),
         '#include "../configs/env.props"');
     final sharedEnvironment = File('configs/env.props').readAsLinesSync();

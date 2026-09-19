@@ -243,11 +243,7 @@ class AppState extends State<App>
     super.initState();
   }
 
-  void initAds() async {
-    if (isIos) {
-      await AppTracking.requestAuthorization();
-    }
-
+  void initAds() {
     Services().advertisement.initAdvertise(_app!.advertisement);
   }
 

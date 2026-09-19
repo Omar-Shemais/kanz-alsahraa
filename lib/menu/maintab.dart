@@ -13,7 +13,6 @@ import 'package:provider/provider.dart';
 import '../common/config.dart';
 import '../common/constants.dart';
 import '../common/extensions/extensions.dart';
-import '../common/tools/app_tracking.dart';
 import '../common/tools/in_app_update_for_android.dart';
 import '../data/boxes.dart';
 import '../generated/l10n.dart';
@@ -154,12 +153,10 @@ class MainTabsState extends CustomOverlayState<MainTabs>
     }
   }
 
-  void showGDPRMessage() async {
-    final authorized = await AppTracking.requestAuthorization();
-
-    if (authorized) {
-      Services().advertisement.requestConsentInfoUpdate();
-    }
+  void showGDPRMessage() {
+    // The app does not track customers across apps. Advertising consent, if
+    // configured, is handled by the ad SDK without requesting ATT permission.
+    Services().advertisement.requestConsentInfoUpdate();
   }
 
   /// init the Event Bus listening

@@ -6,7 +6,6 @@ import 'dart:math' show Random;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:location/location.dart';
 
 import '../../common/constants.dart';
 import '../../common/tools.dart';
@@ -159,7 +158,6 @@ class PlacePickerState extends State<PlacePicker> with GoogleMapMixin {
 
   void onMapCreated(GoogleMapController controller) {
     mapController.complete(controller);
-    moveToCurrentUserLocation();
   }
 
   @override
@@ -613,14 +611,6 @@ class PlacePickerState extends State<PlacePicker> with GoogleMapMixin {
     reverseGeocodeLatLng(latLng);
 
     getNearbyPlaces(latLng);
-  }
-
-  void moveToCurrentUserLocation() {
-    var location = Location();
-    location.getLocation().then((locationData) {
-      var target = LatLng(locationData.latitude!, locationData.longitude!);
-      moveToLocation(target);
-    });
   }
 }
 

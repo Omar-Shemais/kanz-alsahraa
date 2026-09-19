@@ -22,7 +22,6 @@ import 'package:fluttertoast/fluttertoast_web.dart';
 import 'package:google_sign_in_web/google_sign_in_web.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
 import 'package:just_audio_web/just_audio_web.dart';
-import 'package:location_web/location_web.dart';
 import 'package:maps_launcher/maps_launcher_web.dart';
 import 'package:package_info_plus_web/package_info_plus_web.dart';
 import 'package:shared_preferences_web/shared_preferences_web.dart';
@@ -51,7 +50,6 @@ void registerPlugins(Registrar registrar) {
   GoogleSignInPlugin.registerWith(registrar);
   ImagePickerPlugin.registerWith(registrar);
   JustAudioPlugin.registerWith(registrar);
-  LocationWebPlugin.registerWith(registrar);
   MapsLauncherWeb.registerWith(registrar);
   PackageInfoPlugin.registerWith(registrar);
   SharedPreferencesPlugin.registerWith(registrar);
