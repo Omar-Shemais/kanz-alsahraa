@@ -250,6 +250,7 @@ class Category {
     id = parsedJson['id'].toString();
     name = parsedJson['name'];
     parent = parsedJson['parent'].toString();
+    slug = parsedJson['slug']?.toString();
     totalProduct = parsedJson['count'];
     final configuredImage = kCategoryStaticImages[parsedJson['id']];
     if (configuredImage is String && configuredImage.trim().isNotEmpty) {

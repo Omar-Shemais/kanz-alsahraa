@@ -14,6 +14,7 @@ import '../../../widgets/common/index.dart';
 import '../../../widgets/common/parallax_image.dart';
 import '../../../widgets/common/refresh_scroll_physics.dart';
 import '../../index.dart';
+import '../category_presentation.dart';
 
 class CardCategories extends StatefulWidget {
   /// Not support enableLargeCategory
@@ -169,10 +170,8 @@ class _StateCardCategories extends BaseScreen<CardCategories> {
           );
         }
 
-        var categories = provider.rootCategories ?? <Category>[];
-        if (categories.isEmpty) {
-          categories = provider.categories ?? <Category>[];
-        }
+        final allCategories = provider.categories ?? <Category>[];
+        final categories = storefrontRootCategories(allCategories);
 
         if (categories.isEmpty) {
           return Center(
@@ -230,9 +229,37 @@ class _CategoryCardItem extends StatelessWidget {
 
   /// Render category Image support caching on ios/android
   /// also fix loading on Web
-  Widget renderCategoryImage(maxWidth) {
-    final image = category.image ?? '';
-    if (image.isEmpty) return const SizedBox();
+  Widget _fallback(BuildContext context, double maxWidth) {
+    final color = Theme.of(context).primaryColor;
+    return Container(
+      width: maxWidth,
+      height: maxWidth * 0.35,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            color.withValues(alpha: 0.92),
+            color.withValues(alpha: 0.58),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.category_outlined,
+          color: Colors.white.withValues(alpha: 0.34),
+          size: maxWidth * 0.17,
+          semanticLabel: 'صورة افتراضية للقسم',
+        ),
+      ),
+    );
+  }
+
+  /// Render category Image support caching on ios/android
+  /// also fix loading on Web
+  Widget renderCategoryImage(BuildContext context, double maxWidth) {
+    if (!hasUsableCategoryImage(category)) return _fallback(context, maxWidth);
+    final image = category.image!;
     var imageProxy = '';
 
     if (kImageProxy.isNotEmpty) {
@@ -252,14 +279,16 @@ class _CategoryCardItem extends StatelessWidget {
         width: maxWidth,
         height: maxWidth * 0.35,
         placeholder: kTransparentImage,
+        imageErrorBuilder: (_, __, ___) => _fallback(context, maxWidth),
       );
     }
 
     return FluxImage(
-      imageUrl: category.image!,
+      imageUrl: image,
       fit: BoxFit.cover,
       width: maxWidth,
       height: maxWidth * 0.35,
+      errorWidget: _fallback(context, maxWidth),
     );
   }
 
@@ -271,7 +300,7 @@ class _CategoryCardItem extends StatelessWidget {
       onTap: onTap,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (enableParallax) {
+          if (enableParallax && hasUsableCategoryImage(category)) {
             return Container(
               height: constraints.maxWidth * 0.35,
               width: MediaQuery.of(context).size.width,
@@ -298,7 +327,7 @@ class _CategoryCardItem extends StatelessWidget {
               children: <Widget>[
                 ClipRRect(
                     borderRadius: const BorderRadius.all(Radius.circular(3.0)),
-                    child: renderCategoryImage(constraints.maxWidth)),
+                    child: renderCategoryImage(context, constraints.maxWidth)),
                 Container(
                   width: constraints.maxWidth,
                   height: constraints.maxWidth * 0.35,
@@ -389,7 +418,7 @@ class SubItem extends StatelessWidget {
                 color: Theme.of(context)
                     .colorScheme
                     .secondary
-                    .withOpacity(level == 0 && seeAll == '' ? 0.2 : 0),
+                    .withValues(alpha: level == 0 && seeAll == '' ? 0.2 : 0),
               ),
             ),
           ),
@@ -406,7 +435,9 @@ class SubItem extends StatelessWidget {
                     border: Border(
                       bottom: BorderSide(
                         width: 1.5,
-                        color: Theme.of(context).primaryColor.withOpacity(0.4),
+                        color: Theme.of(context)
+                            .primaryColor
+                            .withValues(alpha: 0.4),
                       ),
                     ),
                   ),

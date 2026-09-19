@@ -8,10 +8,12 @@ void main() {
       'name': '1 جرام',
       'parent': 124,
       'count': 10,
+      'slug': 'one-gram',
       'image': null,
     });
 
     expect(category.image, isNull);
+    expect(category.slug, 'one-gram');
   });
 
   test('WordPress category uses a real WooCommerce image when supplied', () {
