@@ -65,7 +65,10 @@ void main() {
     expect(dependencies, isNot(contains('google_maps_flutter:')));
     expect(dependencies, isNot(contains('flutter_facebook_auth:')));
     expect(dependencies, isNot(contains('facebook_app_events:')));
+    expect(dependencies, isNot(contains('google_sign_in:')));
+    expect(dependencies, isNot(contains('google_sign_in_ios:')));
     final podfile = File('ios/Podfile').readAsStringSync();
+    expect(podfile, isNot(contains('OneSignalXCFramework')));
     expect(podfile, contains("'PERMISSION_LOCATION=0'"));
     expect(podfile, contains("'PERMISSION_LOCATION_WHENINUSE=0'"));
     expect(podfile, contains("'PERMISSION_LOCATION_ALWAYS=0'"));
@@ -127,5 +130,8 @@ void main() {
         contains('/pre-actions.sh'));
     expect(project, contains('PrivacyInfo.xcprivacy in Resources'));
     expect(project, contains('FirebaseCrashlytics/run'));
+    expect(project, isNot(contains('OneSignalNotificationServiceExtension')),
+        reason:
+            'The inactive OneSignal extension must not be embedded beside Firebase Messaging.');
   });
 }

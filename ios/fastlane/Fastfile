@@ -20,20 +20,6 @@ platform :ios do
       )
     end
 
-  lane :update_profile_build_onesignal do |options|
-    update_project_provisioning(
-      target_filter: "OneSignalNotificationServiceExtension",
-      xcodeproj: "Runner.xcodeproj",
-      profile: options[:profilesioning_file],
-      code_signing_identity: options[:code_signing_identity],
-    )
-    update_code_signing_settings(
-      targets: "OneSignalNotificationServiceExtension",
-      use_automatic_signing: options[:use_automatic_signing],
-      path: options[:xcodeproj]    
-    )
-  end
-
   lane :update_profile_build do |options|
     update_project_provisioning(
       target_filter: "Runner",
