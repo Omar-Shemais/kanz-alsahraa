@@ -40,11 +40,16 @@ void main() {
       'NSCameraUsageDescription',
       'NSPhotoLibraryUsageDescription',
       'NSFaceIDUsageDescription',
-      'NSMicrophoneUsageDescription',
-      'NSSpeechRecognitionUsageDescription',
     ]) {
       expect(info[key]!.innerText, isNotEmpty);
     }
+    expect(info, isNot(contains('NSMicrophoneUsageDescription')));
+    expect(info, isNot(contains('NSSpeechRecognitionUsageDescription')));
+    expect(
+      File('pubspec.yaml').readAsStringSync(),
+      isNot(contains('speech_to_text:')),
+      reason: 'Unused speech APIs trigger unnecessary iOS privacy declarations.',
+    );
     expect(info['NSAppTransportSecurity']!.innerXml, isNot(contains('<true')));
     final entitlements = plist('ios/Runner/Runner.entitlements');
     expect(entitlements['com.apple.developer.applesignin']!.innerText.trim(),

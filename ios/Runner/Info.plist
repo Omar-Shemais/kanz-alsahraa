@@ -109,10 +109,6 @@
     <string>يتيح لك التطبيق تسجيل الدخول السريع والآمن باستخدام البصمة أو التعرف على الوجه</string>
 	<key>NSCameraUsageDescription</key>
 	<string>يحتاج التطبيق الوصول للكاميرا لإرفاق إيصالات التحويل البنكي أو صور المنتجات</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>يستخدم التطبيق الميكروفون عند اختيار البحث الصوتي لتحويل كلامك إلى عبارة بحث عن المنتجات</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>يستخدم التطبيق ميزة التعرف على الكلام عند اختيار البحث الصوتي لعرض المنتجات التي تبحث عنها</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -121,7 +121,6 @@ dependencies:
   flutter_linkify: 6.0.0
   gms_check: 1.0.2
   google_mobile_ads: ^5.1.0
-  speech_to_text: ^7.3.0 # may conflict with qr_code_scanner
   flutter_keyboard_visibility: 6.0.0
   app_tracking_transparency: ^2.0.5
   flutter_branch_sdk: 7.1.0
