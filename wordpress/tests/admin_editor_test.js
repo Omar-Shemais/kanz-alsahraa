@@ -13,7 +13,7 @@ class Element {
   change() { this.listeners.change?.({ preventDefault() {} }); }
 }
 const elements = {};
-for (const id of ['kanz-json', 'kanz-error', 'kanz-sections', 'kanz-updates', 'kanz-appearance', 'kanz-all-fields', 'kanz-apply', 'kanz-import', 'kanz-add-banner', 'kanz-add-category', 'kanz-form', 'kanz-export', 'kanz-confirm-updates', 'kanz-category-order']) elements[id] = new Element();
+for (const id of ['kanz-json', 'kanz-error', 'kanz-sections', 'kanz-updates', 'kanz-appearance', 'kanz-all-fields', 'kanz-apply', 'kanz-import', 'kanz-add-banner', 'kanz-add-category', 'kanz-form', 'kanz-export', 'kanz-confirm-updates', 'kanz-category-order', 'kanz-filter-category-order']) elements[id] = new Element();
 elements['kanz-json'].value = fs.readFileSync(path.join(__dirname, '../../lib/config/config_ar.json'), 'utf8');
 const canonicalScript = fs.readFileSync(path.join(__dirname, '../kanz-app-control/admin.js'), 'utf8');
 let editorScript = canonicalScript;
@@ -26,7 +26,7 @@ if (process.argv.includes('--snippet')) {
 }
 vm.runInNewContext(editorScript, {
   document: { getElementById: (id) => elements[id], createElement: (tag) => new Element(tag) },
-  window: { confirm: () => true }, kanzAdmin: { categories: [{ id: '124', name: 'سبائك ذهب' }, { id: '130', name: 'جنيهات ذهب' }, { id: '430', name: 'سبائك فضة' }], products: [{ id: '101', name: 'سبيكة 10 جرام' }] },
+  window: { confirm: () => true }, kanzAdmin: { categories: [{ id: '510', name: 'عروض اليوم الوطني', parent: 0, count: 7 }, { id: '502', name: 'أحدث المنتجات', parent: 0, count: 7 }, { id: '124', name: 'سبائك ذهب', parent: 0, count: 2 }, { id: '130', name: 'جنيهات ذهب', parent: 0, count: 1 }, { id: '430', name: 'سبائك فضة', parent: 0, count: 1 }, { id: '185', name: 'غير مصنف', parent: 0, count: 1, isUncategorized: true }], products: [{ id: '101', name: 'سبيكة 10 جرام' }] },
   setTimeout, Blob, URL,
 });
 const read = () => JSON.parse(elements['kanz-json'].value);
@@ -52,6 +52,14 @@ const orderBeforeInvalidEdit = read().TabBar.find((item) => item.layout === 'cat
 orderInput.value = '2.5'; orderInput.change();
 assert.deepEqual(read().TabBar.find((item) => item.layout === 'category').categories, orderBeforeInvalidEdit);
 assert.equal(orderInput.value, '1');
+const categoryTab = read().TabBar.find((item) => item.layout === 'category');
+assert.ok(Array.isArray(categoryTab.filterCategories));
+assert.ok(categoryTab.filterCategories.includes('124'));
+assert.ok(categoryTab.filterCategories.includes('510'));
+assert.ok(categoryTab.filterCategories.includes('502'));
+assert.ok(!categoryTab.filterCategories.includes('185'));
+const filterCheckboxes = descendants(elements['kanz-filter-category-order']).filter((item) => item.tag === 'input' && item.type === 'checkbox');
+assert.equal(filterCheckboxes.length, 6);
 const modified = read(); modified.Setting.MainColor = '#abcdef';
 elements['kanz-json'].value = JSON.stringify(modified);
 elements['kanz-json'].listeners.input();

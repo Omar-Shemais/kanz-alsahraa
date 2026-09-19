@@ -94,6 +94,7 @@
     renderAppearance();
     renderAllFields();
     renderCategoryOrder();
+    renderFilterCategoryOrder();
     config.HorizonLayout.forEach((section, index) => {
       const card = document.createElement('div');
       card.style.cssText = 'border:1px solid #ccc;padding:12px;margin:12px 0;background:white';
@@ -439,6 +440,84 @@
 
     filterInput.addEventListener('input', () => renderList(filterInput.value));
     renderList('');
+  }
+  function renderFilterCategoryOrder() {
+    const panel = document.getElementById('kanz-filter-category-order'); if (!panel) return;
+    panel.replaceChildren();
+    const tab = config.TabBar.find((item) => item.layout === 'category'); if (!tab) return;
+    const available = kanzAdmin.categories || [];
+    const pageOrder = Array.isArray(tab.categories) ? tab.categories.map(String) : [];
+    const allIds = [...new Set([...pageOrder, ...available.map((item) => String(item.id))])];
+    if (!Array.isArray(tab.filterCategories)) {
+      tab.filterCategories = allIds.filter((id) => {
+        const category = available.find((item) => String(item.id) === id);
+        return category?.isUncategorized !== true;
+      });
+      sync();
+    }
+    const visible = tab.filterCategories.map(String).filter((id) => allIds.includes(id));
+    tab.filterCategories = visible;
+
+    const note = document.createElement('p');
+    note.textContent = 'فعّل التصنيفات التي تريد ظهورها داخل فلتر المنتجات ورتّبها بصورة مستقلة عن صفحة التصنيفات. أقسام أحدث المنتجات وعروض اليوم الوطني تبقى متاحة مثل بقية التصنيفات.';
+    panel.append(note);
+    const search = document.createElement('input');
+    search.type = 'search'; search.placeholder = '🔍 ابحث في تصنيفات الفلتر...';
+    search.style.cssText = 'display:block;width:100%;max-width:650px;padding:8px 12px;margin:8px 0 12px;border:1px solid #ccd0d4;border-radius:6px';
+    panel.append(search);
+    const list = document.createElement('div'); panel.append(list);
+
+    const renderList = () => {
+      list.replaceChildren();
+      const query = search.value.trim().toLowerCase();
+      const ordered = [...visible, ...allIds.filter((id) => !visible.includes(id))];
+      ordered.forEach((id) => {
+        const category = available.find((item) => String(item.id) === id);
+        const name = category?.name || `تصنيف #${id}`;
+        if (query && !name.toLowerCase().includes(query) && !id.includes(query)) return;
+        const enabled = visible.includes(id);
+        const row = document.createElement('div');
+        row.style.cssText = `display:flex;align-items:center;justify-content:space-between;padding:8px 12px;margin:6px 0;max-width:650px;border:1px solid #ddd;border-radius:6px;background:${enabled ? '#f8fff8' : '#f4f4f4'}`;
+        const identity = document.createElement('label');
+        identity.style.cssText = 'display:flex;align-items:center;gap:8px;font-weight:600';
+        const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = enabled;
+        checkbox.addEventListener('change', () => change(() => {
+          if (checkbox.checked) {
+            if (!visible.includes(id)) visible.push(id);
+          } else {
+            if (visible.length === 1) {
+              checkbox.checked = true;
+              throw new Error('يجب إبقاء تصنيف واحد على الأقل ظاهراً في الفلتر.');
+            }
+            const index = visible.indexOf(id);
+            if (index !== -1) visible.splice(index, 1);
+          }
+          tab.filterCategories = [...visible];
+        }));
+        const parent = category?.parent
+          ? available.find((item) => String(item.id) === String(category.parent))?.name
+          : '';
+        identity.append(checkbox, `${name}${parent ? ` — فرعي من ${parent}` : ''}`);
+        row.append(identity);
+        const actions = document.createElement('div'); actions.style.cssText = 'display:flex;align-items:center;gap:3px';
+        if (enabled) {
+          const index = visible.indexOf(id);
+          const position = document.createElement('input'); position.type = 'number'; position.min = '1'; position.max = String(visible.length); position.step = '1'; position.value = String(index + 1);
+          position.style.cssText = 'width:52px;text-align:center';
+          position.addEventListener('change', () => {
+            const target = Number(position.value) - 1;
+            if (!Number.isInteger(target) || target < 0 || target >= visible.length) { position.value = String(index + 1); return; }
+            change(() => { visible.splice(target, 0, visible.splice(index, 1)[0]); tab.filterCategories = [...visible]; });
+          });
+          actions.append(position);
+          button('↑', () => change(() => { if (index > 0) { [visible[index - 1], visible[index]] = [visible[index], visible[index - 1]]; tab.filterCategories = [...visible]; } }), actions);
+          button('↓', () => change(() => { if (index + 1 < visible.length) { [visible[index + 1], visible[index]] = [visible[index], visible[index + 1]]; tab.filterCategories = [...visible]; } }), actions);
+        }
+        row.append(actions); list.append(row);
+      });
+    };
+    search.addEventListener('input', renderList);
+    renderList();
   }
   function renderUpdates() {
     const updates = document.getElementById('kanz-updates'); if (!updates) return;

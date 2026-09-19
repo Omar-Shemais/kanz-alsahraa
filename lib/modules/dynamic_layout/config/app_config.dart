@@ -372,6 +372,7 @@ class TabBarMenuConfig {
 
   dynamic jsonData;
   dynamic categories;
+  dynamic filterCategories;
   dynamic images;
   bool parallax = false;
 
@@ -396,6 +397,7 @@ class TabBarMenuConfig {
     this.showOriginalColor = false,
     this.jsonData,
     this.categories,
+    this.filterCategories,
     this.images,
     this.categoryLayout = 'card',
     this.vendorLayout = 'card',
@@ -419,6 +421,7 @@ class TabBarMenuConfig {
     showOriginalColor = json['showOriginalColor'] ?? false;
     key = json['key'];
     categories = json['categories'];
+    filterCategories = json['filterCategories'];
     images = json['images'];
     categoryLayout = json['categoryLayout'] ?? 'card';
     vendorLayout = json['vendorLayout'] ?? 'card';
@@ -456,6 +459,9 @@ class TabBarMenuConfig {
     }
     map['jsonData'] = jsonData;
     map['categories'] = categories;
+    if (filterCategories != null) {
+      map['filterCategories'] = filterCategories;
+    }
     map['images'] = images;
 
     map['parallax'] = parallax;
@@ -485,6 +491,7 @@ class TabBarMenuConfig {
       remapCategories: remapCategories,
       jsonData: jsonData,
       categories: categories,
+      filterCategories: filterCategories,
       images: images,
       parallax: parallax,
       visible: visible,

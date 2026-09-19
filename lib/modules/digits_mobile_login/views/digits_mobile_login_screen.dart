@@ -9,7 +9,9 @@ import '../../../generated/l10n.dart';
 import '../../../models/index.dart';
 import '../../../screens/login_sms/login_sms_screen.dart';
 import '../../../screens/login_sms/verify.dart';
+import '../digits_login_failure.dart';
 import '../services/index.dart';
+import 'digits_mobile_login_sign_up_screen.dart';
 import 'digits_mobile_login_verify_screen.dart';
 
 class DigitsMobileLoginScreen extends LoginSMSScreen {
@@ -22,6 +24,34 @@ class DigitsMobileLoginScreen extends LoginSMSScreen {
 
 class _LoginSMSState extends LoginSMSScreenState<DigitsMobileLoginScreen> {
   final _services = DigitsMobileLoginServices();
+
+  void _showLoginFailure(Object error) {
+    if (!mounted) return;
+    final failure = presentDigitsLoginFailure(error);
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(failure.text, textDirection: TextDirection.rtl),
+          duration: const Duration(seconds: 10),
+          action: SnackBarAction(
+            label: failure.action == DigitsLoginFailureAction.register
+                ? 'إنشاء حساب'
+                : 'إغلاق',
+            onPressed: () {
+              if (failure.action == DigitsLoginFailureAction.register) {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => DigitsMobileLoginSignUpScreen(
+                    initialMobile: viewModel.phoneNumber,
+                  ),
+                ));
+              }
+            },
+          ),
+        ),
+      );
+  }
 
   @override
   void loginSMS(context) {
@@ -54,7 +84,7 @@ class _LoginSMSState extends LoginSMSScreenState<DigitsMobileLoginScreen> {
 
           void verifyFailed(exception) {
             stopAnimation();
-            failMessage(exception.toString(), context);
+            _showLoginFailure(exception);
           }
 
           viewModel.verify(
@@ -69,8 +99,7 @@ class _LoginSMSState extends LoginSMSScreenState<DigitsMobileLoginScreen> {
                       mobile: viewModel.phoneNumber);
                   return true;
                 } catch (e) {
-                  await stopAnimation()
-                      .then((value) => failMessage(e.toString(), context));
+                  await stopAnimation().then((value) => _showLoginFailure(e));
                   return false;
                 }
               });
@@ -78,7 +107,7 @@ class _LoginSMSState extends LoginSMSScreenState<DigitsMobileLoginScreen> {
           _sendLoginOtp();
         }
       } catch (e) {
-        stopAnimation().then((value) => failMessage(e.toString(), context));
+        stopAnimation().then((value) => _showLoginFailure(e));
       }
     }
   }
@@ -105,7 +134,7 @@ class _LoginSMSState extends LoginSMSScreenState<DigitsMobileLoginScreen> {
       }
     } catch (e) {
       await stopAnimation();
-      failMessage(e.toString(), context);
+      _showLoginFailure(e);
     }
   }
 
@@ -124,7 +153,7 @@ class _LoginSMSState extends LoginSMSScreenState<DigitsMobileLoginScreen> {
       NavigateTools.navigateAfterLogin(loggedInUser, context);
     } catch (e) {
       await stopAnimation();
-      failMessage(e.toString(), context);
+      _showLoginFailure(e);
     }
   }
 }

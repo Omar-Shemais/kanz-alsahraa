@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 typedef ParentSelectChanged = void Function(bool isSelected);
+typedef ParentBuilder = Widget Function(
+  BuildContext context,
+  bool isExpanded,
+  VoidCallback toggle,
+);
 
 /// # Tree View
 ///
@@ -35,19 +40,25 @@ class TreeView extends StatelessWidget {
 /// is collapsed by default. When clicked the child widget is expanded.
 class Parent extends StatefulWidget {
   final Widget parent;
+  final Widget? expandedParent;
+  final ParentBuilder? parentBuilder;
   final ChildList childList;
   final MainAxisSize mainAxisSize;
   final CrossAxisAlignment crossAxisAlignment;
   final MainAxisAlignment mainAxisAlignment;
   final ParentSelectChanged? callback;
+  final bool initiallyExpanded;
 
   const Parent({
     required this.parent,
+    this.expandedParent,
+    this.parentBuilder,
     required this.childList,
     this.mainAxisAlignment = MainAxisAlignment.center,
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.mainAxisSize = MainAxisSize.min,
     this.callback,
+    this.initiallyExpanded = false,
     super.key,
   });
 
@@ -56,7 +67,27 @@ class Parent extends StatefulWidget {
 }
 
 class ParentState extends State<Parent> {
-  final ValueNotifier<bool> _isSelected = ValueNotifier(false);
+  late final ValueNotifier<bool> _isSelected;
+
+  @override
+  void initState() {
+    super.initState();
+    _isSelected = ValueNotifier(widget.initiallyExpanded);
+  }
+
+  @override
+  void didUpdateWidget(covariant Parent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.initiallyExpanded && widget.initiallyExpanded) {
+      _isSelected.value = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _isSelected.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +96,16 @@ class ParentState extends State<Parent> {
       crossAxisAlignment: widget.crossAxisAlignment,
       mainAxisAlignment: widget.mainAxisAlignment,
       children: <Widget>[
-        InkWell(
-          onTap: expand,
-          child: widget.parent,
+        ValueListenableBuilder<bool>(
+          valueListenable: _isSelected,
+          builder: (context, expanded, child) => widget.parentBuilder != null
+              ? widget.parentBuilder!(context, expanded, expand)
+              : InkWell(
+                  onTap: expand,
+                  child: expanded
+                      ? widget.expandedParent ?? widget.parent
+                      : widget.parent,
+                ),
         ),
         _getChild(),
       ],

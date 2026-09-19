@@ -4,8 +4,9 @@ import 'package:provider/provider.dart';
 
 import '../../../generated/l10n.dart';
 import '../../../models/index.dart'
-    show BlogModel, Category, CategoryModel, ProductModel;
+    show AppModel, BlogModel, Category, CategoryModel, ProductModel;
 import '../../common/tree_view.dart';
+import 'category_filter_categories.dart';
 import 'widgets/category_item.dart';
 import 'widgets/menu_title_widget.dart';
 
@@ -121,30 +122,39 @@ class _CategoryTreeState extends State<CategoryFilterWidget> {
         selectedCategoryTree.insert(0, category.parent);
       }
 
+      final containsSelection = categoryContainsSelection(
+        categories ?? const <Category>[],
+        category.id,
+        _categoryId.toSet(),
+      );
+      CategoryItem item({
+        required bool expanded,
+        VoidCallback? onExpand,
+      }) =>
+          CategoryItem(
+            category,
+            padding: widget.paddingItem,
+            margin: widget.marginItem,
+            hasChild: hasChildren(categories, category.id),
+            isSelected: _categoryId.contains(category.id),
+            isParentOfSelected: selectedCategoryTree.contains(category.id),
+            isExpanded: expanded,
+            onExpand: onExpand,
+            onTap: () => onTap(category),
+            level: level,
+            isBlog: widget.isBlog,
+          );
+
       subTree.add(Parent(
-        parent: CategoryItem(
-          category,
-          padding: widget.paddingItem,
-          margin: widget.marginItem,
-          hasChild: hasChildren(categories, category.id),
-          isSelected: _categoryId.contains(category.id),
-          isParentOfSelected: selectedCategoryTree.contains(category.id),
-          onTap: () => onTap(category),
-          level: level,
-          isBlog: widget.isBlog,
+        parent: item(expanded: false),
+        expandedParent: item(expanded: true),
+        parentBuilder: (context, expanded, toggle) => item(
+          expanded: expanded,
+          onExpand: toggle,
         ),
+        initiallyExpanded: containsSelection,
         childList: ChildList(
           children: [
-            if (hasChildren(categories, category.id))
-              CategoryItem(
-                category,
-                isParent: true,
-                padding: widget.paddingItem,
-                margin: widget.marginItem,
-                isSelected: _categoryId.contains(category.id),
-                onTap: () => onTap(category),
-                level: level + 1,
-              ),
             ...subCategories,
           ],
         ),
@@ -155,9 +165,17 @@ class _CategoryTreeState extends State<CategoryFilterWidget> {
   }
 
   Widget getTreeView({required List<Category> categories}) {
+    final filterIds = widget.isUseBlog
+        ? null
+        : context.select<AppModel, List<String>?>((model) =>
+            model.filterCategories == null
+                ? null
+                : List<String>.from(model.filterCategories!));
+    final visibleCategories = arrangeFilterCategories(categories, filterIds);
+    selectedCategoryTree = [];
     return TreeView(
       parentList: _getCategoryItems(
-        categories,
+        visibleCategories,
         onFilter: widget.onFilter,
       ),
     );

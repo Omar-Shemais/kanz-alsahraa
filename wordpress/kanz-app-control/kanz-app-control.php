@@ -17,6 +17,16 @@ function kanz_config_validate($data) {
         if (!is_array($tab) || empty($tab['layout']) || empty($tab['icon']) || !is_string($tab['layout']) || !is_string($tab['icon'])) {
             return new WP_Error('invalid_tabs', 'إعدادات شريط التنقل غير صحيحة.');
         }
+        if (isset($tab['filterCategories'])) {
+            if (!is_array($tab['filterCategories']) || !$tab['filterCategories']) {
+                return new WP_Error('invalid_filter_categories', 'اختر تصنيفاً واحداً على الأقل لفلتر المنتجات.');
+            }
+            foreach ($tab['filterCategories'] as $category_id) {
+                if (!preg_match('/^\d+$/', (string) $category_id)) {
+                    return new WP_Error('invalid_filter_categories', 'قائمة تصنيفات الفلتر غير صحيحة.');
+                }
+            }
+        }
     }
     foreach ($data['HorizonLayout'] as $section) {
         if (!is_array($section) || empty($section['layout']) || !is_string($section['layout'])) {
@@ -77,6 +87,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
                     'name' => $term->name,
                     'parent' => (int) $term->parent,
                     'count' => (int) $term->count,
+                    'isUncategorized' => (int) get_option('default_product_cat') === (int) $term->term_id,
                 );
             }
         }
@@ -182,6 +193,8 @@ function kanz_config_page() {
         <h2>ترتيب التصنيفات في صفحة التصنيفات</h2>
         <p>الأسهم تغيّر ترتيب التصنيفات. تُحفظ القائمة كاملة عند تغيير الترتيب، دون حذف التصنيفات الأخرى. التصنيفات الجديدة لاحقاً تحتاج إعادة حفظ الترتيب.</p>
         <div id="kanz-category-order"></div>
+        <h2>تصنيفات فلتر المنتجات</h2>
+        <div id="kanz-filter-category-order"></div>
         <h2>التحديث الإجباري</h2>
         <p>الحد هو رقم البناء، وليس الاسم مثل 1.10.2. لا تفعّله قبل توفر إصدار يمكن للعملاء تنزيله. يطبّق التطبيق سياسة الإعدادات المحفوظة عند فتحه من جديد؛ لا يقطع عملية دفع جارية إذا تغيرت الإعدادات أثناء الاستخدام.</p>
         <div id="kanz-updates"></div>

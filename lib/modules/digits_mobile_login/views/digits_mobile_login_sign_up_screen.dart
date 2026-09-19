@@ -21,7 +21,9 @@ import '../services/index.dart';
 import 'digits_mobile_login_verify_screen.dart';
 
 class DigitsMobileLoginSignUpScreen extends StatefulWidget {
-  const DigitsMobileLoginSignUpScreen();
+  const DigitsMobileLoginSignUpScreen({super.key, this.initialMobile});
+
+  final String? initialMobile;
 
   @override
   State<DigitsMobileLoginSignUpScreen> createState() =>
@@ -41,6 +43,7 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
   final firstNameNode = FocusNode();
   final lastNameNode = FocusNode();
   final mobileNode = FocusNode();
+  late final TextEditingController mobileController;
   final usernameNode = FocusNode();
   final emailNode = FocusNode();
 
@@ -49,6 +52,8 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
   @override
   void initState() {
     super.initState();
+    mobile = widget.initialMobile;
+    mobileController = TextEditingController(text: mobile);
     _verifySuccessStream = Services().firebase.getFirebaseStream();
 
     if (LoginSMSConstants.dialCodeDefault.isNotEmpty ||
@@ -71,6 +76,7 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
   @override
   void dispose() {
     mobileNode.dispose();
+    mobileController.dispose();
     emailNode.dispose();
     usernameNode.dispose();
     firstNameNode.dispose();
@@ -354,13 +360,14 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
                             backgroundColor:
                                 Theme.of(context).colorScheme.surface,
                             dialogBackgroundColor:
-                                Theme.of(context).dialogBackgroundColor,
+                                Theme.of(context).dialogTheme.backgroundColor,
                           ),
                           Expanded(
                             child: CustomTextField(
                               key: const Key('registerMobileField'),
                               autofillHints: const [AutofillHints.familyName],
                               focusNode: mobileNode,
+                              controller: mobileController,
                               showCancelIcon: true,
                               keyboardType: TextInputType.phone,
                               onChanged: (value) => mobile = value,

@@ -81,6 +81,7 @@ class AppModel with ChangeNotifier {
 
   /// Product and Category Layout setting
   List<String>? categories;
+  List<String>? filterCategories;
   List<Map>? remapCategories;
   Map? categoriesIcons;
   String categoryLayout = '';
@@ -331,6 +332,7 @@ class AppModel with ChangeNotifier {
             activeTabs.firstWhereOrNull((e) => e.layout == nextTab.layout);
         if (existingTab != null) {
           existingTab.categories = nextTab.categories;
+          existingTab.filterCategories = nextTab.filterCategories;
           existingTab.images = nextTab.images;
           existingTab.categoryLayout = nextTab.categoryLayout;
           existingTab.vendorLayout = nextTab.vendorLayout;
@@ -350,6 +352,7 @@ class AppModel with ChangeNotifier {
 
   void _syncHomeNavigation() {
     categories = null;
+    filterCategories = null;
     remapCategories = null;
     categoriesIcons = null;
     categoryLayout = '';
@@ -394,6 +397,15 @@ class AppModel with ChangeNotifier {
         /// Support old type category (base64) work with new API
         /// Old type is base64, new type is url like gid://shopify/Collection/123456789
         categories = categories?.map(_parseShopifyCategories).toList();
+      }
+    }
+    if (categoryTab.filterCategories != null) {
+      if (categoryTab.filterCategories is Iterable) {
+        filterCategories = (categoryTab.filterCategories as Iterable)
+            .map((e) => e.toString())
+            .toList();
+      } else {
+        filterCategories = [categoryTab.filterCategories.toString()];
       }
     }
     if (categoryTab.images != null) {
