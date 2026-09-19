@@ -6,12 +6,13 @@ import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../common/config.dart';
+import '../../../common/constants.dart';
 import '../../../models/index.dart'
     show CartModel, Product, ProductModel, UserModel;
 import '../../../models/product_variant_model.dart';
+import '../../../routes/flux_navigate.dart';
 import '../../../services/service_config.dart';
 import '../../../services/services.dart';
-import '../../cart/cart_screen.dart';
 import '../../chat/vendor_chat.dart';
 import '../product_detail_screen.dart';
 import '../widgets/index.dart';
@@ -126,16 +127,10 @@ class _HalfSizeLayoutState extends State<HalfSizeLayout>
                       size: 22,
                     ),
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (BuildContext context) => Scaffold(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.surface,
-                            body: const CartScreen(isModal: true),
-                          ),
-                          fullscreenDialog: true,
-                        ),
+                      FluxNavigate.pushNamed(
+                        RouteList.cart,
+                        context: context,
+                        forceRootNavigator: true,
                       );
                     }),
               ),

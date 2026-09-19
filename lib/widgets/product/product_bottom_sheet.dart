@@ -17,10 +17,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/constants.dart';
 import '../../common/tools.dart';
 import '../../generated/l10n.dart';
 import '../../models/index.dart' show CartModel, Product, ProductVariation;
-import '../../screens/index.dart' show CartScreen;
+import '../../routes/flux_navigate.dart';
 
 // These curves define the emphasized easing curve.
 const Cubic _kAccelerateCurve = Cubic(0.548, 0.0, 0.757, 0.464);
@@ -292,6 +293,17 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet>
     }
   }
 
+  /// Opens the cart as a real route instead of embedding a full screen inside
+  /// this animated corner sheet. A routed cart owns its SafeArea, app bar and
+  /// back navigation, so it cannot be clipped underneath the iOS status bar.
+  Future<void> _openCartRoute() async {
+    await FluxNavigate.pushNamed(
+      RouteList.cart,
+      context: context,
+      forceRootNavigator: true,
+    );
+  }
+
   // Closes the ExpandingBottomSheet if it's open or opening, otherwise does nothing.
   void close() {
     if (_isOpen) {
@@ -309,8 +321,6 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet>
       return const EdgeInsetsDirectional.only(start: 16.0, end: 8.0);
     }
   }
-
-  bool get _cartIsVisible => _thumbnailOpacityAnimation.value == 0.0;
 
   Widget _buildThumbnails(int numProducts) {
     var totalCart = Provider.of<CartModel>(context).totalCartQuantity;
@@ -374,16 +384,6 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet>
     );
   }
 
-  Widget _buildCartScreen() {
-    return Container(
-      color: Theme.of(context).colorScheme.surface,
-      child: const CartScreen(
-        isModal: true,
-        hideNewAppBar: true,
-      ),
-    );
-  }
-
   Widget _buildCart(BuildContext context, Widget? child) {
     // numProducts is the number of different products in the cart (does not
     // include multiples of the same product).
@@ -439,9 +439,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet>
           color: isCustomCart
               ? Colors.transparent
               : Theme.of(context).primaryColor.withOpacity(0.2),
-          child: _cartIsVisible
-              ? _buildCartScreen()
-              : _buildThumbnails(numProducts),
+          child: _buildThumbnails(numProducts),
         ),
       ),
     );
@@ -486,7 +484,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet>
         builder: _buildSlideAnimation,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: open,
+          onTap: _openCartRoute,
           child: AnimatedBuilder(
             builder: _buildCart,
             animation: _controller,
