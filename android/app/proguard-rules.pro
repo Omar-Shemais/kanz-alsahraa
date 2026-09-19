@@ -29,6 +29,14 @@
 -keep public class com.google.ads.** { *; }
 
 ##############################################
+# Google Play Core / Deferred Components (R8 fix)
+##############################################
+-dontwarn com.google.android.play.core.**
+-dontwarn com.google.android.play.core.splitcompat.**
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasks.**
+
+##############################################
 # flutter_inappwebview
 ##############################################
 -keep class com.pichillilorenzo.flutter_inappwebview.** { *; }
