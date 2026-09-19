@@ -14,7 +14,8 @@ void validateShorebirdConfiguration(String configText, String pubspecText) {
   final assets = (pubspec['flutter'] as YamlMap)['assets'] as YamlList;
   if (!assets.contains('shorebird.yaml')) {
     throw StateError(
-        'shorebird.yaml must be bundled in Flutter assets. Run shorebird init.');
+        'The checked-out pubspec.yaml does not bundle shorebird.yaml. '
+        'Run shorebird init, then commit and push both files to the branch Codemagic builds.');
   }
   if (config['auto_update'] == false) {
     throw StateError(
