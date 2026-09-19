@@ -151,13 +151,17 @@ class _LoginPageState extends BaseScreen<LoginScreenMobile>
                                   CustomTextField(
                                     key: const Key('loginEmailField'),
                                     controller: usernameCtrl,
-                                    autofillHints: const [AutofillHints.email],
+                                    focusNode: _usernameFocusNode,
+                                    autofillHints: const [
+                                      AutofillHints.username,
+                                      AutofillHints.email,
+                                    ],
                                     showCancelIcon: true,
                                     autocorrect: false,
                                     enableSuggestions: false,
                                     textInputAction: TextInputAction.next,
                                     keyboardType: TextInputType.emailAddress,
-                                    nextNode: _usernameFocusNode,
+                                    nextNode: _passwordFocusNode,
                                     decoration: InputDecoration(
                                       labelText: S.of(_parentContext).username,
                                       hintText: S
@@ -175,6 +179,7 @@ class _LoginPageState extends BaseScreen<LoginScreenMobile>
                                     textInputAction: TextInputAction.done,
                                     controller: passwordCtrl,
                                     focusNode: _passwordFocusNode,
+                                    onSubmitted: (_) => _onTapLogin(),
                                     decoration: InputDecoration(
                                       labelText: S.of(_parentContext).password,
                                       hintText: S

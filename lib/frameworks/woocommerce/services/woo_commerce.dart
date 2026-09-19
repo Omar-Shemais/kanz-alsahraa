@@ -421,8 +421,9 @@ class WooCommerceService extends BaseServices {
     } catch (e, trace) {
       printLog(trace.toString());
       printLog(e.toString());
-      //This error exception is about your Rest API is not config correctly so that not return the correct JSON format, please double check the document from this link https://docs.inspireui.com/fluxstore/woocommerce-setup/
-      return [];
+      // Let the home section distinguish a real empty category from a failed
+      // request. It can then retain cached products or offer a compact retry.
+      rethrow;
     }
   }
 

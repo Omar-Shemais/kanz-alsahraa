@@ -8,6 +8,7 @@ import '../../../services/index.dart';
 import '../config/product_config.dart';
 import '../helper/helper.dart';
 import 'product_empty.dart';
+import 'product_layout_session_cache.dart';
 
 /// Handle the product network request, caching and empty product
 class ProductFutureBuilder extends StatefulWidget {
@@ -30,6 +31,13 @@ class ProductFutureBuilder extends StatefulWidget {
 
 class _ProductListLayoutState extends State<ProductFutureBuilder> {
   ValueNotifier<List<Product>?> productsNotifier = ValueNotifier(null);
+  bool _loadFailed = false;
+
+  @override
+  void dispose() {
+    productsNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -41,11 +49,21 @@ class _ProductListLayoutState extends State<ProductFutureBuilder> {
       context.read<RecentModel>().getRecentProduct();
       return;
     }
-    WidgetsBinding.instance.endOfFrame.then((_) async {
-      if (mounted) {
-        productsNotifier.value = await getProductLayout(context);
-      }
-    });
+    WidgetsBinding.instance.endOfFrame.then((_) => _loadProducts());
+  }
+
+  Future<void> _loadProducts() async {
+    if (!mounted) return;
+    try {
+      final products = await getProductLayout(context);
+      if (!mounted) return;
+      _loadFailed = false;
+      productsNotifier.value = products ?? <Product>[];
+    } catch (_) {
+      if (!mounted) return;
+      _loadFailed = true;
+      productsNotifier.value = <Product>[];
+    }
   }
 
   Future<List<Product>?> getProductLayout(BuildContext context) async {
@@ -63,11 +81,21 @@ class _ProductListLayoutState extends State<ProductFutureBuilder> {
     if (jsonData is Map && jsonData['data'] != null) {
       products = Services().api.productsFromJsonData(jsonData['data']);
     }
-    products ??= await Services().api.fetchProductsLayout(
-          config: widget.config.jsonData,
-          userId: userId,
-          refreshCache: widget.cleanCache,
-        );
+    if (products == null) {
+      final cacheKey = ProductLayoutSessionCache.keyFor(
+        config: widget.config.jsonData,
+        userId: userId,
+      );
+      products = await ProductLayoutSessionCache.getOrLoad(
+        key: cacheKey,
+        refresh: widget.cleanCache,
+        loader: () => Services().api.fetchProductsLayout(
+              config: widget.config.jsonData,
+              userId: userId,
+              refreshCache: widget.cleanCache,
+            ),
+      );
+    }
     return products;
   }
 
@@ -113,6 +141,17 @@ class _ProductListLayoutState extends State<ProductFutureBuilder> {
                           );
               }
 
+              if (_loadFailed && products.isEmpty) {
+                return _ProductLoadFailure(
+                  title: widget.config.name,
+                  onRetry: () {
+                    _loadFailed = false;
+                    productsNotifier.value = null;
+                    _loadProducts();
+                  },
+                );
+              }
+
               /// Hide sale off layout when product list is empty.
               if (products.isEmpty &&
                   isSaleOffLayout &&
@@ -133,5 +172,53 @@ class _ProductListLayoutState extends State<ProductFutureBuilder> {
             },
           );
         });
+  }
+}
+
+class _ProductLoadFailure extends StatelessWidget {
+  const _ProductLoadFailure({required this.onRetry, this.title});
+
+  final String? title;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title?.isNotEmpty ?? false)
+            Text(
+              title!,
+              textAlign: TextAlign.start,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          const SizedBox(height: 8),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                children: [
+                  const Icon(Icons.cloud_off_outlined),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text('المنتجات غير متاحة دون اتصال حالياً'),
+                  ),
+                  TextButton(onPressed: onRetry, child: const Text('إعادة')),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

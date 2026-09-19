@@ -31,6 +31,7 @@ Future<http.Response> _httpCache(
 }) async {
   requireHttps(uri);
   final startTime = DateTime.now();
+  http.Response? staleResponse;
 
   if (refreshCache) {
     await HttpCacheManager().removeFile(uri.toString());
@@ -43,14 +44,18 @@ Future<http.Response> _httpCache(
       if (!refreshCache) {
         final cachedInfo =
             await HttpCacheManager().getFileFromCache(uri.toString());
-        if (cachedInfo != null &&
-            cachedInfo.validTill.isAfter(DateTime.now()) &&
-            cachedInfo.file.existsSync()) {
+        if (cachedInfo != null && cachedInfo.file.existsSync()) {
           var res = await cachedInfo.file.readAsString();
           var fileSize =
               (cachedInfo.file.lengthSync() / (1024 * 1024)).toStringAsFixed(2);
-          printLog('📥 GET CACHE($fileSize mb)', startTime);
-          return http.Response(res, 200);
+          if (cachedInfo.validTill.isAfter(DateTime.now())) {
+            printLog('📥 GET CACHE($fileSize mb)', startTime);
+            return http.Response(res, 200);
+          }
+          // Keep the last valid payload available while attempting a refresh.
+          // Product images have their own disk cache; retaining the catalog
+          // response makes the complete home screen usable without a network.
+          staleResponse = http.Response(res, 200);
         }
       }
 
@@ -68,17 +73,25 @@ Future<http.Response> _httpCache(
       }
       return http.Response('', 404);
     } catch (e) {
-      // printLog(trace);
       printLog('CACHE ISSUE: $e', startTime, Level.debug);
+      if (staleResponse != null) {
+        printLog('📥 GET STALE CACHE', startTime);
+        return staleResponse;
+      }
     }
   }
   final client = SecureHttpClient();
   try {
-    return await client.get(uri, headers: headers).timeout(
-          const Duration(seconds: 15),
-          onTimeout: () =>
-              throw http.ClientException('Network timeout for $uri'),
-        );
+    try {
+      return await client.get(uri, headers: headers).timeout(
+            const Duration(seconds: 15),
+            onTimeout: () =>
+                throw http.ClientException('Network timeout for $uri'),
+          );
+    } catch (_) {
+      if (staleResponse != null) return staleResponse;
+      rethrow;
+    }
   } finally {
     client.close();
   }

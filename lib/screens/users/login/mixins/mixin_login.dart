@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../app.dart';
@@ -108,6 +109,7 @@ mixin LoginMixin<T extends StatefulWidget> on BaseScreen<T> {
         username: usernameCtrl.text.trim(),
         password: passwordCtrl.text.trim(),
         success: (user) {
+          TextInput.finishAutofillContext(shouldSave: true);
           afterCallLogin(true);
           loginDone();
         },

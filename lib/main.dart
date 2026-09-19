@@ -108,14 +108,20 @@ void main() {
         /// Use await to prevent any usage until the initialization is completed.
         await Services().firebase.init();
         if (Firebase.apps.isNotEmpty) {
-          try {
-            await AppTelemetry.initialize();
-          } catch (_) {
-            printLog('[Telemetry] Initialization unavailable.');
-          }
+          final telemetryInitialization = AppTelemetry.initialize().catchError(
+            (Object _) => printLog('[Telemetry] Initialization unavailable.'),
+          );
+          await Future.wait<void>([
+            telemetryInitialization,
+            Configurations().loadRemoteConfig(),
+            BiometricsTools.instance.init(),
+          ]);
+        } else {
+          await Future.wait<void>([
+            Configurations().loadRemoteConfig(),
+            BiometricsTools.instance.init(),
+          ]);
         }
-        await Configurations().loadRemoteConfig();
-        await BiometricsTools.instance.init();
       }
     } catch (e) {
       printLog(e);

@@ -211,18 +211,20 @@ class LoginSMSScreenState<T extends LoginSMSScreen> extends State<T>
                         _loginButtonController.view as AnimationController,
                     onTap: () => loginSMS(context),
                   ),
-                  if (widget.enableRegister) ...[
-                    const SizedBox(height: 20),
-                    TextButton(
-                      key: const Key('loginWithEmailButton'),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const LoginScreen(emailOnly: true),
-                        ),
+                  const SizedBox(height: 20),
+                  OutlinedButton.icon(
+                    key: const Key('loginWithEmailButton'),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const LoginScreen(emailOnly: true),
                       ),
-                      child: const Text('الدخول بالبريد الإلكتروني'),
                     ),
-                  ],
+                    icon: const Icon(Icons.email_outlined),
+                    label: const Text('الدخول بالبريد الإلكتروني'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                 ],
               ),

@@ -10,7 +10,6 @@ import '../../../widgets/common/flex_separated.dart';
 import '../../../widgets/common/index.dart';
 import '../../../widgets/common/parallax_image.dart';
 import '../config/product_config.dart';
-import 'package:infinite_carousel/infinite_carousel.dart';
 import '../helper/custom_physic.dart';
 import '../helper/helper.dart';
 
@@ -115,58 +114,37 @@ class ProductListDefault extends StatelessWidget {
       );
     }
 
-    final cardWidth = Layout.buildProductWidth(
-        screenWidth: horizontalWidth, layout: layout);
-
     final body = Container(
       color: background ??
           Theme.of(context)
               .colorScheme
               .surface
-              .withOpacity(enableBackground ? 0.0 : 1.0),
+              .withValues(alpha: enableBackground ? 0.0 : 1.0),
       padding: EdgeInsetsDirectional.only(start: padding),
-      constraints: BoxConstraints(
-        maxHeight: (config.productListItemHeight ?? 0) > 0 
-            ? config.productListItemHeight! 
-            : Layout.buildProductHeight(layout: layout, defaultHeight: 180),
-        minHeight: (config.productListItemHeight ?? 0) > 0 
-            ? config.productListItemHeight! 
-            : Layout.buildProductHeight(layout: layout, defaultHeight: 180),
+      // A fixed carousel height left hundreds of pixels below shorter cards.
+      // The horizontal viewport can derive its cross-axis size from this row,
+      // while CustomScrollPhysic preserves the configured snapping behavior.
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        controller: controller,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        physics: config.isSnapping ?? false
+            ? CustomScrollPhysic(
+                width: Layout.buildProductWidth(
+                  screenWidth: horizontalWidth,
+                  layout: layout,
+                ),
+              )
+            : const ScrollPhysics(),
+        child: FlexSeparated.row(
+          separationSize: 16,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: renderProduct(
+            context,
+            enableBackground: enableBackground,
+          ),
+        ),
       ),
-      child: (config.isSnapping ?? false) && listProducts.length > 1
-          ? InfiniteCarousel.builder(
-              itemCount: listProducts.length,
-              itemExtent: cardWidth + 16,
-              controller: InfiniteScrollController(),
-              axisDirection: Axis.horizontal,
-              itemBuilder: (context, itemIndex, realIndex) {
-                final productWidgets =
-                    renderProduct(context, enableBackground: enableBackground);
-                return Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: productWidgets[itemIndex],
-                );
-              },
-            )
-          : SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              controller: controller,
-              padding: const EdgeInsets.symmetric(
-                vertical: 0,
-                horizontal: 8,
-              ),
-              physics: config.isSnapping ?? false
-                  ? CustomScrollPhysic(
-                      width: Layout.buildProductWidth(
-                          screenWidth: horizontalWidth, layout: layout))
-                  : const ScrollPhysics(),
-              child: FlexSeparated.row(
-                separationSize: 16,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children:
-                    renderProduct(context, enableBackground: enableBackground),
-              ),
-            ),
     );
 
     return HandleAutoSlide.list(
@@ -241,7 +219,7 @@ class ProductListDefault extends StatelessWidget {
     return BackgroundColorWidget(
       enable: config.enableBackground,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 20.0),
+        padding: const EdgeInsets.only(bottom: 12.0),
         child: body,
       ),
     );
