@@ -265,4 +265,5 @@
 - أصبحت صلاحية إشعارات iOS تُقرأ وتُطلب من Firebase Messaging مباشرة مع قبول authorized/provisional. عند الرفض تعرض صفحة الملف الشخصي رابط إعدادات iPhone وتعيد مزامنة المفتاح عند الرجوع، ويحترم اشتراك `all-notifications` حالة المفتاح حتى مع سباق التهيئة.
 - توقفت صور المنتجات عن حذف decoded memory cache عند خروج sliver من الشاشة، مع gapless playback، لمنع إعادة placeholder وفك الصورة عند الرجوع للأعلى.
 - نجحت 15 اختبارات Flutter مركزة للدفع، شكل الأقسام، الإشعارات وتحضير checkout. تحليل الملفات المعدلة لا يحتوي أخطاء؛ بقيت 8 ملاحظات deprecation قديمة. نجح PHP lint وفحصا الـSnippet المعزولان (hooks/validation و13 فحص MStore/credentials/audience)، ولم تُرسل إشعارات أو تُعدّل بيانات الموقع.
+- بعد الدمج نجح كامل `flutter test --no-pub`: جميع الاختبارات الـ231، كما نجح بناء Android debug وخرج `build/app/outputs/flutter-apk/app-debug.apk`.
 - يلزم بناء TestFlight جديد لاختبار الحالات الخمس على iPhone. تحديث الـSnippet المحلي لا يصبح حياً حتى استبدال كود Snippet الحالي بالنسخة الجديدة؛ fallback داخل التطبيق يصلح القسم المنشور الحالي بعد تثبيت البناء الجديد.
