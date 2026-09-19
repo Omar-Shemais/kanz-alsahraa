@@ -1,10 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:random_string/random_string.dart';
-import 'package:the_apple_sign_in/the_apple_sign_in.dart' as apple;
 
 import '../common/config.dart';
 import '../common/constants.dart';
@@ -45,47 +42,9 @@ class UserModel with ChangeNotifier {
         .submitForgotPassword(forgotPwLink: forgotPwLink, data: data);
   }
 
-  /// Login by apple, This function only test on iPhone
+  /// Social sign-in is intentionally disabled. Kanz uses phone verification.
   Future<void> loginApple({Function? success, Function? fail, context}) async {
-    try {
-      final result = await apple.TheAppleSignIn.performRequests([
-        const apple.AppleIdRequest(
-            requestedScopes: [apple.Scope.email, apple.Scope.fullName])
-      ]);
-
-      switch (result.status) {
-        case apple.AuthorizationStatus.authorized:
-          {
-            user = await _service.api.loginApple(
-                token: ServerConfig().isMStoreApiPluginSupported
-                    ? String.fromCharCodes(
-                        result.credential!.authorizationCode!)
-                    : String.fromCharCodes(result.credential!.identityToken!),
-                firstName: result.credential?.fullName?.givenName,
-                lastName: result.credential?.fullName?.familyName);
-
-            Services().firebase.loginFirebaseApple(
-                  authorizationCode: result.credential!.authorizationCode!,
-                  identityToken: result.credential!.identityToken!,
-                );
-
-            await _saveUser(user);
-            success!(user);
-
-            notifyListeners();
-          }
-          break;
-
-        case apple.AuthorizationStatus.error:
-          fail!(S.of(context).errorMsg(result.error!));
-          break;
-        case apple.AuthorizationStatus.cancelled:
-          fail!(S.of(context).loginCanceled);
-          break;
-      }
-    } catch (err) {
-      fail!(S.of(context).loginErrorServiceProvider(err.toString()));
-    }
+    fail?.call('تسجيل الدخول متاح برقم الجوال فقط.');
   }
 
   /// Login by Firebase phone
@@ -105,64 +64,13 @@ class UserModel with ChangeNotifier {
     }
   }
 
-  /// Login by Facebook
+  /// Social sign-in is not offered by Kanz. Accounts use phone verification.
   Future<void> loginFB({Function? success, Function? fail, context}) async {
-    try {
-      final result = await FacebookAuth.instance.login();
-      switch (result.status) {
-        case LoginStatus.success:
-          final accessToken = await FacebookAuth.instance.accessToken;
-
-          Services()
-              .firebase
-              .loginFirebaseFacebook(token: accessToken!.tokenString);
-
-          user =
-              await _service.api.loginFacebook(token: accessToken.tokenString);
-
-          await _saveUser(user);
-          success!(user);
-          break;
-        case LoginStatus.cancelled:
-          fail!(S.of(context).loginCanceled);
-          break;
-        default:
-          fail!(result.message);
-          break;
-      }
-      notifyListeners();
-    } catch (err) {
-      fail!(S.of(context).loginErrorServiceProvider(err.toString()));
-    }
+    fail?.call('تسجيل الدخول متاح برقم الجوال فقط.');
   }
 
   Future<void> loginGoogle({Function? success, Function? fail, context}) async {
-    try {
-      var googleSignIn = GoogleSignIn(scopes: ['email']);
-
-      /// Need to disconnect or cannot login with another account.
-      try {
-        await googleSignIn.disconnect();
-      } catch (_) {
-        // ignore.
-      }
-
-      var res = await googleSignIn.signIn();
-
-      if (res == null) {
-        fail!(S.of(context).loginCanceled);
-      } else {
-        var auth = await res.authentication;
-        Services().firebase.loginFirebaseGoogle(token: auth.accessToken);
-        user = await _service.api.loginGoogle(token: auth.accessToken);
-        await _saveUser(user);
-        success!(user);
-        notifyListeners();
-      }
-    } catch (err, trace) {
-      printError(err, trace);
-      fail!(S.of(context).loginErrorServiceProvider(err.toString()));
-    }
+    fail?.call('تسجيل الدخول متاح برقم الجوال فقط.');
   }
 
   Future<void> loginWithCookie(
@@ -333,7 +241,6 @@ class UserModel with ChangeNotifier {
     }
     try {
       unawaited(Services().firebase.signOut());
-      unawaited(FacebookAuth.instance.logOut());
     } catch (err) {
       printLog(err);
     }

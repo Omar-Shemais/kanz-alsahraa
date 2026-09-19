@@ -37,9 +37,6 @@ target 'Runner' do
   # This is just a temporary solution to fix the iOS build issue. We need to remove this line after the author fixes this [issue](https://github.com/natintosh/plugin_libphonenumber/issues/35)
   pod 'PhoneNumberKit', '3.8.0'
   
-  # Fix CocoaPods failing to resolve GoogleMaps version intersection (fixes deployment target error)
-  pod 'GoogleMaps', '8.4.0'
-
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
@@ -67,7 +64,7 @@ post_install do |installer|
         xcconfig = File.read(xcconfig_path)
         xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
         # Remove the -G flag (and -G<n> variants like -G0, -G8) from xcconfig files.
-        # This flag is injected by some pods (e.g. google_mobile_ads) but is unsupported
+        # This flag is unsupported by Clang for arm64 iOS targets.
         # by Clang for arm64-apple-ios targets, causing "unsupported option '-G'" errors.
         xcconfig_mod = xcconfig_mod.gsub(/(?<=[\s=])-G\d*(?=\s|$)/, '')
         File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }

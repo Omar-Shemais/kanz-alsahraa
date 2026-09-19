@@ -126,7 +126,6 @@ android {
                 websiteDomain                : envProperties.getProperty('websiteDomain', ''),
                 customScheme                 : envProperties.getProperty('customScheme', ''),
                 googleApiKeyAndroid          : envProperties.getProperty('googleApiKeyAndroid', ''),
-                adMobAppIdAndroid            : envProperties.getProperty('adMobAppIdAndroid', ''),
                 facebookClientToken          : envProperties.getProperty('facebookClientToken', ''),
                 facebookLoginProtocolScheme  : envProperties.getProperty('facebookLoginProtocolScheme', ''),
                 branchKeyLive                : envProperties.getProperty('branchKeyLive', ''),

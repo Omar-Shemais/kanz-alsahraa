@@ -8,7 +8,6 @@ import '../../models/entities/product.dart';
 import '../../models/order/order.dart';
 import '../../services/elastic/elastic_analytic.dart';
 import '../../services/firebase/firebase_analytic.dart';
-import '../../services/meta_app_event_tracking.dart';
 
 enum AnalyticsEvent {
   tapProduct,
@@ -60,16 +59,12 @@ class Analytics {
   void init() {
     final firebase = FirebaseAnalytic();
     final elastic = ElasticAnalytic();
-    final metaAppEvent = MetaAppEventTracking();
     _subscription = _controller.stream.listen((event) {
       if (Configurations.enableFirebaseAnalytics) {
         firebase.onListener(event);
       }
       if (kBoostEngineConfig.enableAnalytics) {
         elastic.onListener(event);
-      }
-      if (Configurations.enableFacebookAppEvents) {
-        metaAppEvent.onListener(event);
       }
     });
   }

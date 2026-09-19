@@ -32,8 +32,8 @@ void main() {
     expect(info['CFBundleLocalizations']!.childElements.map((e) => e.innerText),
         ['ar']);
     expect(info['FirebaseAppDelegateProxyEnabled']!.name.local, 'true');
-    expect(info['FacebookAutoInitEnabled']!.name.local, 'false');
-    expect(info['FacebookAutoLogAppEventsEnabled']!.name.local, 'false');
+    expect(info, isNot(contains('FacebookAutoInitEnabled')));
+    expect(info, isNot(contains('FacebookAutoLogAppEventsEnabled')));
     expect(
         info['UIBackgroundModes']!.innerText, contains('remote-notification'));
     for (final key in [
@@ -61,6 +61,25 @@ void main() {
     final dependencies = File('pubspec.yaml').readAsStringSync();
     expect(dependencies, isNot(contains('app_tracking_transparency:')));
     expect(dependencies, isNot(contains('\n  location:')));
+    expect(dependencies, isNot(contains('google_mobile_ads:')));
+    expect(dependencies, isNot(contains('google_maps_flutter:')));
+    expect(dependencies, isNot(contains('flutter_facebook_auth:')));
+    expect(dependencies, isNot(contains('facebook_app_events:')));
+    for (final strings in Directory('ios/Runner')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((file) => file.path.endsWith('InfoPlist.strings'))) {
+      final contents = strings.readAsStringSync();
+      for (final key in [
+        'NSLocationWhenInUseUsageDescription',
+        'NSLocationAlwaysAndWhenInUseUsageDescription',
+        'NSLocationAlwaysUsageDescription',
+        'NSUserTrackingUsageDescription',
+        'NSMicrophoneUsageDescription',
+      ]) {
+        expect(contents, isNot(contains(key)), reason: strings.path);
+      }
+    }
     expect(info['NSAppTransportSecurity']!.innerXml, isNot(contains('<true')));
     final entitlements = plist('ios/Runner/Runner.entitlements');
     expect(entitlements['aps-environment']!.innerText, r'${iosApsEnvironment}');

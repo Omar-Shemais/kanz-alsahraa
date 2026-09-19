@@ -432,16 +432,6 @@ class _ShippingAddressState extends State<ShippingAddress> {
                           address!.state = result.state;
                           address!.city = result.city;
                           address!.zipCode = result.zip;
-                          if (result.latLng?.latitude != null &&
-                              result.latLng?.latitude != null) {
-                            address!.mapUrl =
-                                'https://maps.google.com/maps?q=${result.latLng?.latitude},${result.latLng?.longitude}&output=embed';
-                            address!.latitude =
-                                result.latLng?.latitude.toString();
-                            address!.longitude =
-                                result.latLng?.longitude.toString();
-                          }
-
                           loadAddressFields(address);
                           final c =
                               Country(id: result.country, name: result.country);

@@ -75,10 +75,8 @@ extension AppBarItemConfigExt on AppBarItemConfig {
       address.state = result.state;
       address.city = result.city;
       address.zipCode = result.zip;
-      address.latitude = result.latLng?.latitude.toString();
-      address.longitude = result.latLng?.longitude.toString();
-      address.mapUrl =
-          'https://maps.google.com/maps?q=${result.latLng?.latitude},${result.latLng?.longitude}&output=embed';
+      // The native app does not collect map coordinates. The web checkout
+      // verifies the delivery address and payment details.
 
       return address as T;
     }

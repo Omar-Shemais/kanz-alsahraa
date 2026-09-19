@@ -88,21 +88,6 @@
             android:name="com.inspireui.ENVATO_PURCHASE_CODE"
             android:value="${envatoPurchaseCode}" />
 
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id" />
-        <meta-data
-            android:name="com.facebook.sdk.ClientToken"
-            android:value="@string/facebook_client_token" />
-        <!-- Facebook login/events are disabled for Kanz. Prevent the SDK from
-             restoring an obsolete token and making failing startup requests. -->
-        <meta-data
-            android:name="com.facebook.sdk.AutoInitEnabled"
-            android:value="false" />
-        <meta-data
-            android:name="com.facebook.sdk.AutoLogAppEventsEnabled"
-            android:value="false" />
-
         <!-- Other configurations like meta-data, services, etc. -->
         <meta-data android:name="flutterEmbedding" android:value="2" />
 

@@ -109,7 +109,7 @@ mixin MyCartMixin<T extends StatefulWidget> on State<T> {
 
         MainTabControlDelegate.getInstance().changeToDefaultTab();
       }
-    } else if (isLoggedIn || kPaymentConfig.guestCheckout) {
+    } else if (isLoggedIn) {
       doCheckout();
     } else {
       _loginWithResult(context);

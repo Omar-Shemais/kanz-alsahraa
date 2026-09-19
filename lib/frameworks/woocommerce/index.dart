@@ -169,6 +169,15 @@ class WooWidget extends BaseFrameworks
     final cartModel = Provider.of<CartModel>(context, listen: false);
     final userModel = Provider.of<UserModel>(context, listen: false);
 
+    // Orders are completed on the WordPress checkout page, but must always be
+    // created for the signed-in WordPress customer so they appear in the app's
+    // order history. Guest checkout would create customer ID 0 instead.
+    if (userModel.user?.id == null ||
+        userModel.user?.cookie?.isEmpty != false) {
+      error?.call('يرجى تسجيل الدخول قبل إتمام الطلب.');
+      return;
+    }
+
     if (!await _revalidateCart(context,
         (String message) => error?.call(CartValidationNotice(message)))) {
       if (context.mounted) loading?.call(false);
