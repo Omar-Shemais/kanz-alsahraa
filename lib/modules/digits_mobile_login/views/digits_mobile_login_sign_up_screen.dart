@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common/config.dart';
@@ -32,6 +33,8 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
   final _services = DigitsMobileLoginServices();
   final _nameNode = FocusNode();
   final _emailNode = FocusNode();
+  final _passwordNode = FocusNode();
+  final _passwordConfirmationNode = FocusNode();
 
   late final StreamController<String?>? _verifySuccessStream;
   late final String _mobile;
@@ -39,8 +42,12 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
 
   String _fullName = '';
   String _email = '';
+  String _password = '';
+  String _passwordConfirmation = '';
   String? _nameError;
   String? _emailError;
+  String? _passwordError;
+  String? _passwordConfirmationError;
   bool _acceptedTerms = false;
   bool _isLoading = false;
 
@@ -76,6 +83,8 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
   void dispose() {
     _nameNode.dispose();
     _emailNode.dispose();
+    _passwordNode.dispose();
+    _passwordConfirmationNode.dispose();
     super.dispose();
   }
 
@@ -101,12 +110,20 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
   bool _validateInputs() {
     final validName = _fullName.trim().length >= 2;
     final validEmail = _email.trim().validateEmail();
+    final validPassword = _password.length >= 8 && _password.length <= 128;
+    final passwordsMatch = validPassword && _password == _passwordConfirmation;
     setState(() {
       _nameError = validName ? null : 'أدخل الاسم الكامل';
       _emailError = validEmail ? null : 'أدخل بريداً إلكترونياً صحيحاً';
+      _passwordError =
+          validPassword ? null : 'استخدم كلمة مرور من 8 أحرف على الأقل';
+      _passwordConfirmationError =
+          passwordsMatch ? null : 'كلمتا المرور غير متطابقتين';
     });
 
-    if (!validName || !validEmail) return false;
+    if (!validName || !validEmail || !validPassword || !passwordsMatch) {
+      return false;
+    }
     if (!_acceptedTerms) {
       _scaffoldMessengerKey.currentState?.showSnackBar(
         const SnackBar(content: Text('يجب الموافقة على الشروط والخصوصية')),
@@ -185,6 +202,7 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
                   mobile: _mobile,
                   firstName: _firstName,
                   lastName: _lastName,
+                  password: _password,
                   isRegister: true,
                 ),
               ),
@@ -211,11 +229,13 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
         email: _email.trim(),
         countryCode: _dialCode,
         mobile: _mobile,
+        password: _password,
         fToken: token,
       );
       await Provider.of<UserModel>(context, listen: false)
           .setUser(loggedInUser);
       if (mounted) {
+        TextInput.finishAutofillContext(shouldSave: true);
         setState(() => _isLoading = false);
         NavigateTools.navigateAfterLogin(loggedInUser, context);
       }
@@ -294,9 +314,10 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
                     CustomTextField(
                       key: const Key('registerEmailField'),
                       focusNode: _emailNode,
+                      nextNode: _passwordNode,
                       autofillHints: const [AutofillHints.email],
                       keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.done,
+                      textInputAction: TextInputAction.next,
                       autocorrect: false,
                       enableSuggestions: false,
                       onChanged: (value) {
@@ -309,6 +330,52 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
                         labelText: 'البريد الإلكتروني',
                         hintText: 'name@example.com',
                         errorText: _emailError,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    CustomTextField(
+                      key: const Key('registerPasswordField'),
+                      focusNode: _passwordNode,
+                      nextNode: _passwordConfirmationNode,
+                      autofillHints: const [AutofillHints.newPassword],
+                      obscureText: true,
+                      showEyeIcon: true,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      textInputAction: TextInputAction.next,
+                      onChanged: (value) {
+                        _password = value;
+                        if (_passwordError != null) {
+                          setState(() => _passwordError = null);
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'كلمة المرور',
+                        hintText: '8 أحرف على الأقل',
+                        errorText: _passwordError,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    CustomTextField(
+                      key: const Key('registerPasswordConfirmationField'),
+                      focusNode: _passwordConfirmationNode,
+                      autofillHints: const [AutofillHints.newPassword],
+                      obscureText: true,
+                      showEyeIcon: true,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _sendSms(),
+                      onChanged: (value) {
+                        _passwordConfirmation = value;
+                        if (_passwordConfirmationError != null) {
+                          setState(() => _passwordConfirmationError = null);
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'تأكيد كلمة المرور',
+                        hintText: 'أعد كتابة كلمة المرور',
+                        errorText: _passwordConfirmationError,
                       ),
                     ),
                     const SizedBox(height: 18),

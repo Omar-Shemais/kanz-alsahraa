@@ -77,6 +77,7 @@ class DigitsMobileLoginServices {
     required String? mobile,
     String? firstName,
     String? lastName,
+    required String password,
     String? fToken,
     String? otp,
   }) async {
@@ -98,12 +99,53 @@ class DigitsMobileLoginServices {
       if (isNotBlank(jsonDecode['message'])) {
         throw Exception(jsonDecode['message']);
       } else {
-        return User.fromWooJson(jsonDecode['user'], jsonDecode['cookie']);
+        final user = User.fromWooJson(jsonDecode['user'], jsonDecode['cookie']);
+        return _setAccountPassword(user, password);
       }
     } catch (e) {
       //This error exception is about your Rest API is not config correctly so that not return the correct JSON format, please double check the document from this link https://docs.inspireui.com/fluxstore/woocommerce-setup/
       rethrow;
     }
+  }
+
+  Future<User> _setAccountPassword(User user, String password) async {
+    final cookie = user.cookie;
+    if (cookie == null || cookie.isEmpty) {
+      throw Exception('تعذر تأمين الحساب الجديد. حاول تسجيل الدخول مجدداً.');
+    }
+
+    final response = await httpPost(
+      Uri.parse('$domain/wp-json/kanz/v1/account/password'),
+      body: convert.jsonEncode({
+        'password': password,
+        'password_confirmation': password,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Cookie': cookie,
+      },
+    );
+
+    dynamic payload;
+    try {
+      payload = convert.jsonDecode(response.body);
+    } catch (_) {
+      throw Exception('تعذر إعداد كلمة المرور. حاول تسجيل الدخول برقم الجوال.');
+    }
+    if (response.statusCode < 200 ||
+        response.statusCode >= 300 ||
+        payload is! Map ||
+        payload['success'] != true ||
+        payload['cookie'] is! String ||
+        (payload['cookie'] as String).isEmpty) {
+      final message = payload is Map ? payload['message'] : null;
+      throw Exception(message is String && message.isNotEmpty
+          ? message
+          : 'تعذر إعداد كلمة المرور. حاول تسجيل الدخول برقم الجوال.');
+    }
+
+    user.cookie = payload['cookie'] as String;
+    return user;
   }
 
   Future<bool> loginCheck({

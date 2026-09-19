@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:sms_autofill/sms_autofill.dart';
@@ -24,6 +25,7 @@ class DigitsMobileVerifyArgs {
       this.mobile,
       this.firstName,
       this.lastName,
+      this.password,
       required this.isRegister});
 
   final String? username;
@@ -32,6 +34,7 @@ class DigitsMobileVerifyArgs {
   final String? mobile;
   final String? firstName;
   final String? lastName;
+  final String? password;
   final bool isRegister;
 }
 
@@ -308,6 +311,7 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
               mobile: widget.args?.mobile ?? '',
               firstName: widget.args?.firstName ?? '',
               lastName: widget.args?.lastName ?? '',
+              password: widget.args?.password ?? '',
               otp: smsCode)
           : await _services.login(
               countryCode: widget.args?.countryCode ?? '',
@@ -316,6 +320,9 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
       await Provider.of<UserModel>(context, listen: false)
           .setUser(loggedInUser);
       await _stopAnimation();
+      if (widget.args?.isRegister == true) {
+        TextInput.finishAutofillContext(shouldSave: true);
+      }
       NavigateTools.navigateAfterLogin(loggedInUser, context);
     } catch (e) {
       await _stopAnimation();

@@ -84,7 +84,26 @@ void main() {
     expect(phoneUi, contains("titleButton: 'متابعة'"));
     expect(phoneUi, contains('LoginScreen(emailOnly: true)'));
     expect(registration, contains("key: const Key('registerFullNameField')"));
+    expect(registration, contains("Key('registerPasswordField')"));
+    expect(registration, contains("Key('registerPasswordConfirmationField')"));
+    expect(registration, contains('AutofillHints.newPassword'));
+    expect(registration, contains('password: _password'));
     expect(registration, isNot(contains("Key('registerUsernameField')")));
     expect(registration, isNot(contains("Key('registerLastNameField')")));
+  });
+
+  test('verified phone registration sets password through protected endpoint',
+      () {
+    final service = File('lib/modules/digits_mobile_login/services/index.dart')
+        .readAsStringSync();
+    final verification = File(
+            'lib/modules/digits_mobile_login/views/digits_mobile_login_verify_screen.dart')
+        .readAsStringSync();
+
+    expect(service, contains('/wp-json/kanz/v1/account/password'));
+    expect(service, contains("'User-Cookie': cookie"));
+    expect(service, contains("'password_confirmation': password"));
+    expect(service, contains("user.cookie = payload['cookie'] as String"));
+    expect(verification, contains('password: widget.args?.password'));
   });
 }
