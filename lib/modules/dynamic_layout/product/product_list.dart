@@ -31,8 +31,17 @@ class ProductList extends StatefulWidget {
   State<ProductList> createState() => _ProductListState();
 }
 
-class _ProductListState extends State<ProductList> {
+class _ProductListState extends State<ProductList>
+    with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
+
+  /// Home product sections are children of a sliver. Without a keep-alive
+  /// handle, Flutter disposes a fully loaded section once it is far enough
+  /// outside the viewport and builds every product card again on the way back
+  /// up. Keeping the section alive preserves its fetched products and decoded
+  /// image widgets for the current home session.
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void dispose() {
@@ -98,6 +107,7 @@ class _ProductListState extends State<ProductList> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final isRecentLayout = widget.config.layout == Layout.recentView;
     final isSaleOffLayout = widget.config.layout == Layout.saleOff;
     Brand? brandByParams;

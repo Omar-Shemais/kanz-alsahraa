@@ -312,7 +312,9 @@ Map<String, dynamic> environment = {
     /// Set to false to disable only registration option
     "enableRegister": true,
     "IsRequiredLogin": false,
-    "showAppleLogin": true,
+    // Kanz uses phone verification as its only customer sign-in method.
+    // Keep Apple and Google authentication out of every login entry point.
+    "showAppleLogin": false,
     "showFacebook": false,
     "showSMSLogin": true,
     "showGoogleLogin": false,
@@ -323,9 +325,10 @@ Map<String, dynamic> environment = {
     "requireUsernameWhenRegister": false,
     "isResetPasswordSupported": true,
 
-    /// Set true value to show only the SMS Login screen, and set the false
-    /// value to show default login screen with other login buttons.
-    "smsLoginAsDefault": false,
+    /// Always open the mobile-number sign-in screen. This also prevents the
+    /// email/password and social-login screen from being the normal entry
+    /// point for customers.
+    "smsLoginAsDefault": true,
 
     /// For Facebook login.
     /// These configs are only used for FluxBuilder's Auto build feature.
