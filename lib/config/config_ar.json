@@ -273,7 +273,7 @@
         "StickyHeader": false,
         "ShowChat": false,
         "useMaterial3": false,
-        "DefaultTheme": "dark"
+        "DefaultTheme": "light"
     },
     "TabBar": [
         {

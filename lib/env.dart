@@ -16,7 +16,7 @@ Map<String, dynamic> environment = {
   },
 
   /// ➡️ lib/common/config/general.dart
-  "defaultDarkTheme": true,
+  "defaultDarkTheme": false,
   "enableRemoteConfigFirebase": false,
   "enableFirebaseAnalytics": true,
   "enableFacebookAppEvents": false,

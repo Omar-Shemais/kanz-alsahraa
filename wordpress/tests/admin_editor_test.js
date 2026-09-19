@@ -34,10 +34,10 @@ const descendants = (element) => [element, ...element.children.flatMap((child) =
 assert.equal(elements['kanz-sections'].children.length, 11);
 const themeSelect = descendants(elements['kanz-appearance']).find((item) => item.tag === 'select');
 assert.ok(themeSelect);
-assert.equal(themeSelect.value, 'dark');
-themeSelect.value = 'light'; themeSelect.change();
-assert.equal(read().Setting.DefaultTheme, 'light');
+assert.equal(themeSelect.value, 'light');
 themeSelect.value = 'dark'; themeSelect.change();
+assert.equal(read().Setting.DefaultTheme, 'dark');
+themeSelect.value = 'light'; themeSelect.change();
 const firstBannerCard = elements['kanz-sections'].children[1];
 const insertBefore = descendants(firstBannerCard).find((item) => item.tag === 'button' && item.textContent === 'إضافة قسم منتجات قبله');
 assert.ok(insertBefore);

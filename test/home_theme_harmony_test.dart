@@ -58,7 +58,7 @@ void main() {
       final root =
           jsonDecode(File('lib/config/config_ar.json').readAsStringSync())
               as Map<String, dynamic>;
-      expect(root['Setting']['DefaultTheme'], 'dark');
+      expect(root['Setting']['DefaultTheme'], 'light');
 
       final layouts = root['HorizonLayout'] as List<dynamic>;
       final firstBanner = layouts[1] as Map<String, dynamic>;
