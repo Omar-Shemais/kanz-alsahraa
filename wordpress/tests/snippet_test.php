@@ -16,7 +16,7 @@ foreach (array('admin_menu', 'admin_enqueue_scripts', 'admin_post_kanz_save_conf
     if (!in_array($hook, $hooks, true)) { throw new Exception('Missing hook.'); }
 }
 $valid = array('Setting' => array(), 'TabBar' => array(array('layout' => 'home', 'icon' => 'home')), 'HorizonLayout' => array());
-if (kanz_v3_config_validate($valid) !== true || !is_wp_error(kanz_v3_notification_credentials())) { throw new Exception('Snippet safety check failed.'); }
-$script = kanz_v3_snippet_admin_js();
+if (kanz_v4_config_validate($valid) !== true || !is_wp_error(kanz_v4_notification_credentials())) { throw new Exception('Snippet safety check failed.'); }
+$script = kanz_v4_snippet_admin_js();
 if (strpos($script, 'DOMContentLoaded') === false || strpos($script, 'kanz-sections') === false) { throw new Exception('Missing inline editor.'); }
 echo 'Standalone snippet checks passed: hooks, duplicate-load guard, config validation, disabled sender and inline editor.' . PHP_EOL;
