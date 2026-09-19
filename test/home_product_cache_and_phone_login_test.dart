@@ -19,5 +19,9 @@ void main() {
     expect(environment, contains('"showGoogleLogin": false'));
     expect(environment, contains('"showSMSLogin": true'));
     expect(environment, contains('"smsLoginAsDefault": true'));
+
+    final routes = File('lib/routes/route.dart').readAsStringSync();
+    expect(routes, contains('Honor the phone-only policy'));
+    expect(routes, contains('const DigitsMobileLoginScreen()'));
   });
 }

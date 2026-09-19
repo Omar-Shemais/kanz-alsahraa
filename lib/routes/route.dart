@@ -23,6 +23,7 @@ import '../models/search_web_model.dart';
 import '../modules/dynamic_layout/geo_search/geo_search_screen.dart';
 import '../modules/dynamic_layout/helper/helper.dart';
 import '../modules/dynamic_layout/index.dart';
+import '../modules/digits_mobile_login/views/digits_mobile_login_screen.dart';
 import '../modules/product_reviews/models/product_reviews_model.dart';
 import '../modules/product_reviews/product_review_screen.dart';
 import '../modules/sms_login/sms_login.dart';
@@ -58,6 +59,30 @@ class Routes {
     RouteList.privacyTerms: (context) => const PrivacyTermScreen(),
     RouteList.register: (context) => const RegistrationScreen(),
     RouteList.login: (context) {
+      // A few legacy actions (chat, product add-ons, and comments) navigate
+      // directly to RouteList.login. Honor the phone-only policy here as well,
+      // rather than exposing the email/social screen through those paths.
+      if (kLoginSetting.smsLoginAsDefault) {
+        if (kAdvanceConfig.enableDigitsMobileLogin) {
+          return ChangeNotifierProvider<LoginSmsViewModel>(
+            create: (context) => LoginSmsViewModel(Services().firebase),
+            child: const DigitsMobileLoginScreen(),
+          );
+        }
+        final userModel = Provider.of<UserModel>(context, listen: false);
+        if (kAdvanceConfig.enableNewSMSLogin) {
+          return SMSLoginScreen(
+            onSuccess: (user) async {
+              await userModel.setUser(user);
+              NavigateTools.navigateAfterLogin(user, context);
+            },
+          );
+        }
+        return ChangeNotifierProvider<LoginSmsViewModel>(
+          create: (context) => LoginSmsViewModel(Services().firebase),
+          child: const LoginSMSScreen(),
+        );
+      }
       return const LoginScreen();
     },
     RouteList.loginSMS: (context) {
