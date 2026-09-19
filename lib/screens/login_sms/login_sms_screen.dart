@@ -1,18 +1,18 @@
 import 'dart:async';
 
-import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../app.dart';
 import '../../common/config.dart';
 import '../../common/constants.dart';
-import '../../common/tools.dart';
 import '../../generated/l10n.dart';
 import '../../models/index.dart';
 import '../../services/services.dart';
 import '../../widgets/common/flux_image.dart';
 import '../../widgets/common/login_animation.dart';
+import '../users/login/login_screen.dart';
 import 'login_sms_viewmodel.dart';
 import 'verify.dart';
 
@@ -28,45 +28,42 @@ class LoginSMSScreenState<T extends LoginSMSScreen> extends State<T>
     with TickerProviderStateMixin {
   late AnimationController _loginButtonController;
   final TextEditingController _controller = TextEditingController(text: '');
+  String? _phoneError;
 
   LoginSmsViewModel get viewModel => context.read<LoginSmsViewModel>();
 
   void loginSMS(context) {
-    if (viewModel.phoneNumber.isEmpty) {
-      Tools.showSnackBar(ScaffoldMessenger.of(context),
-          S.of(context).pleaseInputFillAllFields);
-    } else {
-      Future autoRetrieve(String verId) {
-        return stopAnimation();
-      }
+    if (!validateSaudiPhone()) return;
+    Future autoRetrieve(String verId) {
+      return stopAnimation();
+    }
 
-      Future smsCodeSent(String verId, [int? forceCodeResend]) {
-        stopAnimation();
-        return Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => VerifyCode(
-              verId: verId,
-              phoneNumber: viewModel.phoneFullText,
-              verifySuccessStream: viewModel.getStreamSuccess,
-              resendToken: forceCodeResend,
-            ),
+    Future smsCodeSent(String verId, [int? forceCodeResend]) {
+      stopAnimation();
+      return Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VerifyCode(
+            verId: verId,
+            phoneNumber: viewModel.phoneFullText,
+            verifySuccessStream: viewModel.getStreamSuccess,
+            resendToken: forceCodeResend,
           ),
-        );
-      }
-
-      void verifyFailed(exception) {
-        stopAnimation();
-        failMessage(exception.toString(), context);
-      }
-
-      viewModel.verify(
-        autoRetrieve: autoRetrieve,
-        smsCodeSent: smsCodeSent,
-        verifyFailed: verifyFailed,
-        startVerify: playAnimation,
+        ),
       );
     }
+
+    void verifyFailed(exception) {
+      stopAnimation();
+      failMessage(exception.toString(), context);
+    }
+
+    viewModel.verify(
+      autoRetrieve: autoRetrieve,
+      smsCodeSent: smsCodeSent,
+      verifyFailed: verifyFailed,
+      startVerify: playAnimation,
+    );
   }
 
   @override
@@ -89,14 +86,25 @@ class LoginSMSScreenState<T extends LoginSMSScreen> extends State<T>
   }
 
   void _onChanged() {
-    if (_controller.text != '') {
-      viewModel.updatePhone(_controller.text.removeLeadingZeros());
+    viewModel.updatePhone(_controller.text);
+    if (_phoneError != null) {
+      setState(() => _phoneError = null);
     }
+  }
+
+  @protected
+  bool validateSaudiPhone() {
+    if (viewModel.isValidPhoneNumber) return true;
+    setState(() {
+      _phoneError = 'أدخل رقم جوال سعودي صحيح بصيغة 5XXXXXXXX';
+    });
+    return false;
   }
 
   @override
   void dispose() {
     _controller.removeListener(_onChanged);
+    _controller.dispose();
     _loginButtonController.dispose();
     super.dispose();
   }
@@ -127,105 +135,95 @@ class LoginSMSScreenState<T extends LoginSMSScreen> extends State<T>
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
               child: Column(
                 children: <Widget>[
-                  const SizedBox(height: 80.0),
-                  FractionallySizedBox(
-                    widthFactor: 0.8,
-                    child: FluxImage(
-                      imageUrl: themeConfig.logo,
-                      fit: BoxFit.contain,
+                  const SizedBox(height: 36.0),
+                  SizedBox(
+                    height: 115,
+                    child: FluxImage(imageUrl: themeConfig.logo),
+                  ),
+                  const SizedBox(height: 34.0),
+                  Text(
+                    'تسجيل الدخول أو إنشاء حساب',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'أدخل رقم جوالك وسنحدد حسابك تلقائياً',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.65),
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32.0),
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          height: 56,
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(context).dividerColor,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text('+966 🇸🇦'),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            key: const Key('loginPhoneField'),
+                            textDirection: TextDirection.ltr,
+                            textAlign: TextAlign.left,
+                            autofillHints: const [
+                              AutofillHints.telephoneNumber
+                            ],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(10),
+                            ],
+                            decoration: InputDecoration(
+                              labelText: 'رقم الجوال',
+                              hintText: '5XXXXXXXX',
+                              errorText: _phoneError,
+                            ),
+                            keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.done,
+                            controller: _controller,
+                            onSubmitted: (_) => loginSMS(context),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 120.0),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(top: 17.0),
-                        child: CountryCodePicker(
-                          showDropDownButton: false,
-                          favorite: const ['SA'],
-                          countryFilter: const ['SA'],
-                          enabled: false,
-                          onChanged: (CountryCode? countryCode) =>
-                              viewModel.updateCountryCode(
-                            code: countryCode?.code,
-                            dialCode: countryCode?.dialCode,
-                            name: countryCode?.name,
-                          ),
-                          initialSelection: viewModel.countryCode,
-                          onInit: (countryCode) => viewModel.loadConfig(
-                            code: countryCode?.code,
-                            dialCode: countryCode?.dialCode,
-                            name: countryCode?.name,
-                          ),
-                          //Get the country information relevant to the initial selection
-                          backgroundColor:
-                              Theme.of(context).colorScheme.surface,
-                          dialogBackgroundColor:
-                              Theme.of(context).dialogTheme.backgroundColor ??
-                                  Theme.of(context).colorScheme.surface,
-                        ),
-                      ),
-                      const SizedBox(width: 8.0),
-                      Expanded(
-                        child: TextField(
-                          decoration:
-                              InputDecoration(labelText: S.of(context).phone),
-                          keyboardType: TextInputType.phone,
-                          controller: _controller,
-                        ),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 28),
                   StaggerAnimation(
-                    titleButton: S.of(context).sendSMSCode,
+                    titleButton: 'متابعة',
                     buttonController:
                         _loginButtonController.view as AnimationController,
                     onTap: () => loginSMS(context),
                   ),
-                  if (widget.enableRegister)
-                    Stack(
-                      alignment: AlignmentDirectional.center,
-                      children: <Widget>[
-                        SizedBox(
-                            height: 50.0,
-                            width: 200.0,
-                            child: Divider(color: Colors.grey.shade300)),
-                        Container(
-                            height: 30,
-                            width: 40,
-                            color: Theme.of(context).colorScheme.surface),
-                        Text(
-                          S.of(context).or,
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey.shade400),
-                        )
-                      ],
-                    ),
-                  if (widget.enableRegister)
-                    Column(
-                      children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(S.of(context).dontHaveAccount),
-                            GestureDetector(
-                              onTap: () {
-                                NavigateTools.navigateRegister(context);
-                              },
-                              child: Text(
-                                ' ${S.of(context).signup}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                              ),
-                            ),
-                          ],
+                  if (widget.enableRegister) ...[
+                    const SizedBox(height: 20),
+                    TextButton(
+                      key: const Key('loginWithEmailButton'),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const LoginScreen(emailOnly: true),
                         ),
-                      ],
+                      ),
+                      child: const Text('الدخول بالبريد الإلكتروني'),
                     ),
+                  ],
+                  const SizedBox(height: 24),
                 ],
               ),
             );

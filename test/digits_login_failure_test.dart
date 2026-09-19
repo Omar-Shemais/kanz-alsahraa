@@ -6,7 +6,7 @@ void main() {
     final result =
         presentDigitsLoginFailure(Exception('يرجى الاشتراك قبل تسجيل الدخول.'));
 
-    expect(result.text, 'رقم الجوال غير مسجل. يرجى إنشاء حساب جديد أولاً.');
+    expect(result.text, 'رقم جديد. أكمل بياناتك لإنشاء الحساب.');
     expect(result.action, DigitsLoginFailureAction.register);
   });
 

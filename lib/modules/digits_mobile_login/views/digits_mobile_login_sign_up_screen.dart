@@ -1,22 +1,19 @@
 import 'dart:async';
 
-import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common/config.dart';
-import '../../../common/constants.dart';
 import '../../../common/tools.dart';
-import '../../../generated/l10n.dart';
 import '../../../models/entities/user.dart';
 import '../../../models/index.dart' show AppModel, UserModel;
 import '../../../screens/home/privacy_term_screen.dart';
 import '../../../screens/login_sms/verify.dart';
-import '../../../services/service_config.dart';
 import '../../../services/services.dart';
 import '../../../widgets/common/custom_text_field.dart';
 import '../../../widgets/common/flux_image.dart';
+import '../digits_login_failure.dart';
 import '../services/index.dart';
 import 'digits_mobile_login_verify_screen.dart';
 
@@ -33,416 +30,337 @@ class DigitsMobileLoginSignUpScreen extends StatefulWidget {
 class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
   final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final _services = DigitsMobileLoginServices();
-
-  String? firstName, lastName, email, username, mobile, fToken;
-  CountryCode? countryCode;
-
-  bool isChecked = false;
-  bool isLoading = false;
-
-  final firstNameNode = FocusNode();
-  final lastNameNode = FocusNode();
-  final mobileNode = FocusNode();
-  late final TextEditingController mobileController;
-  final usernameNode = FocusNode();
-  final emailNode = FocusNode();
+  final _nameNode = FocusNode();
+  final _emailNode = FocusNode();
 
   late final StreamController<String?>? _verifySuccessStream;
+  late final String _mobile;
+  late final String _dialCode;
+
+  String _fullName = '';
+  String _email = '';
+  String? _nameError;
+  String? _emailError;
+  bool _acceptedTerms = false;
+  bool _isLoading = false;
+
+  String get _username =>
+      'kanz_${_dialCode.replaceAll(RegExp(r'\D'), '')}$_mobile';
+
+  String get _firstName {
+    final parts = _fullName.trim().split(RegExp(r'\s+'));
+    return parts.isEmpty ? '' : parts.first;
+  }
+
+  String get _lastName {
+    final parts = _fullName.trim().split(RegExp(r'\s+'));
+    return parts.length <= 1 ? '' : parts.skip(1).join(' ');
+  }
 
   @override
   void initState() {
     super.initState();
-    mobile = widget.initialMobile;
-    mobileController = TextEditingController(text: mobile);
-    _verifySuccessStream = Services().firebase.getFirebaseStream();
-
-    if (LoginSMSConstants.dialCodeDefault.isNotEmpty ||
-        LoginSMSConstants.countryCodeDefault.isNotEmpty ||
-        LoginSMSConstants.nameDefault.isNotEmpty) {
-      countryCode = CountryCode(
-        code: LoginSMSConstants.countryCodeDefault.isNotEmpty
-            ? LoginSMSConstants.countryCodeDefault
-            : null,
-        dialCode: LoginSMSConstants.dialCodeDefault.isNotEmpty
-            ? LoginSMSConstants.dialCodeDefault
-            : null,
-        name: LoginSMSConstants.nameDefault.isNotEmpty
-            ? LoginSMSConstants.nameDefault
-            : null,
-      );
+    var digits = (widget.initialMobile ?? '').replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('966')) digits = digits.substring(3);
+    while (digits.startsWith('0')) {
+      digits = digits.substring(1);
     }
+    _mobile = digits;
+    _dialCode = LoginSMSConstants.dialCodeDefault.isNotEmpty
+        ? LoginSMSConstants.dialCodeDefault
+        : '+966';
+    _verifySuccessStream = Services().firebase.getFirebaseStream();
   }
 
   @override
   void dispose() {
-    mobileNode.dispose();
-    mobileController.dispose();
-    emailNode.dispose();
-    usernameNode.dispose();
-    firstNameNode.dispose();
-    lastNameNode.dispose();
+    _nameNode.dispose();
+    _emailNode.dispose();
     super.dispose();
   }
 
-  void _snackBar(String text) {
-    if (mounted) {
-      final snackBar = SnackBar(
-        content: Text(text.clearExceptionKey()),
-        duration: const Duration(seconds: 10),
-        action: SnackBarAction(
-          label: S.of(context).close,
-          onPressed: () {
-            // Some code to undo the change.
-          },
+  void _showError(Object error) {
+    if (!mounted) return;
+    final raw = error.toString().toLowerCase();
+    final failure = presentDigitsLoginFailure(error);
+    final text = raw.contains('email') || raw.contains('البريد')
+        ? 'البريد الإلكتروني مستخدم في حساب آخر. استخدم بريداً مختلفاً.'
+        : failure.action == DigitsLoginFailureAction.none
+            ? failure.text
+            : 'تعذر إنشاء الحساب الآن. حاول مرة أخرى بعد قليل.';
+    _scaffoldMessengerKey.currentState
+      ?..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(text, textDirection: TextDirection.rtl),
+          duration: const Duration(seconds: 8),
         ),
       );
-
-      _scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
-    }
   }
 
-  bool validateInputs() {
-    if ((mobile?.isEmpty ?? true) ||
-        (email?.isEmpty ?? true) ||
-        (username?.isEmpty ?? true)) {
-      _snackBar(S.of(context).pleaseInputFillAllFields);
-      return false;
-    } else if (!email.validateEmail()) {
-      _snackBar(S.of(context).errorEmailFormat);
-      return false;
-    } else if (isChecked == false) {
-      _snackBar(S.of(context).pleaseAgreeTerms);
+  bool _validateInputs() {
+    final validName = _fullName.trim().length >= 2;
+    final validEmail = _email.trim().validateEmail();
+    setState(() {
+      _nameError = validName ? null : 'أدخل الاسم الكامل';
+      _emailError = validEmail ? null : 'أدخل بريداً إلكترونياً صحيحاً';
+    });
+
+    if (!validName || !validEmail) return false;
+    if (!_acceptedTerms) {
+      _scaffoldMessengerKey.currentState?.showSnackBar(
+        const SnackBar(content: Text('يجب الموافقة على الشروط والخصوصية')),
+      );
       return false;
     }
     return true;
   }
 
-  Future<void> _sendSMS(context) async {
-    final isValid = validateInputs();
-    if (isValid) {
-      final phoneNumber = countryCode!.dialCode! + mobile!;
-      setState(() {
-        isLoading = true;
-      });
+  Future<void> _sendSms() async {
+    if (!_validateInputs() || _isLoading) return;
+    final phoneNumber = '$_dialCode$_mobile';
+    setState(() => _isLoading = true);
 
-      try {
-        await _services.signUpCheck(
-            username: username!,
-            email: email!,
-            countryCode: countryCode?.dialCode,
-            mobile: mobile);
+    try {
+      await _services.signUpCheck(
+        username: _username,
+        email: _email.trim(),
+        countryCode: _dialCode,
+        mobile: _mobile,
+      );
 
-        if (kAdvanceConfig.enableDigitsMobileFirebase &&
-            !kAdvanceConfig.enableDigitsMobileWhatsApp) {
-          Future? autoRetrieve(String verId) {
-            setState(() {
-              isLoading = false;
-            });
-            return null;
-          }
+      if (kAdvanceConfig.enableDigitsMobileFirebase &&
+          !kAdvanceConfig.enableDigitsMobileWhatsApp) {
+        Future<void> autoRetrieve(String verId) async {
+          if (mounted) setState(() => _isLoading = false);
+        }
 
-          Future? smsCodeSent(String verId, [int? forceCodeResend]) async {
-            setState(() {
-              isLoading = false;
-            });
-
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => VerifyCode(
-                  verId: verId,
-                  phoneNumber: phoneNumber,
-                  verifySuccessStream: _verifySuccessStream?.stream,
-                  resendToken: forceCodeResend,
-                  callback: _submitRegister,
-                ),
+        Future<void> smsCodeSent(String verId, [int? forceCodeResend]) async {
+          if (mounted) setState(() => _isLoading = false);
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => VerifyCode(
+                verId: verId,
+                phoneNumber: phoneNumber,
+                verifySuccessStream: _verifySuccessStream?.stream,
+                resendToken: forceCodeResend,
+                callback: _submitRegister,
               ),
-            );
-            return null;
-          }
+            ),
+          );
+        }
 
-          void verifyFailed(exception) {
-            setState(() {
-              isLoading = false;
-            });
-            _snackBar(exception.toString());
-          }
+        void verifyFailed(Object exception) {
+          if (mounted) setState(() => _isLoading = false);
+          _showError(exception);
+        }
 
-          void verifyCompleted(data) {
-            _verifySuccessStream?.add(data);
-          }
-
-          unawaited(Services().firebase.verifyPhoneNumber(
+        unawaited(
+          Services().firebase.verifyPhoneNumber(
                 phoneNumber: phoneNumber,
                 codeAutoRetrievalTimeout: autoRetrieve,
                 codeSent: smsCodeSent,
-                verificationCompleted: verifyCompleted,
+                verificationCompleted: (data) =>
+                    _verifySuccessStream?.add(data),
                 verificationFailed: verifyFailed,
-              ));
-        } else {
-          final sent = await _services.sendOTP(
-              countryCode: countryCode?.dialCode,
-              mobile: mobile,
-              forRegister: true);
-          if (sent) {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DigitsMobileVerifyScreen(
-                  args: DigitsMobileVerifyArgs(
-                      username: username,
-                      email: email,
-                      countryCode: countryCode?.dialCode,
-                      mobile: mobile,
-                      firstName: firstName,
-                      lastName: lastName,
-                      isRegister: true),
+              ),
+        );
+      } else {
+        final sent = await _services.sendOTP(
+          countryCode: _dialCode,
+          mobile: _mobile,
+          forRegister: true,
+        );
+        if (sent && mounted) {
+          setState(() => _isLoading = false);
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DigitsMobileVerifyScreen(
+                args: DigitsMobileVerifyArgs(
+                  username: _username,
+                  email: _email.trim(),
+                  countryCode: _dialCode,
+                  mobile: _mobile,
+                  firstName: _firstName,
+                  lastName: _lastName,
+                  isRegister: true,
                 ),
               ),
-            );
-          }
+            ),
+          );
+        } else if (!sent) {
+          throw Exception('otp_not_sent');
         }
-      } catch (e) {
-        setState(() {
-          isLoading = false;
-        });
-        _snackBar(e.toString());
       }
+    } catch (error) {
+      if (mounted) setState(() => _isLoading = false);
+      _showError(error);
     }
   }
 
   Future<void> _submitRegister(String smsCode, User user) async {
     try {
-      setState(() {
-        isLoading = true;
-      });
-      fToken = await user.getIdToken();
+      if (mounted) setState(() => _isLoading = true);
+      final token = await user.getIdToken();
       final loggedInUser = await _services.signUp(
-          username: username!,
-          firstName: firstName,
-          lastName: lastName,
-          email: email!,
-          countryCode: countryCode?.dialCode,
-          mobile: mobile,
-          fToken: fToken);
-      setState(() {
-        isLoading = false;
-      });
+        username: _username,
+        firstName: _firstName,
+        lastName: _lastName,
+        email: _email.trim(),
+        countryCode: _dialCode,
+        mobile: _mobile,
+        fToken: token,
+      );
       await Provider.of<UserModel>(context, listen: false)
           .setUser(loggedInUser);
-      setState(() {
-        isLoading = false;
-      });
-      NavigateTools.navigateAfterLogin(loggedInUser, context);
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      _snackBar(e.toString());
+      if (mounted) {
+        setState(() => _isLoading = false);
+        NavigateTools.navigateAfterLogin(loggedInUser, context);
+      }
+    } catch (error) {
+      if (mounted) setState(() => _isLoading = false);
+      _showError(error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final appModel = Provider.of<AppModel>(context, listen: true);
-    final themeConfig = appModel.themeConfig;
+    final themeConfig = Provider.of<AppModel>(context).themeConfig;
+    final colors = Theme.of(context).colorScheme;
 
     return ScaffoldMessenger(
       key: _scaffoldMessengerKey,
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: colors.surface,
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          elevation: 0.0,
+          backgroundColor: colors.surface,
+          elevation: 0,
+          title: const Text('إنشاء الحساب'),
         ),
         body: SafeArea(
           child: GestureDetector(
             onTap: () => Tools.hideKeyboard(context),
             child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                child: AutofillGroup(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      const SizedBox(height: 10.0),
-                      Center(
-                        child: FluxImage(
-                          imageUrl: themeConfig.logo,
-                          width: MediaQuery.of(context).size.width / 2,
-                          fit: BoxFit.contain,
-                        ),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
+              child: AutofillGroup(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: SizedBox(
+                        height: 82,
+                        child: FluxImage(imageUrl: themeConfig.logo),
                       ),
-                      const SizedBox(
-                        height: 30.0,
-                      ),
-                      CustomTextField(
-                        key: const Key('registerFirstNameField'),
-                        focusNode: firstNameNode,
-                        nextNode: lastNameNode,
-                        showCancelIcon: true,
-                        onChanged: (value) => firstName = value,
-                        onCancel: () {
-                          firstName = '';
-                        },
-                        decoration: InputDecoration(
-                          labelText: S.of(context).firstName,
-                          hintText: S.of(context).enterYourFirstName,
-                        ),
-                      ),
-                      const SizedBox(height: 20.0),
-                      CustomTextField(
-                        key: const Key('registerLastNameField'),
-                        focusNode: lastNameNode,
-                        nextNode: usernameNode,
-                        showCancelIcon: true,
-                        onChanged: (value) => lastName = value,
-                        onCancel: () {
-                          lastName = '';
-                        },
-                        decoration: InputDecoration(
-                          labelText: S.of(context).lastName,
-                          hintText: S.of(context).enterYourLastName,
-                        ),
-                      ),
-                      const SizedBox(height: 20.0),
-                      CustomTextField(
-                        key: const Key('registerUsernameField'),
-                        autofillHints: const [AutofillHints.familyName],
-                        focusNode: usernameNode,
-                        nextNode: emailNode,
-                        showCancelIcon: true,
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) => username = value,
-                        onCancel: () {
-                          username = '';
-                        },
-                        decoration: InputDecoration(
-                          labelText: S.of(context).username,
-                          hintText: S.of(context).enterYourUsername,
-                        ),
-                      ),
-                      const SizedBox(height: 20.0),
-                      CustomTextField(
-                        key: const Key('registerEmailField'),
-                        focusNode: emailNode,
-                        autofillHints: const [AutofillHints.email],
-                        nextNode: mobileNode,
-                        showCancelIcon: true,
-                        onChanged: (value) => email = value,
-                        onCancel: () {
-                          email = '';
-                        },
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: S.of(context).email,
-                          hintText: S.of(context).enterYourEmail,
-                        ),
-                      ),
-                      const SizedBox(height: 20.0),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          CountryCodePicker(
-                            onChanged: (country) {
-                              setState(() {
-                                countryCode = country;
-                              });
-                            },
-                            // Initial selection and favorite can be one of code ('IT') OR dial_code('+39')
-                            initialSelection: countryCode!.code,
-
-                            //Get the country information relevant to the initial selection
-                            onInit: (code) {
-                              countryCode = code;
-                            },
-                            backgroundColor:
-                                Theme.of(context).colorScheme.surface,
-                            dialogBackgroundColor:
-                                Theme.of(context).dialogTheme.backgroundColor,
-                          ),
-                          Expanded(
-                            child: CustomTextField(
-                              key: const Key('registerMobileField'),
-                              autofillHints: const [AutofillHints.familyName],
-                              focusNode: mobileNode,
-                              controller: mobileController,
-                              showCancelIcon: true,
-                              keyboardType: TextInputType.phone,
-                              onChanged: (value) => mobile = value,
-                              onCancel: () {
-                                mobile = '';
-                              },
-                              decoration: InputDecoration(
-                                labelText: S.of(context).phone,
-                                hintText: S.of(context).enterYourPhoneNumber,
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'رقم جديد — أكمل بياناتك',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(height: 20.0),
-                      Row(
-                        children: <Widget>[
-                          Checkbox(
-                            key: const Key('registerConfirmCheckbox'),
-                            value: isChecked,
-                            activeColor: Theme.of(context).primaryColor,
-                            checkColor: Colors.white,
-                            onChanged: (value) {
-                              isChecked = !isChecked;
-                              setState(() {});
-                            },
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'سنرسل رمز تحقق إلى رقم جوالك بعد المتابعة',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: colors.onSurface.withValues(alpha: 0.65),
                           ),
-                          InkWell(
-                            onTap: () {
-                              isChecked = !isChecked;
-                              setState(() {});
-                            },
-                            child: Text(
-                              S.of(context).iwantToCreateAccount,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ),
-                        ],
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 28),
+                    CustomTextField(
+                      key: const Key('registerFullNameField'),
+                      focusNode: _nameNode,
+                      nextNode: _emailNode,
+                      autofillHints: const [AutofillHints.name],
+                      textInputAction: TextInputAction.next,
+                      onChanged: (value) {
+                        _fullName = value;
+                        if (_nameError != null) {
+                          setState(() => _nameError = null);
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'الاسم الكامل',
+                        hintText: 'مثال: محمد أحمد',
+                        errorText: _nameError,
                       ),
-                      InkWell(
-                        onTap: () {
-                          isChecked = !isChecked;
-                          setState(() {});
-                        },
+                    ),
+                    const SizedBox(height: 18),
+                    CustomTextField(
+                      key: const Key('registerEmailField'),
+                      focusNode: _emailNode,
+                      autofillHints: const [AutofillHints.email],
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.done,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      onChanged: (value) {
+                        _email = value;
+                        if (_emailError != null) {
+                          setState(() => _emailError = null);
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'البريد الإلكتروني',
+                        hintText: 'name@example.com',
+                        errorText: _emailError,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: 'رقم الجوال',
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                      child: Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Text(
+                          '$_dialCode $_mobile',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () =>
+                          setState(() => _acceptedTerms = !_acceptedTerms),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Row(
-                          children: <Widget>[
+                          children: [
                             Checkbox(
-                              value: isChecked,
-                              activeColor: Theme.of(context).primaryColor,
-                              checkColor: Colors.white,
-                              onChanged: (value) {
-                                isChecked = !isChecked;
-                                setState(() {});
-                              },
+                              key: const Key('registerTermsCheckbox'),
+                              value: _acceptedTerms,
+                              onChanged: (value) => setState(
+                                () => _acceptedTerms = value ?? false,
+                              ),
                             ),
                             Expanded(
                               child: RichText(
-                                maxLines: 2,
                                 text: TextSpan(
-                                  text: S.of(context).iAgree,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                  children: <TextSpan>[
-                                    const TextSpan(text: ' '),
+                                  text: 'أوافق على ',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  children: [
                                     TextSpan(
-                                      text: S.of(context).agreeWithPrivacy,
+                                      text: 'الشروط وسياسة الخصوصية',
                                       style: TextStyle(
-                                          color: Theme.of(context).primaryColor,
-                                          decoration: TextDecoration.underline),
+                                        color: Theme.of(context).primaryColor,
+                                        decoration: TextDecoration.underline,
+                                      ),
                                       recognizer: TapGestureRecognizer()
                                         ..onTap = () => Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) =>
+                                                builder: (_) =>
                                                     const PrivacyTermScreen(
-                                                        showAgreeButton: false),
+                                                  showAgreeButton: false,
+                                                ),
                                               ),
                                             ),
                                     ),
@@ -453,51 +371,21 @@ class _RegistrationScreenState extends State<DigitsMobileLoginSignUpScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 10.0),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Material(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(5.0)),
-                          elevation: 0,
-                          child: MaterialButton(
-                            key: const Key('registerSubmitButton'),
-                            onPressed: isLoading == true
-                                ? null
-                                : () async {
-                                    await _sendSMS(context);
-                                  },
-                            minWidth: 200.0,
-                            elevation: 0.0,
-                            height: 42.0,
-                            child: Text(
-                              isLoading == true
-                                  ? S.of(context).loading
-                                  : S.of(context).createAnAccount,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
+                    ),
+                    const SizedBox(height: 18),
+                    FilledButton(
+                      key: const Key('registerSubmitButton'),
+                      onPressed: _isLoading ? null : _sendSms,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(52),
                       ),
-                      if (kVendorConfig.vendorRegister &&
-                          ServerConfig().typeName.isMultiVendor)
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context)
-                                .pushReplacementNamed(RouteList.register);
-                          },
-                          child: Text(
-                            S.of(context).becomeAVendor,
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                decoration: TextDecoration.underline),
-                          ),
-                        ),
-                    ],
-                  ),
+                      child: Text(
+                        _isLoading ? 'جارٍ الإرسال…' : 'إرسال رمز التحقق',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
             ),

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +9,7 @@ import '../../common/constants.dart';
 import '../../common/tools.dart';
 import '../../generated/l10n.dart';
 import '../../models/index.dart';
+import '../../modules/digits_mobile_login/digits_login_failure.dart';
 import '../../services/services.dart';
 import '../../widgets/common/flux_image.dart';
 import '../../widgets/common/login_animation.dart';
@@ -19,7 +19,7 @@ class VerifyCode extends StatefulWidget {
   final String? verId;
   final Stream<String?>? verifySuccessStream;
   final int? resendToken;
-  final Function(String, User)? callback;
+  final FutureOr<void> Function(String, User)? callback;
 
   const VerifyCode(
       {this.verId,
@@ -39,9 +39,10 @@ class _VerifyCodeState extends State<VerifyCode>
 
   final TextEditingController _pinCodeController = TextEditingController();
 
-  bool hasError = false;
-  String currentText = '';
-  var onTapRecognizer;
+  String? _errorText;
+  bool _isVerifying = false;
+  int _resendSeconds = 30;
+  Timer? _resendTimer;
   int? _resendToken;
   String? _verId;
   StreamSubscription<String?>? _verifySuccessSubscription;
@@ -70,43 +71,17 @@ class _VerifyCodeState extends State<VerifyCode>
 
     listenForCode();
 
-    onTapRecognizer = TapGestureRecognizer()
-      ..onTap = () {
-        _playAnimation();
-        Future autoRetrieve(String verId) {
-          return _stopAnimation();
-        }
-
-        Future smsCodeSent(String verId, [int? forceCodeResend]) {
-          _resendToken = forceCodeResend;
-          _verId = verId;
-          return _stopAnimation();
-        }
-
-        void verifyFailed(exception) {
-          _stopAnimation();
-          _failMessage(exception.toString(), context);
-        }
-
-        Services().firebase.verifyPhoneNumber(
-              phoneNumber: widget.phoneNumber,
-              codeAutoRetrievalTimeout: autoRetrieve,
-              codeSent: smsCodeSent,
-              verificationCompleted: (credential) {},
-              forceResendingToken: _resendToken,
-              verificationFailed: verifyFailed,
-            );
-      };
-
     _loginButtonController = AnimationController(
       duration: const Duration(milliseconds: 3000),
       vsync: this,
     );
+    _startResendCountdown();
   }
 
   @override
   void dispose() {
     _verifySuccessSubscription?.cancel();
+    _resendTimer?.cancel();
     _loginButtonController.dispose();
     _pinCodeController.dispose();
     cancel();
@@ -135,29 +110,55 @@ class _VerifyCodeState extends State<VerifyCode>
     }
   }
 
-  void _failMessage(message, context) {
-    /// Showing Error messageSnackBarDemo
-    /// Ability so close message
-    // var _message = message;
-    // if (kReleaseMode) {
-    //   _message = S.of(context).userNameInCorrect;
-    // }
+  void _showError(Object error) {
+    if (!mounted) return;
+    setState(() => _errorText = presentDigitsLoginFailure(error).text);
+  }
 
-    final snackBar = SnackBar(
-      content: Text(message),
-      duration: const Duration(seconds: 30),
-      action: SnackBarAction(
-        label: S.of(context).close,
-        onPressed: () {
-          // Some code to undo the change.
-        },
-      ),
-    );
+  void _startResendCountdown() {
+    _resendTimer?.cancel();
+    _resendSeconds = 30;
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      if (_resendSeconds <= 1) {
+        timer.cancel();
+        setState(() => _resendSeconds = 0);
+      } else {
+        setState(() => _resendSeconds--);
+      }
+    });
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  Future<void> _resendCode() async {
+    if (_resendSeconds > 0 || isLoading) return;
+    await _playAnimation();
+    try {
+      await Services().firebase.verifyPhoneNumber(
+            phoneNumber: widget.phoneNumber,
+            codeAutoRetrievalTimeout: (_) => _stopAnimation(),
+            codeSent: (verId, [forceCodeResend]) {
+              _resendToken = forceCodeResend;
+              _verId = verId;
+              _startResendCountdown();
+              return _stopAnimation();
+            },
+            verificationCompleted: (credential) {},
+            forceResendingToken: _resendToken,
+            verificationFailed: (exception) {
+              _stopAnimation();
+              _showError(exception);
+            },
+          );
+    } catch (error) {
+      await _stopAnimation();
+      _showError(error);
+    }
   }
 
   void _loginSMS(smsCode, context) async {
+    if (_isVerifying || smsCode.toString().trim().length != 6) return;
+    _isVerifying = true;
+    if (mounted) setState(() => _errorText = null);
     await _playAnimation();
     try {
       final credential = Services().firebase.getFirebaseCredential(
@@ -167,7 +168,9 @@ class _VerifyCodeState extends State<VerifyCode>
       await _signInWithCredential(credential);
     } catch (e) {
       await _stopAnimation();
-      _failMessage(e.toString(), context);
+      _showError(e);
+    } finally {
+      _isVerifying = false;
     }
   }
 
@@ -203,7 +206,7 @@ class _VerifyCodeState extends State<VerifyCode>
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            const SizedBox(height: 100),
+            const SizedBox(height: 32),
             Column(
               children: <Widget>[
                 Row(
@@ -216,7 +219,7 @@ class _VerifyCodeState extends State<VerifyCode>
                 ),
               ],
             ),
-            const SizedBox(height: 50),
+            const SizedBox(height: 28),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
@@ -229,32 +232,24 @@ class _VerifyCodeState extends State<VerifyCode>
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 30.0, vertical: 8),
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: RichText(
-                  text: TextSpan(
-                    text: S.of(context).enterSentCode,
-                    children: [
-                      TextSpan(
-                        text: Tools.isRTL(context)
-                            ? ' ${widget.phoneNumber?.replaceAll('+', '')}+'
-                            : ' +${widget.phoneNumber?.replaceAll('+', '')}',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontSize: 15,
-                            ),
-                      ),
-                    ],
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.color
-                              ?.withOpacity(0.54),
-                          fontSize: 15,
-                        ),
+              child: Column(
+                children: [
+                  Text(S.of(context).enterSentCode),
+                  const SizedBox(height: 6),
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      widget.phoneNumber ?? '',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('تغيير الرقم'),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
@@ -284,6 +279,9 @@ class _VerifyCodeState extends State<VerifyCode>
                   autoDisposeControllers: false,
                   animationDuration: const Duration(milliseconds: 300),
                   onChanged: (value) {
+                    if (_errorText != null) {
+                      setState(() => _errorText = null);
+                    }
                     if (value.length == 6) _loginSMS(value, context);
                   },
                   cursorColor: Theme.of(context).colorScheme.onSurface,
@@ -294,26 +292,18 @@ class _VerifyCodeState extends State<VerifyCode>
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
               // error showing widget
               child: Text(
-                hasError ? S.of(context).pleaseFillUpAllCellsProperly : '',
+                _errorText ?? '',
                 style: TextStyle(color: Colors.red.shade300, fontSize: 15),
               ),
             ),
             const SizedBox(height: 20),
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                  text: S.of(context).didntReceiveCode,
-                  style: textStyle?.copyWith(fontSize: 15),
-                  children: [
-                    TextSpan(
-                        text: S.of(context).resend.toUpperCase(),
-                        recognizer: onTapRecognizer,
-                        style: textStyle?.copyWith(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ))
-                  ]),
+            TextButton(
+              onPressed: _resendSeconds == 0 ? _resendCode : null,
+              child: Text(
+                _resendSeconds == 0
+                    ? 'إعادة إرسال الرمز'
+                    : 'إعادة الإرسال خلال $_resendSeconds ثانية',
+              ),
             ),
             const SizedBox(height: 14),
             Container(
@@ -345,8 +335,12 @@ class _VerifyCodeState extends State<VerifyCode>
     if (user != null) {
       if (widget.callback != null) {
         await _stopAnimation();
-        widget.callback!(_pinCodeController.text, user);
-        Navigator.pop(context);
+        await Future.sync(
+          () => widget.callback!(_pinCodeController.text, user),
+        );
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
       } else {
         await Provider.of<UserModel>(context, listen: false).loginFirebaseSMS(
           context: context,
@@ -357,13 +351,13 @@ class _VerifyCodeState extends State<VerifyCode>
           },
           fail: (message) {
             _stopAnimation();
-            _failMessage(message, context);
+            _showError(message);
           },
         );
       }
     } else {
       await _stopAnimation();
-      _failMessage(S.of(context).invalidSMSCode, context);
+      _showError(S.of(context).invalidSMSCode);
     }
   }
 }

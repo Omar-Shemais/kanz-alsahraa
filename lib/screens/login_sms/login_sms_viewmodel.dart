@@ -29,7 +29,7 @@ class LoginSmsViewModel extends ChangeNotifier {
   String get flagUri => _flagUri ?? '';
   Stream<String?>? get getStreamSuccess => _verifySuccessStream?.stream;
 
-  bool get isValidPhoneNumber => _phone?.isNotEmpty ?? false;
+  bool get isValidPhoneNumber => RegExp(r'^5\d{8}$').hasMatch(phoneNumber);
 
   void loadConfig({
     String? code,
@@ -86,7 +86,14 @@ class LoginSmsViewModel extends ChangeNotifier {
   }
 
   void updatePhone(String phone) {
-    _phone = phone;
+    var digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('966')) {
+      digits = digits.substring(3);
+    }
+    while (digits.startsWith('0')) {
+      digits = digits.substring(1);
+    }
+    _phone = digits;
     notifyListeners();
   }
 }

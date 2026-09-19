@@ -24,4 +24,25 @@ void main() {
     expect(routes, contains('Honor the phone-only policy'));
     expect(routes, contains('const DigitsMobileLoginScreen()'));
   });
+
+  test('phone authentication uses one automatic login or registration entry',
+      () {
+    final entry = File(
+            'lib/modules/digits_mobile_login/views/digits_mobile_login_screen.dart')
+        .readAsStringSync();
+    final phoneUi =
+        File('lib/screens/login_sms/login_sms_screen.dart').readAsStringSync();
+    final registration = File(
+            'lib/modules/digits_mobile_login/views/digits_mobile_login_sign_up_screen.dart')
+        .readAsStringSync();
+
+    expect(
+        entry, contains('failure.action == DigitsLoginFailureAction.register'));
+    expect(entry, contains('DigitsMobileLoginSignUpScreen'));
+    expect(phoneUi, contains("titleButton: 'متابعة'"));
+    expect(phoneUi, contains('LoginScreen(emailOnly: true)'));
+    expect(registration, contains("key: const Key('registerFullNameField')"));
+    expect(registration, isNot(contains("Key('registerUsernameField')")));
+    expect(registration, isNot(contains("Key('registerLastNameField')")));
+  });
 }

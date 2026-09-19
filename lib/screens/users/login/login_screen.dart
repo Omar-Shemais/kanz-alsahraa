@@ -22,19 +22,23 @@ import 'mixins/mixin_animation_button_login.dart';
 import 'mixins/mixin_login.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.emailOnly = false});
+
+  final bool emailOnly;
 
   @override
   Widget build(BuildContext context) {
     if (Layout.isDisplayDesktop(context)) {
       return const LoginScreenWeb();
     }
-    return const LoginScreenMobile();
+    return LoginScreenMobile(emailOnly: emailOnly);
   }
 }
 
 class LoginScreenMobile extends StatefulWidget {
-  const LoginScreenMobile();
+  const LoginScreenMobile({this.emailOnly = false});
+
+  final bool emailOnly;
 
   @override
   BaseScreen<LoginScreenMobile> createState() => _LoginPageState();
@@ -223,10 +227,11 @@ class _LoginPageState extends BaseScreen<LoginScreenMobile>
                                             Icons.fingerprint_outlined),
                                       ),
                                     ),
-                                  if (kLoginSetting.showFacebook ||
-                                      kLoginSetting.showSMSLogin ||
-                                      kLoginSetting.showGoogleLogin ||
-                                      kLoginSetting.showAppleLogin)
+                                  if (!widget.emailOnly &&
+                                      (kLoginSetting.showFacebook ||
+                                          kLoginSetting.showSMSLogin ||
+                                          kLoginSetting.showGoogleLogin ||
+                                          kLoginSetting.showAppleLogin))
                                     Stack(
                                       alignment: AlignmentDirectional.center,
                                       children: <Widget>[
@@ -249,34 +254,40 @@ class _LoginPageState extends BaseScreen<LoginScreenMobile>
                                         )
                                       ],
                                     ),
+                                  if (!widget.emailOnly)
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: <Widget>[
                                         GestureDetector(
                                           onTap: () {
-                                            NavigateTools.navigateToLoginSms(context);
+                                            NavigateTools.navigateToLoginSms(
+                                                context);
                                           },
                                           child: Text(
                                             'او سجل الدخول عن طريق الجوال',
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: Theme.of(context).primaryColor,
+                                              color: Theme.of(context)
+                                                  .primaryColor,
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                  SocialLoginButtonRow(
-                                    onApplePressed: () =>
-                                        loginWithApple(context),
-                                    onFacebookPressed: () =>
-                                        loginWithFacebook(context),
-                                    onGooglePressed: () =>
-                                        loginWithGoogle(context),
-                                    onSmsPressed: () => loginWithSMS(context),
-                                  ),
+                                  if (!widget.emailOnly)
+                                    SocialLoginButtonRow(
+                                      onApplePressed: () =>
+                                          loginWithApple(context),
+                                      onFacebookPressed: () =>
+                                          loginWithFacebook(context),
+                                      onGooglePressed: () =>
+                                          loginWithGoogle(context),
+                                      onSmsPressed: () => loginWithSMS(context),
+                                    ),
                                   const SizedBox(height: 30.0),
-                                  if (kLoginSetting.enableRegister)
+                                  if (!widget.emailOnly &&
+                                      kLoginSetting.enableRegister)
                                     Column(
                                       children: <Widget>[
                                         Row(

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +13,7 @@ import '../../../models/app_model.dart';
 import '../../../models/user_model.dart';
 import '../../../widgets/common/flux_image.dart';
 import '../../../widgets/common/login_animation.dart';
+import '../digits_login_failure.dart';
 import '../services/index.dart';
 
 class DigitsMobileVerifyArgs {
@@ -53,9 +53,10 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
 
   final _services = DigitsMobileLoginServices();
 
-  bool hasError = false;
-  String currentText = '';
-  var onTapRecognizer;
+  String? _errorText;
+  bool _isVerifying = false;
+  int _resendSeconds = 30;
+  Timer? _resendTimer;
 
   @override
   void codeUpdated() {
@@ -71,30 +72,17 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
     super.initState();
     listenForCode();
 
-    onTapRecognizer = TapGestureRecognizer()
-      ..onTap = () async {
-        try {
-          await _playAnimation();
-          await _services.resendOTP(
-              countryCode: widget.args?.countryCode,
-              mobile: widget.args?.mobile,
-              forRegister: widget.args?.isRegister ?? true);
-          await _stopAnimation();
-        } catch (e) {
-          await _stopAnimation();
-          _failMessage(e.toString(), context);
-        }
-      };
-
     _loginButtonController = AnimationController(
       duration: const Duration(milliseconds: 3000),
       vsync: this,
     );
+    _startResendCountdown();
   }
 
   @override
   void dispose() {
     _loginButtonController.dispose();
+    _resendTimer?.cancel();
     _pinCodeController.dispose();
     cancel();
     super.dispose();
@@ -116,26 +104,40 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
     }
   }
 
-  void _failMessage(String message, BuildContext context) {
-    /// Showing Error messageSnackBarDemo
-    /// Ability so close message
-    // var _message = message;
-    // if (kReleaseMode) {
-    //   _message = S.of(context).userNameInCorrect;
-    // }
+  void _showError(Object error) {
+    if (!mounted) return;
+    setState(() => _errorText = presentDigitsLoginFailure(error).text);
+  }
 
-    final snackBar = SnackBar(
-      content: Text(message.clearExceptionKey()),
-      duration: const Duration(seconds: 30),
-      action: SnackBarAction(
-        label: S.of(context).close,
-        onPressed: () {
-          // Some code to undo the change.
-        },
-      ),
-    );
+  void _startResendCountdown() {
+    _resendTimer?.cancel();
+    _resendSeconds = 30;
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      if (_resendSeconds <= 1) {
+        timer.cancel();
+        setState(() => _resendSeconds = 0);
+      } else {
+        setState(() => _resendSeconds--);
+      }
+    });
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  Future<void> _resendCode() async {
+    if (_resendSeconds > 0 || _isVerifying) return;
+    try {
+      await _playAnimation();
+      await _services.resendOTP(
+        countryCode: widget.args?.countryCode,
+        mobile: widget.args?.mobile,
+        forRegister: widget.args?.isRegister ?? true,
+      );
+      _startResendCountdown();
+      await _stopAnimation();
+    } catch (error) {
+      await _stopAnimation();
+      _showError(error);
+    }
   }
 
   @override
@@ -171,7 +173,7 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            const SizedBox(height: 100),
+            const SizedBox(height: 32),
             Column(
               children: <Widget>[
                 Row(
@@ -184,7 +186,7 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
                 ),
               ],
             ),
-            const SizedBox(height: 50),
+            const SizedBox(height: 28),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
@@ -197,32 +199,24 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 30.0, vertical: 8),
-              child: Directionality(
-                textDirection: TextDirection.rtl,
-                child: RichText(
-                  text: TextSpan(
-                    text: S.of(context).enterSentCode,
-                    children: [
-                      TextSpan(
-                        text: Tools.isRTL(context)
-                            ? ' ${phoneNumber.replaceAll('+', '')}+'
-                            : ' +${phoneNumber.replaceAll('+', '')}',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontSize: 15,
-                            ),
-                      ),
-                    ],
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.color
-                              ?.withOpacity(0.54),
-                          fontSize: 15,
-                        ),
+              child: Column(
+                children: [
+                  Text(S.of(context).enterSentCode),
+                  const SizedBox(height: 6),
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      phoneNumber,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('تغيير الرقم'),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
@@ -252,6 +246,9 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
                   autoDisposeControllers: false,
                   animationDuration: const Duration(milliseconds: 300),
                   onChanged: (value) {
+                    if (_errorText != null) {
+                      setState(() => _errorText = null);
+                    }
                     if (value.length == 6) _verify(value, context);
                   },
                 ),
@@ -261,26 +258,18 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
               // error showing widget
               child: Text(
-                hasError ? S.of(context).pleaseFillUpAllCellsProperly : '',
+                _errorText ?? '',
                 style: TextStyle(color: Colors.red.shade300, fontSize: 15),
               ),
             ),
             const SizedBox(height: 20),
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                  text: S.of(context).didntReceiveCode,
-                  style: textStyle?.copyWith(fontSize: 15),
-                  children: [
-                    TextSpan(
-                        text: S.of(context).resend.toUpperCase(),
-                        recognizer: onTapRecognizer,
-                        style: textStyle?.copyWith(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ))
-                  ]),
+            TextButton(
+              onPressed: _resendSeconds == 0 ? _resendCode : null,
+              child: Text(
+                _resendSeconds == 0
+                    ? 'إعادة إرسال الرمز'
+                    : 'إعادة الإرسال خلال $_resendSeconds ثانية',
+              ),
             ),
             const SizedBox(height: 14),
             Container(
@@ -306,6 +295,9 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
   }
 
   Future<void> _verify(String smsCode, BuildContext context) async {
+    if (_isVerifying || smsCode.trim().length != 6) return;
+    _isVerifying = true;
+    if (mounted) setState(() => _errorText = null);
     try {
       await _playAnimation();
       final loggedInUser = widget.args?.isRegister == true
@@ -327,7 +319,9 @@ class _DigitsMobileVerifyScreenState extends State<DigitsMobileVerifyScreen>
       NavigateTools.navigateAfterLogin(loggedInUser, context);
     } catch (e) {
       await _stopAnimation();
-      _failMessage(e.toString(), context);
+      _showError(e);
+    } finally {
+      _isVerifying = false;
     }
   }
 }

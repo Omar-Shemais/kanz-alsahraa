@@ -27,7 +27,7 @@ DigitsLoginFailureMessage presentDigitsLoginFailure(Object error) {
     'no account',
   ])) {
     return const DigitsLoginFailureMessage(
-      'رقم الجوال غير مسجل. يرجى إنشاء حساب جديد أولاً.',
+      'رقم جديد. أكمل بياناتك لإنشاء الحساب.',
       action: DigitsLoginFailureAction.register,
     );
   }
@@ -43,6 +43,8 @@ DigitsLoginFailureMessage presentDigitsLoginFailure(Object error) {
   }
   if (containsAny(const [
     'invalid_otp',
+    'invalid-verification-code',
+    'session-expired',
     'incorrect otp',
     'wrong otp',
     'verification code',
