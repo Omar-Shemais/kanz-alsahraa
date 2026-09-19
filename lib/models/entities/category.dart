@@ -251,24 +251,22 @@ class Category {
     name = parsedJson['name'];
     parent = parsedJson['parent'].toString();
     totalProduct = parsedJson['count'];
-    if (kCategoryStaticImages.isNotEmpty) {
-      /// prioritize local category images over remote ones
-      image = kCategoryStaticImages[parsedJson['id']] ?? kDefaultImage;
-    } else {
-      /// "Organize my uploads into month- and year-based folders" must be unchecked
-      /// at CMS DashBoard > Settings > Media
-      /// Automatically get category image by following common format:
-      /// https://customer-site.com/wp-content/uploads/category-{category-id}.jpeg
-      image = '${ServerConfig().url}/wp-content/uploads/category-$id.jpeg';
+    final configuredImage = kCategoryStaticImages[parsedJson['id']];
+    if (configuredImage is String && configuredImage.trim().isNotEmpty) {
+      image = configuredImage;
+      return;
+    }
+
+    final remoteImage = parsedJson['image'];
+    final remoteImageUrl = remoteImage is Map
+        ? remoteImage['src']
+        : remoteImage is String
+            ? remoteImage
+            : null;
+    if (remoteImageUrl is String && remoteImageUrl.trim().isNotEmpty) {
+      image = remoteImageUrl;
     }
   }
-
-  // final image = parsedJson['image'];
-  // if (image != null) {
-  //   this.image = image['src'].toString();
-  // } else {
-  //   this.image = kCategoryStaticImages[parsedJson['id']] ?? kDefaultImage;
-  // }
 
   Category.fromNotion(Map parsedJson) {
     try {

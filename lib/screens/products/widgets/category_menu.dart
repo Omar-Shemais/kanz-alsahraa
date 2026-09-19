@@ -26,8 +26,6 @@ class ProductCategoryMenu extends StatefulWidget {
 }
 
 class StateProductCategoryMenu extends State<ProductCategoryMenu> {
-  bool get categoryImageMenu => kAdvanceConfig.categoryImageMenu;
-
   final itemScrollController = ItemScrollController();
 
   var firstJumpDone = false;
@@ -50,14 +48,12 @@ class StateProductCategoryMenu extends State<ProductCategoryMenu> {
   }
 
   Widget renderListCategories(List<Category> categories) {
-    var showImageMenu = categoryImageMenu && widget.imageLayout;
-
     return Container(
       padding: widget.padding ??
           const EdgeInsets.symmetric(horizontal: 8).copyWith(bottom: 4),
       color: Theme.of(context).colorScheme.surface,
       constraints: const BoxConstraints(minHeight: 40),
-      height: showImageMenu ? 130 : 50,
+      height: 50,
       child: Center(
         child: ScrollablePositionedList.builder(
           scrollDirection: Axis.horizontal,
@@ -68,7 +64,10 @@ class StateProductCategoryMenu extends State<ProductCategoryMenu> {
             return ItemCategory(
               categoryId: category.id,
               categoryName: category.name!,
-              categoryImage: showImageMenu ? category.image : null,
+              // Product subcategories are intentionally text-only. Most store
+              // subcategories have no image, so a mixed image row shows broken
+              // placeholders and gives items inconsistent visual weight.
+              categoryImage: null,
               selectedCategories: widget.selectedCategories,
               onTap: widget.onTap,
             );
