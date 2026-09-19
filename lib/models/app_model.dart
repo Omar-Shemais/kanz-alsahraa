@@ -145,13 +145,15 @@ class AppModel with ChangeNotifier {
 
       var defaultCurrency = kAdvanceConfig.defaultCurrency;
 
-      darkTheme = SettingsBox().isDarkTheme ?? kDefaultDarkTheme;
+      darkTheme = SettingsBox().hasSelectedTheme
+          ? (SettingsBox().isDarkTheme ?? kDefaultDarkTheme)
+          : kDefaultDarkTheme;
       currency = SettingsBox().currency ?? defaultCurrency?.currencyDisplay;
       currencyCode =
           SettingsBox().currencyCode ?? defaultCurrency?.currencyCode;
       SettingsBox().countryCode = defaultCurrency?.countryCode;
       isInit = true;
-      await updateTheme(darkTheme);
+      notifyListeners();
 
       return true;
     } catch (err) {
@@ -215,10 +217,11 @@ class AppModel with ChangeNotifier {
     }
   }
 
-  Future<void> updateTheme(bool theme) async {
+  Future<void> updateTheme(bool theme, {bool userInitiated = true}) async {
     try {
       darkTheme = theme;
       SettingsBox().isDarkTheme = theme;
+      if (userInitiated) SettingsBox().hasSelectedTheme = true;
       notifyListeners();
     } catch (error) {
       printLog('[updateTheme] error: ${error.toString()}');
@@ -231,6 +234,7 @@ class AppModel with ChangeNotifier {
     _homeConfigs.invalidate();
     _homeScope = null;
     appConfig = AppConfig.fromJson(config);
+    _applyConfiguredDefaultTheme();
     isLoading = false;
     notifyListeners();
   }
@@ -336,6 +340,7 @@ class AppModel with ChangeNotifier {
       next.tabBar = activeTabs;
     }
     appConfig = next;
+    _applyConfiguredDefaultTheme();
     homeConfigOrigin = origin;
     homeConfigSavedAt = savedAt;
     _syncHomeNavigation();
@@ -363,6 +368,17 @@ class AppModel with ChangeNotifier {
       Configurations().setAlwaysShowTabBar(
           appConfig?.settings.tabBarConfig.alwaysShowTabBar ?? false);
     }
+  }
+
+  void _applyConfiguredDefaultTheme() {
+    final settings = SettingsBox();
+    if (settings.isInitialized && settings.hasSelectedTheme) return;
+    final configured = appConfig?.settings.defaultDarkTheme;
+    if (configured == null) return;
+    darkTheme = configured;
+    // Cache the resolved default without marking it as an explicit user choice,
+    // so administrators can change the default for users who never selected one.
+    if (settings.isInitialized) settings.isDarkTheme = configured;
   }
 
   void handleCategoryTab(TabBarMenuConfig categoryTab) {
@@ -441,6 +457,8 @@ class AppModel with ChangeNotifier {
         await _loadConfigJson(generation);
       }
       if (_homeDisposed || generation != _homeLoadGeneration) return null;
+
+      _applyConfiguredDefaultTheme();
 
       /// Load categories config for the Tabbar menu
       /// User to sort the category Setting

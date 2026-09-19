@@ -13,14 +13,17 @@
             "fit": "fill",
             "items": [
                 {
-                    "radius": 9,
+                    "radius": 12,
                     "category": "",
                     "image": "https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-375-700x263.png",
                     "padding": 5
                 }
             ],
             "marginBottom": 10,
-            "marginTop": 10
+            "marginTop": 12,
+            "marginLeft": 12,
+            "marginRight": 12,
+            "radius": 12
         },
         {
             "layout": "bannerImage",
@@ -28,14 +31,17 @@
             "fit": "fill",
             "items": [
                 {
-                    "radius": 9,
+                    "radius": 12,
                     "category": "",
                     "image": "https://kanzalsahra.com/wp-content/uploads/2026/03/Frame-376-700x263.png",
                     "padding": 5
                 }
             ],
-            "marginBottom": 15,
-            "marginTop": 10
+            "marginBottom": 12,
+            "marginTop": 6,
+            "marginLeft": 12,
+            "marginRight": 12,
+            "radius": 12
         },
         {
             "layout": "bannerImage",
@@ -43,11 +49,12 @@
             "design": "swiper",
             "height": 0.18,
             "fit": "contain",
-            "viewportFraction": 0.35,
+            "viewportFraction": 0.72,
             "padding": 5,
             "autoPlay": true,
             "intervalTime": 3,
-            "radius": 30,
+            "radius": 18,
+            "showIndicator": true,
             "items": [
                 {
                     "category": 125,
@@ -78,8 +85,8 @@
                     "image": "assets/images/gold_bar_withname.png"
                 }
             ],
-            "marginBottom": 25,
-            "marginTop": 5
+            "marginBottom": 24,
+            "marginTop": 12
         },
         {
             "layout": "oneAndHalfColumn",
@@ -265,7 +272,8 @@
         "ProductListLayout": "list",
         "StickyHeader": false,
         "ShowChat": false,
-        "useMaterial3": false
+        "useMaterial3": false,
+        "DefaultTheme": "dark"
     },
     "TabBar": [
         {

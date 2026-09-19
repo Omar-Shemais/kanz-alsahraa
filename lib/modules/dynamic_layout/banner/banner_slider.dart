@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../common/tools/tools.dart';
 import '../../../widgets/common/background_color_widget.dart';
@@ -82,9 +81,6 @@ class _StateBannerSlider extends State<BannerSlider> {
     List items = widget.config.items;
     var showNumber = widget.config.showNumber;
     var boxFit = widget.config.fit;
-    final isCirclePageIndicator =
-        widget.config.pageIndicatorType?.isCircle == true;
-
     return Padding(
       padding: const EdgeInsets.all(0),
       child: Stack(
@@ -112,21 +108,15 @@ class _StateBannerSlider extends State<BannerSlider> {
                 ),
             ],
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 0),
-              child: const SizedBox(),
-            ),
-          ),
           showNumber
               ? Align(
                   alignment: Alignment.topRight,
                   child: Padding(
                     padding: const EdgeInsets.only(top: 15, right: 0),
                     child: Container(
-                      decoration:
-                          BoxDecoration(color: Colors.black.withOpacity(0.6)),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.6),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 7, vertical: 2),
@@ -169,9 +159,9 @@ class _StateBannerSlider extends State<BannerSlider> {
             (Tools.isTablet(MediaQuery.of(context)) ? 0.55 : 0.85);
 
         /// Shift the swiper left to remove the starting gap when viewportFraction < 1.0
-        double offsetRatio = (1.0 - viewportFraction) / 2;
+        var offsetRatio = (1.0 - viewportFraction) / 2;
 
-        return OverflowBox(
+        final slider = OverflowBox(
           maxWidth: width * (1.0 + offsetRatio * 2),
           alignment: Alignment.centerLeft,
           child: FractionalTranslation(
@@ -190,6 +180,37 @@ class _StateBannerSlider extends State<BannerSlider> {
               duration: intervalTime * 100,
             ),
           ),
+        );
+        if (!widget.config.showIndicator || items.length < 2) return slider;
+        return Column(
+          children: [
+            Expanded(child: slider),
+            const SizedBox(height: 10),
+            ValueListenableBuilder<int>(
+              valueListenable: _positionNotifier,
+              builder: (context, current, _) => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  items.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: index == current ? 24 : 9,
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: index == current
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.22),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       case 'tinder':
         return Swiper(
@@ -282,135 +303,94 @@ class _StateBannerSlider extends State<BannerSlider> {
     return RepaintBoundary(
       child: BackgroundColorWidget(
         enable: widget.config.enableBackground,
-      child: LayoutBuilder(
-        builder: (context, constraint) {
-          var bannerPercentWidth = widget.config.overrideBannerPercentWidth ??
-              bannerPercent(constraint.maxWidth)!;
-          var height = screenSize.height * bannerPercentWidth +
-              bannerExtraHeight +
-              upHeight!;
-          if (items.isEmpty) {
-            return widget.config.title != null
-                ? HeaderText(config: widget.config.title!)
-                : const SizedBox();
-          }
+        child: LayoutBuilder(
+          builder: (context, constraint) {
+            var bannerPercentWidth = widget.config.overrideBannerPercentWidth ??
+                bannerPercent(constraint.maxWidth)!;
+            var height = screenSize.height * bannerPercentWidth +
+                bannerExtraHeight +
+                upHeight!;
+            if (items.isEmpty) {
+              return widget.config.title != null
+                  ? HeaderText(config: widget.config.title!)
+                  : const SizedBox();
+            }
 
-          return FractionallySizedBox(
-            widthFactor: 1.0,
-            child: Container(
-              margin: EdgeInsets.only(
-                left: widget.config.marginLeft,
-                right: widget.config.marginRight,
-                top: widget.config.marginTop,
-                bottom: widget.config.marginBottom,
-              ),
-              child: Stack(
-                children: <Widget>[
-                  if (widget.config.showBackground)
-                    SizedBox(
-                      height: height,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 0),
-                        child: ValueListenableBuilder<int>(
-                          valueListenable: _positionNotifier,
-                          builder: (context, position, child) {
-                            BannerItemConfig item = items[position];
-                            return ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                bottom: Radius.elliptical(100, 6),
-                              ),
-                              child: isBlur
-                                  ? ImageFiltered(
-                                      imageFilter: ImageFilter.blur(
-                                        sigmaX: 5.0,
-                                        sigmaY: 5.0,
-                                      ),
-                                      child: Transform.scale(
-                                        scale: 3,
-                                        child: FluxImage(
-                                          imageUrl:
-                                              item.background ?? item.image,
-                                          fit: BoxFit.fill,
-                                          width: screenSize.width + upHeight,
+            return FractionallySizedBox(
+              widthFactor: 1.0,
+              child: Container(
+                margin: EdgeInsets.only(
+                  left: widget.config.marginLeft,
+                  right: widget.config.marginRight,
+                  top: widget.config.marginTop,
+                  bottom: widget.config.marginBottom,
+                ),
+                child: Stack(
+                  children: <Widget>[
+                    if (widget.config.showBackground)
+                      SizedBox(
+                        height: height,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 0),
+                          child: ValueListenableBuilder<int>(
+                            valueListenable: _positionNotifier,
+                            builder: (context, position, child) {
+                              BannerItemConfig item = items[position];
+                              return ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  bottom: Radius.elliptical(100, 6),
+                                ),
+                                child: isBlur
+                                    ? ImageFiltered(
+                                        imageFilter: ImageFilter.blur(
+                                          sigmaX: 5.0,
+                                          sigmaY: 5.0,
                                         ),
+                                        child: Transform.scale(
+                                          scale: 3,
+                                          child: FluxImage(
+                                            imageUrl:
+                                                item.background ?? item.image,
+                                            fit: BoxFit.fill,
+                                            width: screenSize.width + upHeight,
+                                          ),
+                                        ),
+                                      )
+                                    : FluxImage(
+                                        imageUrl: item.background ?? item.image,
+                                        fit: BoxFit.fill,
+                                        width: constraint.maxWidth,
+                                        height: height,
                                       ),
-                                    )
-                                  : FluxImage(
-                                      imageUrl: item.background ?? item.image,
-                                      fit: BoxFit.fill,
-                                      width: constraint.maxWidth,
-                                      height: height,
-                                    ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    Column(
+                      children: [
+                        if (widget.config.title != null)
+                          HeaderText(config: widget.config.title!),
+                        LayoutBuilder(
+                          builder: (context, constraint) {
+                            var width = constraint.maxWidth;
+                            return Center(
+                              child: SizedBox(
+                                width: width,
+                                height: screenSize.height * bannerPercentWidth,
+                                child: renderBanner(width),
+                              ),
                             );
                           },
                         ),
-                      ),
+                      ],
                     ),
-                  Column(
-                    children: [
-                      if (widget.config.title != null)
-                        HeaderText(config: widget.config.title!),
-                      LayoutBuilder(
-                        builder: (context, constraint) {
-                          var width = constraint.maxWidth;
-                          return Center(
-                            child: SizedBox(
-                              width: width,
-                              height: screenSize.height * bannerPercentWidth,
-                              child: renderBanner(width),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
-    ),
-  );
-}
-}
-
-class _LinePaginationBuilder extends SwiperPlugin {
-  final Color activeColor;
-  final Color color;
-
-  _LinePaginationBuilder({
-    required this.activeColor,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context, SwiperPluginConfig config) {
-    List<Widget> list = [];
-
-    int itemCount = config.itemCount;
-    int activeIndex = config.activeIndex;
-
-    for (int i = 0; i < itemCount; i++) {
-      bool active = i == activeIndex;
-      list.add(Container(
-        key: Key("pagination_$i"),
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        width: active ? 20 : 6,
-        height: 2,
-        decoration: BoxDecoration(
-          color: active ? activeColor : color,
-          borderRadius: BorderRadius.circular(2),
+            );
+          },
         ),
-      ));
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Row(
-        key: const Key("pagination_row"),
-        mainAxisSize: MainAxisSize.min,
-        children: list,
       ),
     );
   }

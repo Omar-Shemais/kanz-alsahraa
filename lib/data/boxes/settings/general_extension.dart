@@ -52,6 +52,15 @@ extension GeneralSettings on SettingsBox {
     box.put(BoxKeys.isDarkTheme, value);
   }
 
+  bool get hasSelectedTheme => box.get(
+        BoxKeys.hasSelectedTheme,
+        defaultValue: false,
+      );
+
+  set hasSelectedTheme(bool value) {
+    box.put(BoxKeys.hasSelectedTheme, value);
+  }
+
   int get popupBannerLastUpdatedTime {
     return box.get(
       BoxKeys.popupBannerLastUpdatedTime,

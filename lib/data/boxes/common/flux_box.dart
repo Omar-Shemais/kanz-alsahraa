@@ -9,6 +9,8 @@ abstract class FluxBox {
 
   bool _isInitialized = false;
 
+  bool get isInitialized => _isInitialized;
+
   Box? _box;
 
   Future<void> init() async {

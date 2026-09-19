@@ -13,7 +13,7 @@ class Element {
   change() { this.listeners.change?.({ preventDefault() {} }); }
 }
 const elements = {};
-for (const id of ['kanz-json', 'kanz-error', 'kanz-sections', 'kanz-updates', 'kanz-all-fields', 'kanz-apply', 'kanz-import', 'kanz-add-banner', 'kanz-add-category', 'kanz-form', 'kanz-export', 'kanz-confirm-updates', 'kanz-category-order']) elements[id] = new Element();
+for (const id of ['kanz-json', 'kanz-error', 'kanz-sections', 'kanz-updates', 'kanz-appearance', 'kanz-all-fields', 'kanz-apply', 'kanz-import', 'kanz-add-banner', 'kanz-add-category', 'kanz-form', 'kanz-export', 'kanz-confirm-updates', 'kanz-category-order']) elements[id] = new Element();
 elements['kanz-json'].value = fs.readFileSync(path.join(__dirname, '../../lib/config/config_ar.json'), 'utf8');
 const canonicalScript = fs.readFileSync(path.join(__dirname, '../kanz-app-control/admin.js'), 'utf8');
 let editorScript = canonicalScript;
@@ -30,8 +30,14 @@ vm.runInNewContext(editorScript, {
   setTimeout, Blob, URL,
 });
 const read = () => JSON.parse(elements['kanz-json'].value);
-assert.equal(elements['kanz-sections'].children.length, 11);
 const descendants = (element) => [element, ...element.children.flatMap((child) => typeof child === 'object' ? descendants(child) : [])];
+assert.equal(elements['kanz-sections'].children.length, 11);
+const themeSelect = descendants(elements['kanz-appearance']).find((item) => item.tag === 'select');
+assert.ok(themeSelect);
+assert.equal(themeSelect.value, 'dark');
+themeSelect.value = 'light'; themeSelect.change();
+assert.equal(read().Setting.DefaultTheme, 'light');
+themeSelect.value = 'dark'; themeSelect.change();
 const firstBannerCard = elements['kanz-sections'].children[1];
 const insertBefore = descendants(firstBannerCard).find((item) => item.tag === 'button' && item.textContent === 'إضافة قسم منتجات قبله');
 assert.ok(insertBefore);

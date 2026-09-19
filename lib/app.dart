@@ -144,7 +144,7 @@ class AppState extends State<App>
 
     if (appConfig == null) {
       /// This case is loaded first time without config file
-      return buildLightTheme(langCode);
+      return isDarkTheme ? buildDarkTheme(langCode) : buildLightTheme(langCode);
     }
 
     var fontFamily = appConfig.settings.fontFamily;
@@ -189,12 +189,19 @@ class AppState extends State<App>
         ? appConfig.settings.mainColor
         : (isDarkTheme ? kDarkConfig : kLightConfig).mainColor;
 
+    final resolvedMainColor = HexColor(mainColor);
+    final onMainColor =
+        ThemeData.estimateBrightnessForColor(resolvedMainColor) ==
+                Brightness.dark
+            ? Colors.white
+            : Colors.black;
     var colorScheme = themeData.colorScheme.copyWith(
-      primary: HexColor(mainColor),
+      primary: resolvedMainColor,
+      onPrimary: onMainColor,
     );
 
     return themeData.copyWith(
-      primaryColor: HexColor(mainColor),
+      primaryColor: resolvedMainColor,
       colorScheme: colorScheme,
     );
   }

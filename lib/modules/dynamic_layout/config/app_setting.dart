@@ -28,6 +28,7 @@ class AppSetting {
   late String? productDetail;
   late String? blogDetail;
   late bool? useMaterial3;
+  bool? defaultDarkTheme;
   AgeRestrictionConfig ageRestrictionConfig = kDefaultAgeRestrictionConfig;
   SmartEngagementBannerConfig smartEngagementBannerConfig =
       kSmartEngagementBannerConfig;
@@ -51,6 +52,7 @@ class AppSetting {
     this.productDetail,
     this.blogDetail,
     this.useMaterial3,
+    this.defaultDarkTheme,
     required this.tabBarConfig,
     required this.ageRestrictionConfig,
     required this.smartEngagementBannerConfig,
@@ -75,11 +77,19 @@ class AppSetting {
     productDetail = config['ProductDetail'];
     blogDetail = config['BlogDetail'];
     useMaterial3 = config['useMaterial3'] ?? false;
+    final configuredTheme = config['DefaultTheme']?.toString().toLowerCase();
+    defaultDarkTheme = configuredTheme == 'dark'
+        ? true
+        : configuredTheme == 'light'
+            ? false
+            : config['DefaultDarkTheme'] is bool
+                ? config['DefaultDarkTheme'] as bool
+                : null;
 
     ///
-    aboutUS = "https://kanzalsahra.com/عن-كنز-الصحراء" ; //config['AboutUS'];
-    privacy = "https://kanzalsahra.com/privacy-policy";//config['Privacy'];
-    fAQ = "https://kanzalsahra.com/faq/";//config['FAQ'];
+    aboutUS = 'https://kanzalsahra.com/عن-كنز-الصحراء'; //config['AboutUS'];
+    privacy = 'https://kanzalsahra.com/privacy-policy'; //config['Privacy'];
+    fAQ = 'https://kanzalsahra.com/faq/'; //config['FAQ'];
     news = config['News'];
     support = config['Support'];
     downloadApp = config['DownloadApp'];
@@ -118,6 +128,7 @@ class AppSetting {
     TabBarConfig? tabBarConfig,
     Map? productColors,
     bool? useMaterial3,
+    bool? defaultDarkTheme,
     AgeRestrictionConfig? ageRestrictionConfig,
     SmartEngagementBannerConfig? smartEngagementBannerConfig,
     String? aboutUS,
@@ -141,6 +152,7 @@ class AppSetting {
       tabBarConfig: tabBarConfig ?? this.tabBarConfig,
       productColors: productColors ?? this.productColors,
       useMaterial3: useMaterial3 ?? this.useMaterial3,
+      defaultDarkTheme: defaultDarkTheme ?? this.defaultDarkTheme,
       ageRestrictionConfig: ageRestrictionConfig ?? this.ageRestrictionConfig,
       smartEngagementBannerConfig:
           smartEngagementBannerConfig ?? this.smartEngagementBannerConfig,

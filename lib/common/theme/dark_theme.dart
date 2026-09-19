@@ -21,7 +21,7 @@ ThemeData buildDarkTheme(String? language,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
+        foregroundColor: kDarkBG,
         minimumSize: const Size(120, 36),
         padding: EdgeInsets.zero,
         elevation: 1,
@@ -76,8 +76,8 @@ ThemeData buildDarkTheme(String? language,
       ),
       systemOverlayStyle: SystemUiOverlayStyle.light,
     ),
-    buttonTheme: ButtonThemeData(
-        colorScheme: kColorScheme.copyWith(onPrimary: kLightBG)),
+    buttonTheme:
+        ButtonThemeData(colorScheme: kColorScheme.copyWith(onPrimary: kDarkBG)),
     pageTransitionsTheme: const PageTransitionsTheme(builders: {
       TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
@@ -89,7 +89,24 @@ ThemeData buildDarkTheme(String? language,
       labelStyle: themeFont.copyWith(fontSize: 13),
       unselectedLabelStyle: themeFont.copyWith(fontSize: 13),
     ),
-    dialogBackgroundColor: kDarkBG,
+    dialogTheme: const DialogThemeData(backgroundColor: kDarkBG),
+    dividerColor: Colors.white.withValues(alpha: 0.14),
+    disabledColor: Colors.white.withValues(alpha: 0.38),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: kDarkBgLight,
+      hintStyle: themeFont.copyWith(color: Colors.white60),
+      labelStyle: themeFont.copyWith(color: Colors.white70),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+    ),
+    iconTheme: const IconThemeData(color: kDarkAccent),
     colorScheme: kDarkColorScheme
         .copyWith(
           secondary: kDarkAccent,

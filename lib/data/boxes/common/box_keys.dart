@@ -19,6 +19,7 @@ class BoxKeys {
   static const String password = 'password';
   static const String isLoggedIn = 'isLoggedIn';
   static const String isDarkTheme = 'isDarkTheme';
+  static const String hasSelectedTheme = 'hasSelectedTheme';
   static const String hasFinishedOnboarding = 'hasFinishedOnboarding';
   static const String posAddress = 'posAddress';
   static const String popupBannerLastUpdatedTime = 'popupBannerLastUpdatedTime';

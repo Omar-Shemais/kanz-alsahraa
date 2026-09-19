@@ -34,7 +34,7 @@ class ExcellenceSection extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.elMessiri(
                 fontSize: isSmallScreen ? 13 : 15,
-                color: const Color(0xFF666666),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.5,
               ),
             ),
@@ -126,11 +126,11 @@ class ExcellenceCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(isSmallScreen ? 10 : 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -152,7 +152,7 @@ class ExcellenceCard extends StatelessWidget {
             style: GoogleFonts.elMessiri(
               fontSize: isSmallScreen ? 13 : 15,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF1A1A1A),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           SizedBox(height: isSmallScreen ? 4 : 8),
@@ -161,7 +161,7 @@ class ExcellenceCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.elMessiri(
               fontSize: isSmallScreen ? 10 : 11,
-              color: const Color(0xFF666666),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.3,
             ),
           ),

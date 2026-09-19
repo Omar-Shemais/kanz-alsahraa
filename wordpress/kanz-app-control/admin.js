@@ -91,6 +91,7 @@
     container.replaceChildren();
     if (!config) return;
     renderUpdates();
+    renderAppearance();
     renderAllFields();
     renderCategoryOrder();
     config.HorizonLayout.forEach((section, index) => {
@@ -463,6 +464,20 @@
       })); label.append(checkbox, 'إجبار تحديث الإصدارات الأقدم'); card.append(label); updates.append(card);
     });
   }
+  function renderAppearance() {
+    const panel = document.getElementById('kanz-appearance'); if (!panel) return;
+    panel.replaceChildren();
+    const note = document.createElement('p');
+    note.textContent = 'يطبّق هذا الاختيار على التثبيتات التي لم يغيّر أصحابها المظهر يدوياً. اختيار المستخدم داخل التطبيق يبقى محفوظاً.';
+    panel.append(note);
+    selectField(
+      'المظهر الافتراضي',
+      [['dark', 'داكن'], ['light', 'فاتح']],
+      config.Setting.DefaultTheme === 'light' ? 'light' : 'dark',
+      (value) => { config.Setting.DefaultTheme = value; },
+      panel,
+    );
+  }
   function renderAllFields() {
     const root = document.getElementById('kanz-all-fields'); if (!root) return;
     root.replaceChildren();
@@ -474,7 +489,7 @@
       showSearch: 'إظهار البحث', showLogo: 'إظهار الشعار', showMenu: 'إظهار القائمة',
       autoPlay: 'تشغيل البانرات تلقائياً', height: 'الارتفاع', radius: 'استدارة الزوايا',
       KanzControl: 'التحكم في التطبيق', updates: 'التحديثات', minimumBuild: 'الحد الأدنى لرقم البناء',
-      enabled: 'مفعّل', PrivacyPoliciesPageUrlOrId: 'رابط سياسة الخصوصية',
+      enabled: 'مفعّل', DefaultTheme: 'المظهر الافتراضي', PrivacyPoliciesPageUrlOrId: 'رابط سياسة الخصوصية',
     };
     function walk(parent, key, value, target, path) {
       const label = labels[key] || String(key);

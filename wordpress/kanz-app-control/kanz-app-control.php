@@ -26,6 +26,9 @@ function kanz_config_validate($data) {
             return new WP_Error('invalid_items', 'عناصر القسم يجب أن تكون قائمة.');
         }
     }
+    if (isset($data['Setting']['DefaultTheme']) && !in_array($data['Setting']['DefaultTheme'], array('dark', 'light'), true)) {
+        return new WP_Error('invalid_theme', 'المظهر الافتراضي يجب أن يكون داكناً أو فاتحاً.');
+    }
     if (isset($data['KanzControl'])) {
         if (!is_array($data['KanzControl']) || !isset($data['KanzControl']['updates']) || !is_array($data['KanzControl']['updates'])) {
             return new WP_Error('invalid_updates', 'إعدادات التحديث غير صحيحة.');
@@ -174,6 +177,8 @@ function kanz_config_page() {
         <div id="kanz-sections"></div>
         <button type="button" id="kanz-add-banner" class="button">إضافة بانر</button>
         <button type="button" id="kanz-add-category" class="button">إضافة قسم منتجات</button>
+        <h2>المظهر الافتراضي للتطبيق</h2>
+        <div id="kanz-appearance"></div>
         <h2>ترتيب التصنيفات في صفحة التصنيفات</h2>
         <p>الأسهم تغيّر ترتيب التصنيفات. تُحفظ القائمة كاملة عند تغيير الترتيب، دون حذف التصنيفات الأخرى. التصنيفات الجديدة لاحقاً تحتاج إعادة حفظ الترتيب.</p>
         <div id="kanz-category-order"></div>

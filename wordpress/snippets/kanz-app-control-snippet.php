@@ -105,6 +105,7 @@ function kanz_snippet_admin_js() {
     container.replaceChildren();
     if (!config) return;
     renderUpdates();
+    renderAppearance();
     renderAllFields();
     renderCategoryOrder();
     config.HorizonLayout.forEach((section, index) => {
@@ -477,6 +478,20 @@ function kanz_snippet_admin_js() {
       })); label.append(checkbox, 'إجبار تحديث الإصدارات الأقدم'); card.append(label); updates.append(card);
     });
   }
+  function renderAppearance() {
+    const panel = document.getElementById('kanz-appearance'); if (!panel) return;
+    panel.replaceChildren();
+    const note = document.createElement('p');
+    note.textContent = 'يطبّق هذا الاختيار على التثبيتات التي لم يغيّر أصحابها المظهر يدوياً. اختيار المستخدم داخل التطبيق يبقى محفوظاً.';
+    panel.append(note);
+    selectField(
+      'المظهر الافتراضي',
+      [['dark', 'داكن'], ['light', 'فاتح']],
+      config.Setting.DefaultTheme === 'light' ? 'light' : 'dark',
+      (value) => { config.Setting.DefaultTheme = value; },
+      panel,
+    );
+  }
   function renderAllFields() {
     const root = document.getElementById('kanz-all-fields'); if (!root) return;
     root.replaceChildren();
@@ -488,7 +503,7 @@ function kanz_snippet_admin_js() {
       showSearch: 'إظهار البحث', showLogo: 'إظهار الشعار', showMenu: 'إظهار القائمة',
       autoPlay: 'تشغيل البانرات تلقائياً', height: 'الارتفاع', radius: 'استدارة الزوايا',
       KanzControl: 'التحكم في التطبيق', updates: 'التحديثات', minimumBuild: 'الحد الأدنى لرقم البناء',
-      enabled: 'مفعّل', PrivacyPoliciesPageUrlOrId: 'رابط سياسة الخصوصية',
+      enabled: 'مفعّل', DefaultTheme: 'المظهر الافتراضي', PrivacyPoliciesPageUrlOrId: 'رابط سياسة الخصوصية',
     };
     function walk(parent, key, value, target, path) {
       const label = labels[key] || String(key);
@@ -899,6 +914,9 @@ function kanz_config_validate($data) {
             return new WP_Error('invalid_items', 'عناصر القسم يجب أن تكون قائمة.');
         }
     }
+    if (isset($data['Setting']['DefaultTheme']) && !in_array($data['Setting']['DefaultTheme'], array('dark', 'light'), true)) {
+        return new WP_Error('invalid_theme', 'المظهر الافتراضي يجب أن يكون داكناً أو فاتحاً.');
+    }
     if (isset($data['KanzControl'])) {
         if (!is_array($data['KanzControl']) || !isset($data['KanzControl']['updates']) || !is_array($data['KanzControl']['updates'])) {
             return new WP_Error('invalid_updates', 'إعدادات التحديث غير صحيحة.');
@@ -1089,6 +1107,8 @@ function kanz_config_page() {
         <div id="kanz-sections"></div>
         <button type="button" id="kanz-add-banner" class="button">إضافة بانر</button>
         <button type="button" id="kanz-add-category" class="button">إضافة قسم منتجات</button>
+        <h2>المظهر الافتراضي للتطبيق</h2>
+        <div id="kanz-appearance"></div>
         <h2>ترتيب التصنيفات في صفحة التصنيفات</h2>
         <p>الأسهم تغيّر ترتيب التصنيفات. تُحفظ القائمة كاملة عند تغيير الترتيب، دون حذف التصنيفات الأخرى. التصنيفات الجديدة لاحقاً تحتاج إعادة حفظ الترتيب.</p>
         <div id="kanz-category-order"></div>

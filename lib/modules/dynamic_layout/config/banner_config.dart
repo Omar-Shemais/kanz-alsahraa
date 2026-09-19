@@ -58,6 +58,7 @@ class BannerConfig {
   bool showNumber = false;
   bool isBlur = false;
   bool showBackground = false;
+  bool showIndicator = false;
   int? intervalTime;
   double upHeight = 0.0;
   double radius = 6.0;
@@ -97,6 +98,7 @@ class BannerConfig {
     required this.showNumber,
     required this.isBlur,
     required this.showBackground,
+    this.showIndicator = false,
     this.pageIndicatorType,
     this.isSoundOn,
     this.enableTimeIndicator,
@@ -134,6 +136,7 @@ class BannerConfig {
 
     autoPlay = json['autoPlay'] ?? false;
     showBackground = json['showBackground'] ?? false;
+    showIndicator = json['showIndicator'] ?? false;
     isSlider = json['isSlider'] ?? false;
     showNumber = json['showNumber'] ?? false;
     isBlur = json['isBlur'] ?? false;
@@ -198,6 +201,7 @@ class BannerConfig {
       map['showNumber'] = showNumber;
       map['isBlur'] = isBlur;
       map['showBackground'] = showBackground;
+      map['showIndicator'] = showIndicator;
       map['upHeight'] = upHeight;
       map['isSoundOn'] = isSoundOn;
       map['enableTimeIndicator'] = enableTimeIndicator;

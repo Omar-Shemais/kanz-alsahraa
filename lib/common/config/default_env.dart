@@ -12,7 +12,7 @@ class DefaultConfig {
   static String webProxy = '';
   static Map serverConfig = {};
   static String appConfig = '';
-  static bool defaultDarkTheme = false;
+  static bool defaultDarkTheme = true;
   static String countryCodeDefault = 'VN';
   static String dialCodeDefault = '+84';
   static String nameDefault = 'Vietnam';

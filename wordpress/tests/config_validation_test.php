@@ -17,6 +17,8 @@ $bad = $valid; $bad['Setting']['consumerSecret'] = 'sensitive'; $cases[] = array
 $bad = $valid; $bad['Setting']['nested'] = array('private_key' => 'sensitive'); $cases[] = array($bad, false);
 $bad = $valid; $bad['HorizonLayout'][0]['image'] = 'javascript:alert(1)'; $cases[] = array($bad, false);
 $bad = $valid; $bad['Setting']['title'] = '<script>alert(1)</script>'; $cases[] = array($bad, false);
+$bad = $valid; $bad['Setting']['DefaultTheme'] = 'system'; $cases[] = array($bad, false);
+$good = $valid; $good['Setting']['DefaultTheme'] = 'dark'; $cases[] = array($good, true);
 $bad = $valid; $bad['Setting']['custom'] = 'بند إضافي'; $cases[] = array($bad, true);
 foreach ($cases as $index => $case) {
     if ((kanz_config_validate($case[0]) === true) !== $case[1]) { fwrite(STDERR, 'Failed case ' . $index . PHP_EOL); exit(1); }
