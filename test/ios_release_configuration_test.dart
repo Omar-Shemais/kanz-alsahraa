@@ -65,6 +65,10 @@ void main() {
     expect(dependencies, isNot(contains('google_maps_flutter:')));
     expect(dependencies, isNot(contains('flutter_facebook_auth:')));
     expect(dependencies, isNot(contains('facebook_app_events:')));
+    final podfile = File('ios/Podfile').readAsStringSync();
+    expect(podfile, contains("'PERMISSION_LOCATION=0'"));
+    expect(podfile, contains("'PERMISSION_LOCATION_WHENINUSE=0'"));
+    expect(podfile, contains("'PERMISSION_LOCATION_ALWAYS=0'"));
     for (final strings in Directory('ios/Runner')
         .listSync(recursive: true)
         .whereType<File>()

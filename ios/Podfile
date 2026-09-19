@@ -99,14 +99,21 @@ post_install do |installer|
 
       ## permission handler
       if target.name == 'permission_handler_apple'
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
-          '$(inherited)',
-
-          ## dart: PermissionGroup.camera
+        # Do not rely on ||= here: CocoaPods may already supply inherited
+        # definitions, which would leave an old location macro in the binary.
+        definitions = Array(config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'])
+        definitions << '$(inherited)' if definitions.empty?
+        definitions.reject! do |definition|
+          definition.to_s.start_with?('PERMISSION_CAMERA=', 'PERMISSION_PHOTOS=',
+            'PERMISSION_LOCATION=', 'PERMISSION_LOCATION_WHENINUSE=',
+            'PERMISSION_LOCATION_ALWAYS=')
+        end
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = definitions + [
           'PERMISSION_CAMERA=1',
-
-          ## dart: PermissionGroup.photos
-          'PERMISSION_PHOTOS=1'
+          'PERMISSION_PHOTOS=1',
+          'PERMISSION_LOCATION=0',
+          'PERMISSION_LOCATION_WHENINUSE=0',
+          'PERMISSION_LOCATION_ALWAYS=0'
         ]
       else
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
