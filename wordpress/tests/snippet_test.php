@@ -46,6 +46,11 @@ foreach (array('admin_menu', 'admin_enqueue_scripts', 'admin_post_kanz_save_conf
 }
 $valid = array('Setting' => array(), 'TabBar' => array(array('layout' => 'home', 'icon' => 'home')), 'HorizonLayout' => array());
 if (kanz_v6_config_validate($valid) !== true || !is_wp_error(kanz_v6_notification_credentials())) { throw new Exception('Snippet safety check failed.'); }
+$with_drawer = $valid;
+$with_drawer['KanzDrawerV2'] = array('enabled' => true, 'showTracking' => true, 'rootCategoryIds' => array('124', '130'));
+if (kanz_v6_config_validate($with_drawer) !== true) { throw new Exception('Valid drawer configuration was rejected.'); }
+$with_drawer['KanzDrawerV2']['rootCategoryIds'] = array('javascript:alert(1)');
+if (!is_wp_error(kanz_v6_config_validate($with_drawer))) { throw new Exception('Invalid drawer category was accepted.'); }
 $script = kanz_v6_snippet_admin_js();
 if (strpos($script, 'DOMContentLoaded') === false || strpos($script, 'kanz-sections') === false) { throw new Exception('Missing inline editor.'); }
 $source = file_get_contents(__DIR__ . '/../snippets/kanz-app-control-snippet.php');

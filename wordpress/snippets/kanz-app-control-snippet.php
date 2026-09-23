@@ -1,6 +1,6 @@
 <?php
 /**
- * Kanz App Control — standalone PHP snippet, version 0.6.0.
+ * Kanz App Control — standalone PHP snippet, version 0.6.1.
  * In Code Snippets paste WITHOUT this opening <?php line.
  * Run everywhere: both admin-post handlers and the public config REST route
  * are required. Do not activate together with the equivalent Kanz plugin.
@@ -108,6 +108,7 @@ function kanz_v6_snippet_admin_js() {
     if (!config) return;
     renderUpdates();
     renderAppearance();
+    renderDrawer();
     renderAllFields();
     renderCategoryOrder();
     renderFilterCategoryOrder();
@@ -573,6 +574,64 @@ function kanz_v6_snippet_admin_js() {
       panel,
     );
   }
+  function renderDrawer() {
+    const panel = document.getElementById('kanz-drawer'); if (!panel) return;
+    panel.replaceChildren();
+    const drawer = config.KanzDrawerV2 || {
+      enabled: false, showSearch: true, showTracking: true,
+      showCorporate: true, hideEmptyCategories: true, rootCategoryIds: [],
+    };
+    const toggle = (key, label) => {
+      const row = document.createElement('label');
+      row.style.cssText = 'display:block;margin:10px 0';
+      const input = document.createElement('input'); input.type = 'checkbox';
+      input.checked = drawer[key] === true;
+      input.addEventListener('change', () => change(() => {
+        config.KanzDrawerV2 = { ...drawer, [key]: input.checked };
+      }));
+      row.append(input, ` ${label}`); panel.append(row);
+    };
+    toggle('enabled', 'تفعيل القائمة الجديدة (تحتاج إصدار التطبيق الذي يدعمها)');
+    toggle('showSearch', 'إظهار البحث');
+    toggle('showTracking', 'تتبع شحنتك — فتح صفحة الموقع داخل التطبيق');
+    toggle('showCorporate', 'طلبات الشركات — فتح صفحة الموقع داخل التطبيق');
+    toggle('hideEmptyCategories', 'إخفاء التصنيفات الخالية من المنتجات');
+    const note = document.createElement('p');
+    note.textContent = 'تستعمل القائمة تصنيفات WooCommerce المتاحة داخل التطبيق. لا تضف هنا بيانات دخول أو روابط تتبع خاصة بالعملاء.';
+    panel.append(note);
+    const roots = (kanzAdmin.categories || []).filter((cat) =>
+      Number(cat.parent) === 0 && cat.isUncategorized !== true);
+    const selected = Array.isArray(drawer.rootCategoryIds) ? drawer.rootCategoryIds.map(String) : [];
+    const title = document.createElement('h3'); title.textContent = 'الأقسام الرئيسية وترتيبها'; panel.append(title);
+    button(selected.length ? 'العودة لأقسام الموقع الافتراضية' : 'تخصيص الأقسام', () => change(() => {
+      config.KanzDrawerV2 = { ...drawer,
+        rootCategoryIds: selected.length ? [] : roots.map((cat) => String(cat.id)) };
+    }), panel);
+    if (!selected.length) {
+      const all = document.createElement('p'); all.textContent = 'تظهر أقسام الموقع الرئيسية الافتراضية: سبائك ذهب، جنيهات ذهب، أساور، سبائك فضة، أطقم الماس.'; panel.append(all);
+      return;
+    }
+    selected.forEach((id, index) => {
+      const cat = roots.find((item) => String(item.id) === id);
+      const row = document.createElement('div'); row.style.cssText = 'margin:6px 0';
+      row.append(`${cat?.name || `تصنيف #${id}`} `);
+      button('↑', () => change(() => {
+        if (index > 0) { [selected[index - 1], selected[index]] = [selected[index], selected[index - 1]]; config.KanzDrawerV2 = { ...drawer, rootCategoryIds: selected }; }
+      }), row);
+      button('↓', () => change(() => {
+        if (index < selected.length - 1) { [selected[index + 1], selected[index]] = [selected[index], selected[index + 1]]; config.KanzDrawerV2 = { ...drawer, rootCategoryIds: selected }; }
+      }), row);
+      button('حذف', () => change(() => { selected.splice(index, 1); config.KanzDrawerV2 = { ...drawer, rootCategoryIds: selected }; }), row);
+      panel.append(row);
+    });
+    const available = roots.filter((cat) => !selected.includes(String(cat.id)));
+    if (available.length) {
+      const select = document.createElement('select');
+      available.forEach((cat) => { const option = document.createElement('option'); option.value = cat.id; option.textContent = cat.name; select.append(option); });
+      panel.append(select);
+      button('إضافة قسم', () => change(() => { selected.push(select.value); config.KanzDrawerV2 = { ...drawer, rootCategoryIds: selected }; }), panel);
+    }
+  }
   function renderAllFields() {
     const root = document.getElementById('kanz-all-fields'); if (!root) return;
     root.replaceChildren();
@@ -1008,6 +1067,23 @@ function kanz_v6_config_validate($data) {
     if (isset($data['Setting']['DefaultTheme']) && !in_array($data['Setting']['DefaultTheme'], array('dark', 'light'), true)) {
         return new WP_Error('invalid_theme', 'المظهر الافتراضي يجب أن يكون داكناً أو فاتحاً.');
     }
+    if (isset($data['KanzDrawerV2'])) {
+        $drawer = $data['KanzDrawerV2'];
+        if (!is_array($drawer)) { return new WP_Error('invalid_drawer', 'إعدادات القائمة غير صحيحة.'); }
+        foreach (array('enabled', 'showSearch', 'showTracking', 'showCorporate', 'hideEmptyCategories') as $key) {
+            if (isset($drawer[$key]) && !is_bool($drawer[$key])) {
+                return new WP_Error('invalid_drawer', 'خيارات القائمة يجب أن تكون صحيحة أو خاطئة.');
+            }
+        }
+        if (isset($drawer['rootCategoryIds'])) {
+            if (!is_array($drawer['rootCategoryIds'])) { return new WP_Error('invalid_drawer', 'ترتيب الأقسام غير صحيح.'); }
+            foreach ($drawer['rootCategoryIds'] as $id) {
+                if (!preg_match('/^[1-9][0-9]{0,9}$/', (string) $id)) {
+                    return new WP_Error('invalid_drawer', 'رقم قسم غير صحيح في القائمة.');
+                }
+            }
+        }
+    }
     if (isset($data['KanzControl'])) {
         if (!is_array($data['KanzControl']) || !isset($data['KanzControl']['updates']) || !is_array($data['KanzControl']['updates'])) {
             return new WP_Error('invalid_updates', 'إعدادات التحديث غير صحيحة.');
@@ -1281,6 +1357,8 @@ function kanz_v6_config_page() {
         <button type="button" id="kanz-add-category" class="button">إضافة قسم منتجات</button>
         <h2>المظهر الافتراضي للتطبيق</h2>
         <div id="kanz-appearance"></div>
+        <h2>قائمة التطبيق</h2>
+        <div id="kanz-drawer"></div>
         <h2>ترتيب التصنيفات في صفحة التصنيفات</h2>
         <p>الأسهم تغيّر ترتيب التصنيفات. تُحفظ القائمة كاملة عند تغيير الترتيب، دون حذف التصنيفات الأخرى. التصنيفات الجديدة لاحقاً تحتاج إعادة حفظ الترتيب.</p>
         <div id="kanz-category-order"></div>

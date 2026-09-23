@@ -1,6 +1,7 @@
 import 'dart:convert' as convert;
 import 'dart:convert';
 import 'dart:core';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:http/http.dart';
@@ -26,6 +27,7 @@ import '../../../services/elastic/elastic_service.dart';
 import '../../../services/https.dart';
 import '../../../services/index.dart';
 import '../../../services/review_service.dart';
+import '../../../services/secure_http_client.dart';
 import '../../../services/secure_requests.dart';
 import 'branch_ext.dart';
 import 'woo_query.dart';
@@ -581,6 +583,16 @@ class WooCommerceService extends BaseServices {
       var response = await getWooProductsResponse(params: params, version: 3);
 
       if (response is Map && isNotBlank(response['message'])) {
+        final storeFallback = await _fetchStoreProductsFallback(
+          categoryId: categoryId,
+          page: page,
+          search: search,
+          featured: featured,
+          onSale: onSale,
+        );
+        if (storeFallback != null) {
+          return storeFallback;
+        }
         throw Exception(response['message']);
       } else {
         if (response == null) {
@@ -641,6 +653,96 @@ class WooCommerceService extends BaseServices {
       //This error exception is about your Rest API is not config correctly so that not return the correct JSON format, please double check the document from this link https://docs.inspireui.com/fluxstore/woocommerce-setup/
       rethrow;
     }
+  }
+
+  Future<List<Product>?> _fetchStoreProductsFallback({
+    String? categoryId,
+    page = 1,
+    String? search,
+    bool? featured,
+    bool? onSale,
+  }) async {
+    try {
+      var query = 'per_page=$apiPageSize&page=${page ?? 1}';
+      if (categoryId != null && categoryId.isNotEmpty && categoryId != '0') {
+        query += '&category=$categoryId';
+      }
+      if (search != null && search.isNotEmpty) {
+        query += '&search=${Uri.encodeComponent(search)}';
+      }
+      if (featured == true) {
+        query += '&featured=true';
+      }
+      if (onSale == true) {
+        query += '&on_sale=true';
+      }
+      final client = SecureHttpClient();
+      try {
+        final uri = Uri.parse('$domain/wp-json/wc/store/v1/products?$query');
+        final res =
+            await client.get(uri).timeout(const Duration(seconds: 10));
+        if (res.statusCode == 200) {
+          final decoded = jsonDecode(utf8.decode(res.bodyBytes));
+          if (decoded is List) {
+            final list = <Product>[];
+            for (var raw in decoded) {
+              if (raw is Map) {
+                final item = Map<String, dynamic>.from(raw);
+                final prices =
+                    item['prices'] is Map ? item['prices'] as Map : {};
+                final minorUnits = (prices['currency_minor_unit'] is num)
+                    ? (prices['currency_minor_unit'] as num).toInt()
+                    : 2;
+                final divisor = pow(10, minorUnits).toDouble();
+                String formatPrice(dynamic val) {
+                  if (val == null) return '';
+                  final n = num.tryParse(val.toString());
+                  if (n == null) return val.toString();
+                  return (n / divisor)
+                      .toStringAsFixed(minorUnits > 0 ? minorUnits : 0);
+                }
+
+                item['price'] = formatPrice(prices['price']);
+                item['regular_price'] =
+                    formatPrice(prices['regular_price']);
+                item['sale_price'] = formatPrice(prices['sale_price']);
+                item['on_sale'] = item['on_sale'] ??
+                    (prices['sale_price'] != null &&
+                        prices['sale_price'] != prices['regular_price']);
+                item['in_stock'] = item['is_in_stock'] ?? true;
+                item['stock_status'] = (item['is_in_stock'] ?? true)
+                    ? 'instock'
+                    : 'outofstock';
+                if (item['images'] is List) {
+                  item['images'] = (item['images'] as List).map((img) {
+                    if (img is Map) {
+                      return {
+                        'id': img['id'],
+                        'src': img['src'] ?? img['thumbnail'] ?? '',
+                        'name': img['name'] ?? '',
+                        'alt': img['alt'] ?? '',
+                      };
+                    }
+                    return img;
+                  }).toList();
+                }
+                final product = Product.jsonParser(item);
+                if (categoryId != null) {
+                  product.categoryId = categoryId;
+                }
+                list.add(product);
+              }
+            }
+            return list;
+          }
+        }
+      } finally {
+        client.close();
+      }
+    } catch (e, trace) {
+      printError(e, trace);
+    }
+    return null;
   }
 
   Future<List<Product>> _searchBySku({

@@ -17,6 +17,7 @@ import '../routes/flux_navigate.dart';
 import '../services/index.dart';
 import '../widgets/common/index.dart' show FluxImage, WebView;
 import '../widgets/general/index.dart';
+import 'kanz_drawer_categories.dart';
 import 'maintab_delegate.dart';
 
 class SideBarMenu extends StatefulWidget {
@@ -27,6 +28,32 @@ class SideBarMenu extends StatefulWidget {
 }
 
 class MenuBarState extends State<SideBarMenu> {
+  static List<Category>? _cachedPublicDrawerCategories;
+  List<Category>? _publicDrawerCategories = _cachedPublicDrawerCategories;
+  bool _drawerCategoriesLoading = false;
+  bool _drawerCategoriesFailed = false;
+  bool _drawerCategoriesScheduled = false;
+
+  void _loadDrawerCategories() {
+    if (_drawerCategoriesLoading) return;
+    setState(() => _drawerCategoriesLoading = true);
+    loadPublicDrawerCategories().then((categories) {
+      if (!mounted) return;
+      setState(() {
+        _publicDrawerCategories = categories;
+        _cachedPublicDrawerCategories = categories;
+        _drawerCategoriesLoading = false;
+        _drawerCategoriesFailed = false;
+      });
+    }).catchError((Object _) {
+      if (!mounted) return;
+      setState(() {
+        _drawerCategoriesLoading = false;
+        _drawerCategoriesFailed = true;
+      });
+    });
+  }
+
   bool get isEcommercePlatform =>
       !ServerConfig().isListingType || !ServerConfig().isWordPress;
 
@@ -70,6 +97,10 @@ class MenuBarState extends State<SideBarMenu> {
 
   @override
   Widget build(BuildContext context) {
+    final kanzDrawer = Provider.of<AppModel>(context).appConfig?.kanzDrawer;
+    if (kanzDrawer?.enabled == true) {
+      return buildKanzDrawer(kanzDrawer!);
+    }
     var isDarkTheme = Provider.of<AppModel>(context, listen: false).darkTheme;
     var logo = drawer.getLogoByTheme(isDarkTheme);
 
@@ -132,6 +163,235 @@ class MenuBarState extends State<SideBarMenu> {
         ),
       ),
     );
+  }
+
+  Widget buildKanzDrawer(KanzDrawerConfig config) {
+    if (_publicDrawerCategories == null &&
+        !_drawerCategoriesLoading &&
+        !_drawerCategoriesFailed &&
+        !_drawerCategoriesScheduled) {
+      _drawerCategoriesScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _drawerCategoriesScheduled = false;
+        if (mounted) _loadDrawerCategories();
+      });
+    }
+    final modelCategories = context.watch<CategoryModel>().categories;
+    final categories = (_publicDrawerCategories?.isNotEmpty ?? false)
+        ? _publicDrawerCategories!
+        : (modelCategories?.isNotEmpty ?? false)
+            ? modelCategories!
+            : _immediateDrawerCategories();
+    final roots = categories
+        .where((category) =>
+            category.isRoot &&
+            category.slug != 'uncategorized' &&
+            _visibleCategory(category, categories, config.hideEmptyCategories))
+        .toList();
+    const websiteCategoryIds = ['124', '130', '438', '430', '453'];
+    final categoryOrder = config.rootCategoryIds.isNotEmpty
+        ? config.rootCategoryIds
+        : websiteCategoryIds;
+    if (roots.any((category) => categoryOrder.contains(category.id))) {
+      roots.removeWhere((category) => !categoryOrder.contains(category.id));
+      roots.sort((a, b) => categoryOrder
+          .indexOf(a.id ?? '')
+          .compareTo(categoryOrder.indexOf(b.id ?? '')));
+    }
+    final isDarkTheme = Provider.of<AppModel>(context, listen: false).darkTheme;
+    final logo = drawer.getLogoByTheme(isDarkTheme);
+    const foreground = Color(0xFF1D1F1F);
+    const accent = Color(0xFFC8A34B);
+    return Material(
+      color: Colors.white,
+      child: SafeArea(
+        top: true,
+        bottom: true,
+        child: Container(
+          color: Colors.white,
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              if (logo != null && logo.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14.0),
+                  child: Center(
+                    child: FluxImage(
+                      imageUrl: logo,
+                      height: 44,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                const Divider(color: Color(0xFFEBEBEB), height: 1, thickness: 1),
+              ],
+              if (config.showSearch)
+                _kanzMenuRow(
+                  'البحث عن المنتجات',
+                  leading: const Icon(Icons.search, color: foreground, size: 20),
+                  onTap: () {
+                    onNavigator();
+                    FluxNavigate.pushNamed(RouteList.search, context: context);
+                  },
+                ),
+              for (final root in roots)
+                _kanzCategoryTile(root, categories, config.hideEmptyCategories),
+              if (config.showTracking)
+                _kanzMenuRow(
+                  'تتبع شحنتك',
+                  color: accent,
+                  onTap: () => pushNavigator(
+                      screen: const WebView(
+                    url: 'https://kanzalsahra.com/تتبع-شحنتك/',
+                    title: 'تتبع شحنتك',
+                  )),
+                ),
+              if (config.showCorporate)
+                _kanzMenuRow(
+                  'طلبات الشركات',
+                  onTap: () => pushNavigator(
+                      screen: const WebView(
+                    url:
+                        'https://kanzalsahra.com/corporate-gold-bullion-requests/',
+                    title: 'طلبات الشركات',
+                  )),
+                ),
+              const SizedBox(height: 30),
+              const Divider(color: Color(0xFFEBEBEB), height: 1, thickness: 1),
+              _kanzMenuRow('الرئيسية',
+                  onTap: () => pushNavigator(name: RouteList.home)),
+              _kanzMenuRow('السلة',
+                  onTap: () => pushNavigator(name: RouteList.cart)),
+              _kanzMenuRow('حسابي',
+                  onTap: () => pushNavigator(name: RouteList.profile)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _kanzMenuRow(String label,
+      {VoidCallback? onTap,
+      Widget? leading,
+      Color color = const Color(0xFF1D1F1F)}) {
+    return Material(
+      color: Colors.white,
+      child: InkWell(
+        onTap: onTap,
+        splashColor: const Color(0xFFF0F0F0),
+        highlightColor: const Color(0xFFF9F9F9),
+        child: Container(
+          height: 51,
+          padding: const EdgeInsetsDirectional.only(start: 22, end: 20),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(bottom: BorderSide(color: Color(0xFFEBEBEB), width: 0.8)),
+          ),
+          child: Row(children: [
+            Expanded(
+                child: Text(label,
+                    style: TextStyle(
+                        color: color,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700))),
+            if (leading != null) leading,
+          ]),
+        ),
+      ),
+    );
+  }
+
+  List<Category> _immediateDrawerCategories() => [
+        Category(
+            id: '124',
+            name: 'سبائك ذهب',
+            parent: '0',
+            totalProduct: 1,
+            subCategories: []),
+        Category(
+            id: '130',
+            name: 'جنيهات ذهب',
+            parent: '0',
+            totalProduct: 1,
+            subCategories: []),
+        Category(
+            id: '438',
+            name: 'أساور',
+            parent: '0',
+            totalProduct: 1,
+            subCategories: []),
+        Category(
+            id: '430',
+            name: 'سبائك فضة',
+            parent: '0',
+            totalProduct: 1,
+            subCategories: []),
+        Category(
+            id: '453',
+            name: 'أطقم الماس',
+            parent: '0',
+            totalProduct: 1,
+            subCategories: []),
+      ];
+
+  bool _visibleCategory(Category category, List<Category> all, bool hideEmpty,
+      [Set<String>? visited]) {
+    if (!hideEmpty || (category.totalProduct ?? 0) > 0) return true;
+    final seen = visited ?? <String>{};
+    if (category.id == null || !seen.add(category.id!)) return false;
+    return all
+        .where((child) => child.parent == category.id)
+        .any((child) => _visibleCategory(child, all, hideEmpty, seen));
+  }
+
+  Widget _kanzCategoryTile(
+      Category category, List<Category> all, bool hideEmpty) {
+    final children = all
+        .where((child) =>
+            child.parent == category.id &&
+            _visibleCategory(child, all, hideEmpty))
+        .toList();
+    final label = category.id == '453' ? 'أطقم الماس' : category.name ?? '';
+    if (children.isEmpty) {
+      return _kanzMenuRow(label, onTap: () => _openKanzCategory(category));
+    }
+    return Theme(
+      data: Theme.of(context).copyWith(
+        dividerColor: Colors.transparent,
+        splashColor: const Color(0xFFF0F0F0),
+        highlightColor: const Color(0xFFF9F9F9),
+      ),
+      child: ExpansionTile(
+        tilePadding: const EdgeInsetsDirectional.only(start: 22, end: 20),
+        childrenPadding: EdgeInsets.zero,
+        iconColor: const Color(0xFF1D1F1F),
+        collapsedIconColor: const Color(0xFF1D1F1F),
+        collapsedBackgroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        shape: const Border(bottom: BorderSide(color: Color(0xFFEBEBEB), width: 0.8)),
+        collapsedShape: const Border(bottom: BorderSide(color: Color(0xFFEBEBEB), width: 0.8)),
+        title: Text(label,
+            style: const TextStyle(
+              color: Color(0xFF1D1F1F),
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            )),
+        children: [
+          _kanzMenuRow('عرض الكل', onTap: () => _openKanzCategory(category)),
+          for (final child in children)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 12),
+              child: _kanzCategoryTile(child, all, hideEmpty),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _openKanzCategory(Category category) {
+    onNavigator();
+    navigateToBackDrop(category);
   }
 
   Widget drawerItem(

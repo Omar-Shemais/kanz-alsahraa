@@ -20,6 +20,25 @@ AppConfig _layout(String marker, {bool extraTab = false}) =>
     });
 
 void main() {
+  test('Kanz drawer is opt-in and keeps service links configurable', () {
+    final baseline = _layout('baseline');
+    expect(baseline.kanzDrawer, isNull);
+    final config = AppConfig.fromJson({
+      ...(baseline.jsonData as Map),
+      'KanzDrawerV2': {
+        'enabled': true,
+        'showTracking': true,
+        'showCorporate': false,
+        'rootCategoryIds': [12, '34'],
+      },
+    });
+    expect(config.kanzDrawer!.enabled, isTrue);
+    expect(config.kanzDrawer!.showTracking, isTrue);
+    expect(config.kanzDrawer!.showCorporate, isFalse);
+    expect(config.kanzDrawer!.rootCategoryIds, ['12', '34']);
+    expect(config.toJson()['KanzDrawerV2']['enabled'], isTrue);
+  });
+
   late Map<String, dynamic> storage;
   late List<AppModel> models;
   HomeConfigRepository repository() => HomeConfigRepository(

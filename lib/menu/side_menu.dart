@@ -82,8 +82,8 @@ class _StateSideMenu extends BaseScreen<SideMenu> {
     });
     _subCloseNativeDrawer =
         eventBus.on<EventCloseNativeDrawer>().listen((event) {
-      if (_scaffoldKey.currentState!.isDrawerOpen) {
-        _scaffoldKey.currentState!.openEndDrawer();
+      if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+        _scaffoldKey.currentState?.closeDrawer();
       }
       if (widget.zoomConfig != null) {
         _drawerController.close!();
@@ -184,6 +184,9 @@ class _StateSideMenu extends BaseScreen<SideMenu> {
               Layout.isDisplayTablet(context)
           ? null
           : Drawer(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
               child: enableBackground
                   ? Stack(
                       children: [

@@ -20,6 +20,7 @@ class AppConfig {
   BackgroundConfig? background;
   List<TabBarMenuConfig> tabBar = [];
   DrawerMenuConfig? drawer;
+  KanzDrawerConfig? kanzDrawer;
   AppBarConfig? appBar;
   dynamic jsonData;
   OnBoardingConfig? onBoardingConfig;
@@ -63,6 +64,9 @@ class AppConfig {
     drawer = json['Drawer'] != null
         ? DrawerMenuConfig.fromJson(json['Drawer'])
         : null;
+    if (json['KanzDrawerV2'] is Map) {
+      kanzDrawer = KanzDrawerConfig.fromJson(json['KanzDrawerV2']);
+    }
 
     onBoardingConfig = json['onBoardingConfig'] != null
         ? OnBoardingConfig.fromJson(json['onBoardingConfig'])
@@ -102,6 +106,9 @@ class AppConfig {
     if (drawer != null) {
       map['Drawer'] = drawer?.toJson();
     }
+    if (kanzDrawer != null) {
+      map['KanzDrawerV2'] = kanzDrawer!.toJson();
+    }
     if (background != null) {
       map['Background'] = background?.toJson();
     }
@@ -113,6 +120,51 @@ class AppConfig {
     }
     return map;
   }
+}
+
+/// Opt-in, remotely managed Kanz navigation. Older app versions ignore it.
+class KanzDrawerConfig {
+  final bool enabled;
+  final bool showSearch;
+  final bool showTracking;
+  final bool showCorporate;
+  final bool hideEmptyCategories;
+  final List<String> rootCategoryIds;
+
+  const KanzDrawerConfig({
+    this.enabled = false,
+    this.showSearch = true,
+    this.showTracking = true,
+    this.showCorporate = true,
+    this.hideEmptyCategories = true,
+    this.rootCategoryIds = const [],
+  });
+
+  factory KanzDrawerConfig.fromJson(Map json) {
+    final ids = json['rootCategoryIds'];
+    return KanzDrawerConfig(
+      enabled: json['enabled'] == true,
+      showSearch: json['showSearch'] != false,
+      showTracking: json['showTracking'] != false,
+      showCorporate: json['showCorporate'] != false,
+      hideEmptyCategories: json['hideEmptyCategories'] != false,
+      rootCategoryIds: ids is List
+          ? ids
+              .where((id) => id is int || id is String)
+              .map((id) => id.toString())
+              .toList()
+          : const [],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'enabled': enabled,
+        'showSearch': showSearch,
+        'showTracking': showTracking,
+        'showCorporate': showCorporate,
+        'hideEmptyCategories': hideEmptyCategories,
+        'rootCategoryIds': rootCategoryIds,
+      };
 }
 
 /// logo : 'assets/images/logo.png'

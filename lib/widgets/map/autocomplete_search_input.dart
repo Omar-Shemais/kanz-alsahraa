@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_async_autocomplete/flutter_async_autocomplete.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../common/config.dart';
 import '../../common/tools/flash.dart';
 import '../../generated/l10n.dart';
 import '../../models/entities/prediction.dart';
 import '../../services/services.dart';
-import '../common/place_picker.dart';
 
 class AutocompleteSearchInput extends StatefulWidget {
   const AutocompleteSearchInput(
@@ -23,7 +23,7 @@ class AutocompleteSearchInput extends StatefulWidget {
 class _AutocompleteSearchInputState extends State<AutocompleteSearchInput> {
   final _autoController = TextEditingController();
   final _scrollController = ScrollController();
-  final _uuid = Uuid().generateV4();
+  final _uuid = const Uuid().v4();
   @override
   Widget build(BuildContext context) {
     return AsyncAutocomplete<Prediction>(
